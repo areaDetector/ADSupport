@@ -7,7 +7,7 @@ include $(TOP)/configure/CONFIG
 
 
 LIBRARY_IOC = netCDF
-NETCDF = $(TOP)/ADApp/netCDFSrc
+NETCDF = $(TOP)/supportApp/netCDFSrc
 USR_CFLAGS += -DHAVE_CONFIG_H
 
 ifeq ($(SHARED_LIBRARIES),YES)
