@@ -1,8 +1,26 @@
-This directory contains the libxml2 code (2.9.4).  It has been slightly modified to build under the EPICS build system.
+This directory contains the libxml2 code (2.9.4).  
+It has been slightly modified to build under the EPICS build system.
 
-It is intended for use on WIN32, vxWorks, and RTEMS.  On Linux and OS-X the standard package managers should be used instead.
+It is intended for use on WIN32, vxWorks, and RTEMS.  
+On Linux and OS-X the standard package managers should be used instead.
 
 These are the files that have been modified from the original distribution
+catalog.c  
+  Added optional third argument to open() function call, required on vxWorks.
 
-Makefile  This is completely new
+xmlschemas.c  
+  Declare variable at start of block, required on Visual Studio.
+  
+relaxng.c 
+  Declare variable at start of block, required on Visual Studio.
+
+config.h
+  The starting version of this file was the win32/VC10/config.h in the distribution.
+  Changes to support vxWorks in addition to Windows.
+  
+xmlversion.h
+  Disable FTP, HTTP, HTML, ICONV. 
+
+Makefile  
+  This is completely new.
 
