@@ -16,7 +16,65 @@ H5Tinit_win64.c and H5Tinit_win32.c were created by building H5detect.exe
 for win32-x86 and windows-x86.  The appropriate version of H5Tdetector.exe
 was then run and the output redirected to create these 2 files.
 
-NEED TO FIX THE FLAGS TO BUILD WITH (THREADSAFE, ETC.) and document them.
+These are the flags that were used by CMake with my comments:
+
+32-bit shared:
+  
+/Zi                                           (Generates complete debugging infomation)
+/W3                                           (Warning level 3)
+/WX-                                          (Don't treat compiler warnings as errors)
+/O2                                           (Creates fast code)
+/Ob1                                          (Disables /Ob2 that was set by /O2. Only inline functions that are declared inline.)
+/Oy-                                          (Don't disable omission of frame pointers; only available with x86, not x64)
+/D WIN32                                      (Not used by any .c or .h file)
+/D _WINDOWS                                   (Used by Visual Studio?)
+/D NDEBUG                                     (Disables debugging code, should be set)
+/D H5_BUILT_AS_DYNAMIC_LIB                    (Must be set when building dynamically)
+/D H5_HAVE_THREADSAFE                         (Must be set when building dynamically)
+/D _BIND_TO_CURRENT_VCLIBS_VERSION=1          (Requires target machine to have at least the library version on the build machine)
+/D _CRT_SECURE_NO_WARNINGS                    (Disable security warnings)
+/D _CONSOLE                                   (Used by Visual Studio?)
+/D "CMAKE_INTDIR=\"RelWithDebInfo\""          (Used only by CMake?)
+/D hdf5_shared_EXPORTS                        (Must be set to build a DLL)
+/D _WINDLL                                    (Related to linking with MFC?)
+/D _MBCS                                      (Multi-byte character set)
+/Gm-                                          (Disable minimal rebuild)
+/MD                                           (Multi-threaded DLL runtime)
+/GS                                           (Buffer security check; set by default)
+/fp:precise                                   (Floating point behavior; set by default)
+/Zc:wchar_t                                   (wchar_t maps to _wchar_t)
+/Zc:forScope                                  (controls scope of for loop initializer; deprecated and default behavior)
+/Fo"hdf5-shared.dir\RelWithDebInfo\\"         (location of object file)
+/Fd"hdf5-shared.dir\RelWithDebInfo\vc100.pdb" (renames program database file)
+/Gd                                           (uses cdecl; set by default)
+/TC                                           (This is a C source file)
+/analyze-                                     (Disables code analysis)
+/errorReport:queue                            (Controls behavior on compiler error)
+
+32-bit static:
+Same as 32-bit shared except
+/D H5_BUILT_AS_DYNAMIC_LIB                    (not present)
+/D H5_HAVE_THREADSAFE                         (not present)
+/D hdf5_shared_EXPORTS                        (not present)
+/D _WINDLL                                    (not present)
+/MT                                           (replaces /MD)
+
+64-bit shared:
+Same as 32-shared except:
+/Oy-                                          (not present)
+
+64-bit static:
+/D H5_BUILT_AS_DYNAMIC_LIB                    (not present)
+/D H5_HAVE_THREADSAFE                         (not present)
+/D hdf5_shared_EXPORTS                        (not present)
+/D _WINDLL                                    (not present)
+/MT                                           (replaces /MD)
+
+Based on the above the EPICS Makefile sets the following flags
+/D NDEBUG                                     (all builds)
+/D H5_BUILT_AS_DYNAMIC_LIB                    (dynamic builds)
+/D H5_HAVE_THREADSAFE                         (dynamic builds)
+/D hdf5_shared_EXPORTS                        (dynamic builds)
 
 Makefile  
   This is completely new.
