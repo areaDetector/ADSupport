@@ -4,9 +4,11 @@ include $(TOP)/configure/CONFIG
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 #=============================
 
-INC_WIN32 += tiff.h tiffio.h tiffvers.h tiffconf.h 
+INC_WIN32   += tiff.h tiffio.h tiffvers.h tiffconf.h 
+INC_vxWorks += tiff.h tiffio.h tiffvers.h tiffconf.h 
 
-LIBRARY_IOC_WIN32 = tiff
+LIBRARY_IOC_WIN32   = tiff
+LIBRARY_IOC_vxWorks = tiff
 ifeq ($(SHARED_LIBRARIES),YES)
   USR_CFLAGS_WIN32 += -DDLL_TIFF
   tiff.dll: USR_CFLAGS_WIN32 += -DDLL_EXPORT
@@ -52,7 +54,7 @@ tiff_SRCS += tif_version.c
 tiff_SRCS += tif_warning.c
 tiff_SRCS += tif_write.c
 tiff_SRCS += tif_zip.c
-tiff_SRCS += tif_win32.c
+tiff_SRCS_WIN32 += tif_win32.c
         
         
 include $(TOP)/configure/RULES
