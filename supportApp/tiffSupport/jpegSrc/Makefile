@@ -4,9 +4,11 @@ include $(TOP)/configure/CONFIG
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 #=============================
 
-INC_WIN32 += jpeglib.h jconfig.h jmorecfg.h jerror.h 
+INC_WIN32   += jpeglib.h jconfig.h jmorecfg.h jerror.h 
+INC_vxWorks += jpeglib.h jconfig.h jmorecfg.h jerror.h 
 
 LIBRARY_IOC_WIN32 = jpeg
+LIBRARY_IOC_vxWorks = jpeg
 ifeq ($(SHARED_LIBRARIES),YES)
   USR_CFLAGS_WIN32 += -DDLL_JPEG
   jpeg.dll: USR_CFLAGS_WIN32 += -DDLL_EXPORT
