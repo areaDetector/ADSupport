@@ -242,7 +242,7 @@ typedef int errno_t;
 /* #undef H5_HAVE_PTHREAD_H */
 
 /* Define to 1 if you have the 'InitOnceExecuteOnce' function. */
-#ifdef H5_BUILD_AS_DYNAMIC_LIB
+#ifdef H5_BUILT_AS_DYNAMIC_LIB
   #define H5_HAVE_WIN_THREADS 1
 #endif
 
