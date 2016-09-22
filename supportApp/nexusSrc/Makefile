@@ -49,10 +49,13 @@ ifeq ($(OS_CLASS), $(filter $(OS_CLASS), Linux Darwin solaris))
   endif
 endif
 
-LIBRARY_IOC_WIN32    += NeXus
+ifneq (mingw, $(findstring mingw, $(T_A)))
+  LIBRARY_IOC_WIN32    += NeXus
+endif
 LIBRARY_IOC_cygwin32 += NeXus
 LIBRARY_IOC_Linux    += NeXus
 LIBRARY_IOC_Darwin   += NeXus
+#LIBRARY_IOC_vxWorks   += NeXus
 
 NeXus_SRCS += napi.c
 NeXus_SRCS += napi5.c
