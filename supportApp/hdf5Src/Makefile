@@ -6,9 +6,11 @@ include $(TOP)/configure/CONFIG
 
 
 
-LIBRARY_IOC_WIN32 = hdf5
-LIBRARY_IOC_vxWorks = hdf5
-PROD_IOC_WIN32 = H5detect
+ifneq (mingw, $(findstring mingw, $(T_A)))
+  LIBRARY_IOC_WIN32 = hdf5
+  PROD_IOC_WIN32 = H5detect
+endif
+#LIBRARY_IOC_vxWorks = hdf5
 
 USR_CFLAGS += -D NDEBUG
 ifeq ($(SHARED_LIBRARIES), YES)
