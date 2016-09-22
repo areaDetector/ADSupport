@@ -53,6 +53,10 @@
 # include <io.h>
 #endif
 
+#ifdef vxWorks
+# include <ioLib.h>
+#endif
+
 #include "tiffiop.h"
 
 static tmsize_t
