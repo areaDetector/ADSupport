@@ -33,13 +33,13 @@
 #define SIZEOF_LONG 4
 
 /* Signed 64-bit type formatter */
-#define TIFF_INT64_FORMAT "%I64d"
+#define TIFF_INT64_FORMAT "lld"
 
 /* Signed 64-bit type */
 #define TIFF_INT64_T signed long long
 
 /* Unsigned 64-bit type formatter */
-#define TIFF_UINT64_FORMAT "%I64u"
+#define TIFF_UINT64_FORMAT "llu"
 
 /* Unsigned 64-bit type */
 #define TIFF_UINT64_T unsigned long long
@@ -47,15 +47,9 @@
 /* Set the native cpu bit order */
 #define HOST_FILLORDER FILLORDER_LSB2MSB
 
-#ifdef _MSC_VER
-#  if (_MSC_VER < 1900)
-#    define snprintf _snprintf
-#  endif
-#endif
-
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */
-/* #undef WORDS_BIGENDIAN */
+#define WORDS_BIGENDIAN 1
 
 /* Define to `__inline__' or `__inline' if that's what the C compiler
    calls it, or to nothing if 'inline' is not supported under any name.  */
