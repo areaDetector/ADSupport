@@ -44,13 +44,13 @@
 #define TIFF_UINT32_T unsigned int
 
 /* Signed 64-bit type formatter */
-#define TIFF_INT64_FORMAT "%I64d"
+/* #define TIFF_INT64_FORMAT "%I64d" */
 
 /* Signed 64-bit type */
 #define TIFF_INT64_T signed long long
 
 /* Unsigned 64-bit type formatter */
-#define TIFF_UINT64_FORMAT "%I64u"
+/* #define TIFF_UINT64_FORMAT "%I64u" */
 
 /* Unsigned 64-bit type */
 #define TIFF_UINT64_T unsigned long long
