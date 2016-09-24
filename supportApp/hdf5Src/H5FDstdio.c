@@ -124,6 +124,11 @@ typedef struct H5FD_stdio_t {
     #define file_offset_t   __int64
     #define file_ftruncate  _chsize_s   /* Supported in VS 2005 or newer */
     #define file_ftell      _ftelli64
+#else
+    #define file_fseek      fseeko64
+    #define file_offset_t   __int64
+    #define file_ftruncate  _chsize_s   /* Supported in VS 2005 or newer */
+    #define file_ftell      ftello64
 #endif /* H5_HAVE_MINGW */
 #endif /* H5_HAVE_WIN32_API */
 
