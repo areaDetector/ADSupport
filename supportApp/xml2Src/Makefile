@@ -6,11 +6,11 @@ include $(TOP)/configure/CONFIG
 
 
 
-LIBRARY_IOC_WIN32 = libxml2
-LIBRARY_IOC_vxWorks = libxml2
+LIBRARY_IOC_WIN32   = xml2
+LIBRARY_IOC_vxWorks = xml2
 
-ifeq ($(SHARED_LIBRARIES),NO)
-#  USR_CFLAGS_WIN32 += -DLIBXML_STATIC
+ifeq ($(SHARED_LIBRARIES),YES)
+  USR_CFLAGS_WIN32 += -DPIC -DNOLIBTOOL
 endif
 
 # OS-specific files in os/ARCH
