@@ -6,17 +6,20 @@ include $(TOP)/configure/CONFIG
 
 
 
-ifneq (mingw, $(findstring mingw, $(T_A)))
-  LIBRARY_IOC_WIN32 = hdf5
-  PROD_IOC_WIN32 = H5detect
-endif
+LIBRARY_IOC_WIN32 = hdf5
+PROD_IOC_WIN32 = H5detect
 #LIBRARY_IOC_vxWorks = hdf5
 
 USR_CFLAGS += -D NDEBUG
 ifeq ($(SHARED_LIBRARIES), YES)
   USR_CFLAGS += -D H5_BUILT_AS_DYNAMIC_LIB 
   USR_CFLAGS += -D hdf5_shared_EXPORTS
-  USR_CFLAGS += -D H5_HAVE_THREADSAFE
+  ifeq (mingw, $(findstring mingw, $(T_A)))
+    USR_CFLAGS += -D__MSVCRT_VERSION__=0x800
+  else
+    # The thread code on mingw needs work, get compiler errors
+    USR_CFLAGS += -D H5_HAVE_THREADSAFE
+  endif
 endif
 
 # OS-specific files in os/ARCH
@@ -331,7 +334,11 @@ ifeq (windows-x64, $(findstring windows-x64, $(T_A)))
   LIB_SRCS += H5Tinit_win64.c
 endif
 ifeq (win32-x86, $(findstring win32-x86, $(T_A)))
-  LIB_SRCS += H5Tinit_win32.c
+  ifeq (mingw, $(findstring mingw, $(T_A)))
+    LIB_SRCS += H5Tinit_mingw32.c
+  else
+    LIB_SRCS += H5Tinit_win32.c
+  endif
 endif
 LIB_SRCS += H5lib_settings.c
 
