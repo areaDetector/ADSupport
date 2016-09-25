@@ -10,6 +10,7 @@ void *dlsym(void *handle, const char *symbol);
 int dlclose(void *handle);
 char *dlerror(void);
 void tzset(void);
-int fseeko(FILE *stream, off_t offset, int whence);
-off_t ftello(FILE *stream);
-int ftruncate(int fd, off_t length);
+#define HDftruncate(F,L)   vxWorks_ftruncate(F,L)
+int vxWorks_ftruncate(int fd, off_t length);
+#define HDflock(F,L)   vxWorks_flock(F,L)
+int vxWorks_flock(int fd, int operation);
