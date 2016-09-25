@@ -92,7 +92,9 @@ typedef int errno_t;
 /* #undef H5_HAVE_DIRECT */
 
 /* Define to 1 if you have the <dirent.h> header file. */
-/* #undef H5_HAVE_DIRENT_H */
+#ifdef vxWorks
+  #define H5_HAVE_DIRENT_H 1
+#endif
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 /* #undef H5_HAVE_DLFCN_H */
@@ -242,8 +244,10 @@ typedef int errno_t;
 /* #undef H5_HAVE_PTHREAD_H */
 
 /* Define to 1 if you have the 'InitOnceExecuteOnce' function. */
-#ifdef H5_BUILT_AS_DYNAMIC_LIB
-  #define H5_HAVE_WIN_THREADS 1
+#ifdef _WIN32
+  #ifdef H5_BUILT_AS_DYNAMIC_LIB
+    #define H5_HAVE_WIN_THREADS 1
+  #endif
 #endif
 
 /* Define to 1 if you have the `random' function. */
@@ -652,6 +656,10 @@ typedef int errno_t;
 # if defined __BIG_ENDIAN__
 #  define WORDS_BIGENDIAN 1
 # endif
+#endif
+
+#ifdef vxWorks
+#  define WORDS_BIGENDIAN 1
 #endif
 
 /* #undef WORDS_BIGENDIAN */
