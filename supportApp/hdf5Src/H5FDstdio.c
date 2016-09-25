@@ -132,6 +132,13 @@ typedef struct H5FD_stdio_t {
 #endif /* H5_HAVE_MINGW */
 #endif /* H5_HAVE_WIN32_API */
 
+#ifdef H5_HAVE_VXWORKS
+  #define file_fseek      fseek
+  #define file_offset_t   off_t
+  #define file_ftruncate  vxWorks_ftruncate
+  #define file_ftell      ftell
+#endif
+
 /* If these functions weren't re-defined for Windows, give them
  * more platform-independent names.
  */
