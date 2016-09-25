@@ -11,7 +11,33 @@
 /* Define if using MinGW */
 #ifdef __MINGW32__
 #define H5_HAVE_MINGW
-typedef int errno_t;
+  typedef int errno_t;
+#endif
+
+#ifdef vxWorks
+  #include <H5vxWorks.h>
+  #include <hostLib.h>
+  typedef int8_t        int_least8_t  ;
+  typedef uint8_t       uint_least8_t;
+  typedef int8_t        int_fast8_t  ;
+  typedef uint8_t       uint_fast8_t;
+
+  typedef int16_t       int_least16_t  ;
+  typedef uint16_t      uint_least16_t;
+  typedef int32_t       int_fast16_t  ;
+  typedef uint32_t      uint_fast16_t;
+
+  typedef int32_t       int_least32_t  ;
+  typedef uint32_t      uint_least32_t;
+  typedef int32_t       int_fast32_t  ;
+  typedef uint32_t      uint_fast32_t;
+
+  typedef int64_t       int_least64_t  ;
+  typedef uint64_t      uint_least64_t;
+  typedef int64_t       int_fast64_t  ;
+  typedef uint64_t      uint_fast64_t;
+   /* This is needed by H5PL.c */
+  #define RTLD_NOW 0x00002
 #endif
 
 /* Define if on the Windows platform and default WIN32 API */
@@ -369,7 +395,9 @@ typedef int errno_t;
 /* #undef H5_HAVE_TM_GMTOFF */
 
 /* Define to 1 if you have the <unistd.h> header file. */
-/* #undef H5_HAVE_UNISTD_H */
+#ifdef vxWorks
+  #define H5_HAVE_UNISTD_H 1
+#endif
 
 /* Define to 1 if you have the `vasprintf' function. */
 /* #undef H5_HAVE_VASPRINTF */
