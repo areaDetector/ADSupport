@@ -15,6 +15,7 @@
 #endif
 
 #ifdef vxWorks
+  #define H5_HAVE_VXWORKS
   #include <H5vxWorks.h>
   #include <hostLib.h>
   typedef int8_t        int_least8_t  ;
