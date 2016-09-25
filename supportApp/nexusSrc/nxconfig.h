@@ -29,7 +29,9 @@
 /* #undef HAVE_LIBMFHDF */
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
-#define HAVE_LIBPTHREAD 1
+#ifndef vxWorks
+  #define HAVE_LIBPTHREAD 1
+#endif
 
 /* Define to 1 if you have the `readline' library (-lreadline). */
 #define HAVE_LIBREADLINE 1
@@ -197,7 +199,9 @@
 /* Define to the type of a signed integer type of width exactly 64 bits if
    such a type exists and the standard includes do not define it. */
 #ifndef __LP64__
-typedef long long int64_t;
+  #ifndef vxWorks
+    typedef long long int64_t;
+  #endif
 #endif
 
 /* Define to the type of a signed integer type of width exactly 8 bits if such
