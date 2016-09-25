@@ -53,7 +53,7 @@ LIBRARY_IOC_WIN32    += NeXus
 LIBRARY_IOC_cygwin32 += NeXus
 LIBRARY_IOC_Linux    += NeXus
 LIBRARY_IOC_Darwin   += NeXus
-#LIBRARY_IOC_vxWorks   += NeXus
+LIBRARY_IOC_vxWorks  += NeXus
 
 NeXus_SRCS += napi.c
 NeXus_SRCS += napi5.c
