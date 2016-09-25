@@ -29,17 +29,12 @@ void tzset(void)
 {
 }
 
-int fseeko(FILE *stream, off_t offset, int whence)
+int vxWorks_ftruncate(int fd, off_t length)
 {
-  return fseek(stream, (long)offset, whence);
+  return 0;
 }
 
-off_t ftello(FILE *stream)
-{
-  return (off_t)ftell(stream);
-}
-  
-int ftruncate(int fd, off_t length)
+int vxWorks_flock(int fd, int operation)
 {
   return 0;
 }
