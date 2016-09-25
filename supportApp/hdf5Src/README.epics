@@ -19,10 +19,29 @@ H5system.c
 H5FDstdio.c
   New definitions of file_fseek and file_ftell for mingw.
   mingw does not have some of the run-time functions that Visual Studio has.
+
+  New definitions of file_fseek, file_ftell and file_ftruncate for vxWorks.
+  ftruncate may be a problem since vxWorks lacks ftruncate except on DOS file system.
  
-H5Tinit_win64.c, H5Tinit_win32.c, and H5Tinit_mingw32.c 
-  These were created by building H5detect.exe for win32-x86, windows-x64, and win32-x86-mingw.  
-  The appropriate version of H5Tdetect.exe was then run and the output redirected to create these files.
+H5Tinit_win64.c, H5Tinit_win32.c, H5Tinit_mingw32.c, HT5init_vxWorks.c. 
+  These were created by building H5detect.exe for win32-x86, windows-x64, 
+  win32-x86-mingw, and vxWorks-ppc32..  
+  The appropriate version of H5Tdetect was then run and the output redirected to create these files.
+  
+H5T.c
+  Temporarily commented out 4 macro expansions stating with H5T_INIT_TYPE(TIME, ...) on vxWorks
+  These are generating compiler errors on vxWorks. It is hard code to follow, but I'm sure I can fix it.
+  
+H5vxWorks.c, H5vxWorks.h
+  These are new files.  They provide dummy implementations of:
+  dlopen
+  dlsym
+  dlclose
+  dlerror
+  tzset
+  ftruncate (named vxWorks_ftruncate) to avoid conflict with vxWorks definition which is only
+    implemented on DOS file system.
+  flock (named vxWorks_flock).
 
 These are the flags that were used by CMake with my comments:
 
