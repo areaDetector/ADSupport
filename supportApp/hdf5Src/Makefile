@@ -6,19 +6,20 @@ include $(TOP)/configure/CONFIG
 
 
 
-LIBRARY_IOC_WIN32 = hdf5
-PROD_IOC_WIN32 = H5detect
-#LIBRARY_IOC_vxWorks = hdf5
+LIBRARY_IOC_WIN32   = hdf5
+LIBRARY_IOC_vxWorks = hdf5
+PROD_IOC_WIN32   = H5detect
+PROD_IOC_vxWorks = H5detect
 
 USR_CFLAGS += -D NDEBUG
 ifeq ($(SHARED_LIBRARIES), YES)
-  USR_CFLAGS += -D H5_BUILT_AS_DYNAMIC_LIB 
-  USR_CFLAGS += -D hdf5_shared_EXPORTS
+  USR_CFLAGS_WIN32 += -D H5_BUILT_AS_DYNAMIC_LIB 
+  USR_CFLAGS_WIN32 += -D hdf5_shared_EXPORTS
   ifeq (mingw, $(findstring mingw, $(T_A)))
-    USR_CFLAGS += -D__MSVCRT_VERSION__=0x800
+    USR_CFLAGS_WIN32 += -D__MSVCRT_VERSION__=0x800
   else
     # The thread code on mingw needs work, get compiler errors
-    USR_CFLAGS += -D H5_HAVE_THREADSAFE
+    USR_CFLAGS_WIN32 += -D H5_HAVE_THREADSAFE
   endif
 endif
 
@@ -59,6 +60,44 @@ INC_WIN32 += H5version.h
 INC_WIN32 += H5Zpublic.h
 INC_WIN32 += hdf5.h
 INC_WIN32 += H5pubconf.h 
+
+INC_vxWorks += H5ACpublic.h
+INC_vxWorks += H5api_adpt.h
+INC_vxWorks += H5Apublic.h
+INC_vxWorks += H5Cpublic.h
+INC_vxWorks += H5Dpublic.h
+INC_vxWorks += H5Epubgen.h
+INC_vxWorks += H5Epublic.h
+INC_vxWorks += H5FDcore.h
+INC_vxWorks += H5FDdirect.h
+INC_vxWorks += H5FDfamily.h
+INC_vxWorks += H5FDlog.h
+INC_vxWorks += H5FDmpi.h
+INC_vxWorks += H5FDmpio.h
+INC_vxWorks += H5FDmulti.h
+INC_vxWorks += H5FDpublic.h
+INC_vxWorks += H5FDsec2.h
+INC_vxWorks += H5FDstdio.h
+INC_vxWorks += H5FDwindows.h
+INC_vxWorks += H5Fpublic.h
+INC_vxWorks += H5Gpublic.h
+INC_vxWorks += H5Ipublic.h
+INC_vxWorks += H5Lpublic.h
+INC_vxWorks += H5MMpublic.h
+INC_vxWorks += H5Opublic.h
+INC_vxWorks += H5overflow.h
+INC_vxWorks += H5PLextern.h
+INC_vxWorks += H5PLpublic.h
+INC_vxWorks += H5Ppublic.h
+INC_vxWorks += H5public.h
+INC_vxWorks += H5Rpublic.h
+INC_vxWorks += H5Spublic.h
+INC_vxWorks += H5Tpublic.h
+INC_vxWorks += H5version.h
+INC_vxWorks += H5Zpublic.h
+INC_vxWorks += hdf5.h
+INC_vxWorks += H5pubconf.h
+INC_vxWorks += H5vxWorks.h 
 
 LIB_SRCS += H5.c
 LIB_SRCS += H5checksum.c
@@ -330,6 +369,8 @@ LIB_SRCS += H5Zshuffle.c
 LIB_SRCS += H5Zszip.c
 LIB_SRCS += H5Ztrans.c
 
+LIB_SRCS_vxWorks += H5vxWorks.c
+
 ifeq (windows-x64, $(findstring windows-x64, $(T_A)))
   LIB_SRCS += H5Tinit_win64.c
 endif
@@ -340,13 +381,15 @@ ifeq (win32-x86, $(findstring win32-x86, $(T_A)))
     LIB_SRCS += H5Tinit_win32.c
   endif
 endif
+LIB_SRCS_vxWorks += H5Tinit_vxWorks.c
+
 LIB_SRCS += H5lib_settings.c
 
 LIB_LIBS += szip zlib 
 LIB_SYS_LIBS_WIN32 += ws2_32
 
 H5detect_SRCS += H5detect.c
-PROD_SYS_LIBS += ws2_32
+PROD_SYS_LIBS_WIN32 += ws2_32
 
 include $(TOP)/configure/RULES
 #----------------------------------------
