@@ -421,7 +421,7 @@ typedef enum { FALSE = 0, TRUE = 1 } boolean;
 #define INLINE __inline__
 #endif
 #ifndef INLINE
-#define INLINE			/* default is to define it as empty */
+#define INLINE __inline	
 #endif
 #endif
 
