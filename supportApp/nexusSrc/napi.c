@@ -23,8 +23,6 @@
 
 ----------------------------------------------------------------------------*/
 
-/* static const char* rscid = "$Id: napi.c 1814 2012-02-07 14:37:57Z Freddie Akeroyd $"; */	/* Revision inserted by CVS */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>

@@ -21,10 +21,9 @@
  
   For further information, see <http://www.nexus.anl.gov/>
   
-  $Id: napiu.c 1548 2010-10-06 18:57:35Z Tobias Richter $
+  $Id: napiu.c 1863 2012-12-17 14:06:34Z Tobias Richter $
 
  ----------------------------------------------------------------------------*/
-/* static const char* rscid = "$Id: napiu.c 1548 2010-10-06 18:57:35Z Tobias Richter $"; */	/* Revision interted by CVS */
 
 #include <stdlib.h>
 #include <assert.h>
