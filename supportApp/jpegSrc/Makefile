@@ -18,8 +18,10 @@ ifeq ($(WITH_JPEG),YES)
     jpeg.dll: USR_CFLAGS_WIN32 += -DDLL_EXPORT
   endif
 
+  jpeg_SRCS += jaricom.c 
   jpeg_SRCS += jcapimin.c 
   jpeg_SRCS += jcapistd.c 
+  jpeg_SRCS += jcarith.c 
   jpeg_SRCS += jccoefct.c 
   jpeg_SRCS += jccolor.c
   jpeg_SRCS += jcdctmgr.c 
@@ -30,12 +32,12 @@ ifeq ($(WITH_JPEG),YES)
   jpeg_SRCS += jcmaster.c
   jpeg_SRCS += jcomapi.c 
   jpeg_SRCS += jcparam.c 
-  jpeg_SRCS += jcphuff.c 
   jpeg_SRCS += jcprepct.c 
   jpeg_SRCS += jcsample.c 
   jpeg_SRCS += jctrans.c 
   jpeg_SRCS += jdapimin.c
   jpeg_SRCS += jdapistd.c 
+  jpeg_SRCS += jdarith.c 
   jpeg_SRCS += jdatadst.c 
   jpeg_SRCS += jdatasrc.c 
   jpeg_SRCS += jdcoefct.c 
@@ -47,7 +49,6 @@ ifeq ($(WITH_JPEG),YES)
   jpeg_SRCS += jdmarker.c 
   jpeg_SRCS += jdmaster.c
   jpeg_SRCS += jdmerge.c 
-  jpeg_SRCS += jdphuff.c 
   jpeg_SRCS += jdpostct.c 
   jpeg_SRCS += jdsample.c 
   jpeg_SRCS += jdtrans.c 
@@ -58,7 +59,6 @@ ifeq ($(WITH_JPEG),YES)
   jpeg_SRCS += jidctflt.c 
   jpeg_SRCS += jidctfst.c 
   jpeg_SRCS += jidctint.c 
-  jpeg_SRCS += jidctred.c 
   jpeg_SRCS += jquant1.c
   jpeg_SRCS += jquant2.c 
   jpeg_SRCS += jutils.c 
