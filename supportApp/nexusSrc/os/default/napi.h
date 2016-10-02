@@ -21,7 +21,7 @@
  
   For further information, see <http://www.nexusformat.org>
   
-  $Id: napi.h 1814 2012-02-07 14:37:57Z Freddie Akeroyd $
+  $Id: napi.h 1874 2013-03-05 14:03:40Z Freddie Akeroyd $
 
  ----------------------------------------------------------------------------*/
 /** \file 
@@ -51,10 +51,12 @@
 #ifndef NEXUSAPI
 #define NEXUSAPI
 
+/* #if HAVE_CONFIG_H */
 #include <napiconfig.h>
+/* #endif */ /* HAVE_CONFIG_H */
 
 /* NeXus HDF45 */
-#define NEXUS_VERSION   "4.3.0"                /* major.minor.patch */
+#define NEXUS_VERSION   "4.3.1"                /* major.minor.patch */
 
 #define CONSTCHAR       const char
 
