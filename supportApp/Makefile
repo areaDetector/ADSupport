@@ -3,7 +3,9 @@ include $(TOP)/configure/CONFIG
 
 DIRS += netCDFSrc
 
-DIRS += tiffSupport
+DIRS += jpegSrc
+
+DIRS += tiffSrc
 
 DIRS += xml2Src
 

@@ -1,7 +1,5 @@
-This directory contains the source code for JPEG, which is built for Windows
-and vxWorks.
-
-It is based on jpeg-6b with the following changes:
+This directory contains the source code for JPEG from version jpeg-6b 
+with the following changes:
 
 Makefile
   Rewritten to use EPICS build system
