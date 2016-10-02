@@ -1,9 +1,6 @@
 This directory contains the netCDF code (4.1.3).  
 It has been slightly modified to build under the EPICS build system.
 
-It is intended for use on WIN32, vxWorks, and RTEMS.  
-On Linux and OS-X the standard package managers should be used instead.
-
 The following source files were modified.
 
 pstdint.h 
