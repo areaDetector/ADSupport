@@ -6,28 +6,28 @@ include $(TOP)/configure/CONFIG
 
 
 
-LIBRARY_IOC_WIN32 = szip
-LIBRARY_IOC_vxWorks = szip
+ifeq ($(WITH_SZIP),YES)
+  ifeq ($(SZIP_EXTERNAL),NO)
 
-ifeq ($(SHARED_LIBRARIES),YES)
-  USR_CFLAGS += -DSZ_BUILT_AS_DYNAMIC_LIB -Dszip_EXPORTS
-endif
-  
-# OS-specific files in os/ARCH
-INC_WIN32 += SZconfig.h
-INC_WIN32 += rice.h
-INC_WIN32 += ricehdf.h
-INC_WIN32 += szip_adpt.h
-INC_WIN32 += szlib.h
-INC_vxWorks += SZconfig.h
-INC_vxWorks += rice.h
-INC_vxWorks += ricehdf.h
-INC_vxWorks += szip_adpt.h
-INC_vxWorks += szlib.h
+    LIBRARY_IOC_WIN32 = szip
+    LIBRARY_IOC_vxWorks = szip
 
-LIB_SRCS += encoding.c
-LIB_SRCS += rice.c
-LIB_SRCS += sz_api.c
+    ifeq ($(SHARED_LIBRARIES),YES)
+      USR_CFLAGS += -DSZ_BUILT_AS_DYNAMIC_LIB -Dszip_EXPORTS
+    endif
+
+    INC += SZconfig.h
+    INC += rice.h
+    INC += ricehdf.h
+    INC += szip_adpt.h
+    INC += szlib.h
+
+    LIB_SRCS += encoding.c
+    LIB_SRCS += rice.c
+    LIB_SRCS += sz_api.c
+
+  endif # ($(SZIP_EXTERNAL),NO)
+endif # ($(WITH_SZIP),YES)
 
 include $(TOP)/configure/RULES
 #----------------------------------------
