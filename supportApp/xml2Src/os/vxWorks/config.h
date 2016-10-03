@@ -1,6 +1,9 @@
 /* config.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Need iocLib.h on vxWorks for dup() function */
+#include <ioLib.h>
+
 /* Type cast for the gethostbyname() argument */
 #define GETHOSTBYNAME_ARG_CAST /**/
 
@@ -26,10 +29,10 @@
 #define HAVE_DIRENT_H 1
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
-#define HAVE_DLFCN_H 1
+/* #define HAVE_DLFCN_H 1 */
 
 /* Have dlopen based dso */
-#define HAVE_DLOPEN /**/
+/* #define HAVE_DLOPEN */ /**/
 
 /* Define to 1 if you have the <dl.h> header file. */
 /* #undef HAVE_DL_H */
@@ -92,7 +95,7 @@
 /* #undef HAVE_LIBLZMA */
 
 /* Define if pthread library is there (-lpthread) */
-#define HAVE_LIBPTHREAD /**/
+/* #define HAVE_LIBPTHREAD */ /**/
 
 /* Define if readline library is there (-lreadline) */
 /* #undef HAVE_LIBREADLINE */
@@ -148,7 +151,7 @@
 #define HAVE_PRINTF 1
 
 /* Define if <pthread.h> is there */
-#define HAVE_PTHREAD_H /**/
+/* #define HAVE_PTHREAD_H */ /**/
 
 /* Define to 1 if you have the `putenv' function. */
 #define HAVE_PUTENV 1
@@ -157,7 +160,7 @@
 #define HAVE_RAND 1
 
 /* Define to 1 if you have the `rand_r' function. */
-#define HAVE_RAND_R 1
+/* #define HAVE_RAND_R 1 */
 
 /* Define to 1 if you have the <resolv.h> header file. */
 #define HAVE_RESOLV_H 1
@@ -211,7 +214,7 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if you have the `strndup' function. */
-#define HAVE_STRNDUP 1
+/* #define HAVE_STRNDUP 1 */
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
