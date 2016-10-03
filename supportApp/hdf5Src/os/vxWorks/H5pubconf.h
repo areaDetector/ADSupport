@@ -190,7 +190,7 @@ typedef uint64_t      uint_fast64_t;
 /* #undef H5_HAVE_IOCTL */
 
 /* Define to 1 if you have the <io.h> header file. */
-#define H5_HAVE_IO_H 1
+/* #define H5_HAVE_IO_H 1 */
 
 /* Define to 1 if you have the `dl' library (-ldl). */
 /* #undef H5_HAVE_LIBDL */
@@ -352,7 +352,7 @@ typedef uint64_t      uint_fast64_t;
 /* #undef H5_HAVE_THREADSAFE */
 
 /* Define if `timezone' is a global variable */
-#define H5_HAVE_TIMEZONE 1
+/* #define H5_HAVE_TIMEZONE 1 */
 
 /* Define if the ioctl TIOCGETD is defined */
 /* #undef H5_HAVE_TIOCGETD */
