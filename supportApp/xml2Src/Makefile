@@ -14,6 +14,9 @@ ifeq ($(WITH_XML2),YES)
       USR_CFLAGS_WIN32 += -DPIC -DNOLIBTOOL
     endif
 
+    # Need _REENTRANT flag on Linux for threads to build correctly
+    USR_CFLAGS_Linux += -D_REENTRANT
+
     INC_WIN32 += win32config.h
     INC_WIN32 += wsockcompat.h
     INC += libxml/DOCBparser.h
