@@ -42,13 +42,21 @@
 #define TIFF_INT64_FORMAT "%I64d"
 
 /* Signed 64-bit type */
-#define TIFF_INT64_T signed __int64
+#ifdef __MINGW32__
+  #define TIFF_INT64_T signed long long
+#else
+  #define TIFF_INT64_T signed __int64
+#endif
 
 /* Unsigned 64-bit type formatter */
 #define TIFF_UINT64_FORMAT "%I64u"
 
 /* Unsigned 64-bit type */
-#define TIFF_UINT64_T unsigned __int64
+#ifdef __MINGW32__
+  #define TIFF_UINT64_T unsigned long long
+#else
+  #define TIFF_UINT64_T unsigned __int64
+#endif
 
 #if _WIN64
 /*
@@ -108,6 +116,7 @@
 #if defined(_MSC_VER) && _MSC_VER < 1900
 #define snprintf _snprintf
 #endif
+#define HAVE_SNPRINTF 1
 
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */
@@ -123,7 +132,9 @@
 
 #define lfind _lfind
 
-#pragma warning(disable : 4996) /* function deprecation warnings */
+#ifndef __MINGW32__
+  #pragma warning(disable : 4996) /* function deprecation warnings */
+#endif
 
 #endif /* _TIF_CONFIG_H_ */
 /*
