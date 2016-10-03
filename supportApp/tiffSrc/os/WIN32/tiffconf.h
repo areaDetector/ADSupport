@@ -47,13 +47,28 @@
 #define TIFF_INT64_FORMAT "%I64d"
 
 /* Signed 64-bit type */
-#define TIFF_INT64_T signed __int64
+
+#ifndef TIFF_INT64_T
+  #ifdef __MINGW32__
+    #define TIFF_INT64_T signed long long
+  #else
+    #define TIFF_INT64_T signed __int64
+  #endif
+#endif
 
 /* Unsigned 64-bit type formatter */
 #define TIFF_UINT64_FORMAT "%I64u"
 
 /* Unsigned 64-bit type */
-#define TIFF_UINT64_T unsigned __int64
+/* Signed 64-bit type */
+
+#ifndef TIFF_UINT64_T
+  #ifdef __MINGW32__
+    #define TIFF_UINT64_T unsigned long long
+  #else
+    #define TIFF_UINT64_T unsigned __int64
+  #endif
+#endif
 
 #if _WIN64
 /*
