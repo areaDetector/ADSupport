@@ -8,8 +8,8 @@ include $(TOP)/configure/CONFIG
 ifeq ($(WITH_HDF5),YES)
   ifeq ($(HDF5_EXTERNAL),NO)
 
-    LIBRARY_IOC   = hdf5
-    PROD_IOC   = H5detect
+    LIBRARY_IOC = hdf5
+    PROD_IOC    = H5detect
 
     USR_CFLAGS += -D NDEBUG
     ifeq ($(SHARED_LIBRARIES), YES)
@@ -23,80 +23,43 @@ ifeq ($(WITH_HDF5),YES)
       endif
     endif
 
-    # OS-specific files in os/ARCH
-    INC_WIN32 += H5ACpublic.h
-    INC_WIN32 += H5api_adpt.h
-    INC_WIN32 += H5Apublic.h
-    INC_WIN32 += H5Cpublic.h
-    INC_WIN32 += H5Dpublic.h
-    INC_WIN32 += H5Epubgen.h
-    INC_WIN32 += H5Epublic.h
-    INC_WIN32 += H5FDcore.h
-    INC_WIN32 += H5FDdirect.h
-    INC_WIN32 += H5FDfamily.h
-    INC_WIN32 += H5FDlog.h
-    INC_WIN32 += H5FDmpi.h
-    INC_WIN32 += H5FDmpio.h
-    INC_WIN32 += H5FDmulti.h
-    INC_WIN32 += H5FDpublic.h
-    INC_WIN32 += H5FDsec2.h
-    INC_WIN32 += H5FDstdio.h
-    INC_WIN32 += H5FDwindows.h
-    INC_WIN32 += H5Fpublic.h
-    INC_WIN32 += H5Gpublic.h
-    INC_WIN32 += H5Ipublic.h
-    INC_WIN32 += H5Lpublic.h
-    INC_WIN32 += H5MMpublic.h
-    INC_WIN32 += H5Opublic.h
-    INC_WIN32 += H5overflow.h
-    INC_WIN32 += H5PLextern.h
-    INC_WIN32 += H5PLpublic.h
-    INC_WIN32 += H5Ppublic.h
-    INC_WIN32 += H5public.h
-    INC_WIN32 += H5Rpublic.h
-    INC_WIN32 += H5Spublic.h
-    INC_WIN32 += H5Tpublic.h
-    INC_WIN32 += H5version.h
-    INC_WIN32 += H5Zpublic.h
-    INC_WIN32 += hdf5.h
-    INC_WIN32 += H5pubconf.h 
+    INC += H5ACpublic.h
+    INC += H5api_adpt.h
+    INC += H5Apublic.h
+    INC += H5Cpublic.h
+    INC += H5Dpublic.h
+    INC += H5Epubgen.h
+    INC += H5Epublic.h
+    INC += H5FDcore.h
+    INC += H5FDdirect.h
+    INC += H5FDfamily.h
+    INC += H5FDlog.h
+    INC += H5FDmpi.h
+    INC += H5FDmpio.h
+    INC += H5FDmulti.h
+    INC += H5FDpublic.h
+    INC += H5FDsec2.h
+    INC += H5FDstdio.h
+    INC += H5FDwindows.h
+    INC += H5Fpublic.h
+    INC += H5Gpublic.h
+    INC += H5Ipublic.h
+    INC += H5Lpublic.h
+    INC += H5MMpublic.h
+    INC += H5Opublic.h
+    INC += H5overflow.h
+    INC += H5PLextern.h
+    INC += H5PLpublic.h
+    INC += H5Ppublic.h
+    INC += H5public.h
+    INC += H5Rpublic.h
+    INC += H5Spublic.h
+    INC += H5Tpublic.h
+    INC += H5version.h
+    INC += H5Zpublic.h
+    INC += hdf5.h
+    INC += H5pubconf.h 
 
-    INC_vxWorks += H5ACpublic.h
-    INC_vxWorks += H5api_adpt.h
-    INC_vxWorks += H5Apublic.h
-    INC_vxWorks += H5Cpublic.h
-    INC_vxWorks += H5Dpublic.h
-    INC_vxWorks += H5Epubgen.h
-    INC_vxWorks += H5Epublic.h
-    INC_vxWorks += H5FDcore.h
-    INC_vxWorks += H5FDdirect.h
-    INC_vxWorks += H5FDfamily.h
-    INC_vxWorks += H5FDlog.h
-    INC_vxWorks += H5FDmpi.h
-    INC_vxWorks += H5FDmpio.h
-    INC_vxWorks += H5FDmulti.h
-    INC_vxWorks += H5FDpublic.h
-    INC_vxWorks += H5FDsec2.h
-    INC_vxWorks += H5FDstdio.h
-    INC_vxWorks += H5FDwindows.h
-    INC_vxWorks += H5Fpublic.h
-    INC_vxWorks += H5Gpublic.h
-    INC_vxWorks += H5Ipublic.h
-    INC_vxWorks += H5Lpublic.h
-    INC_vxWorks += H5MMpublic.h
-    INC_vxWorks += H5Opublic.h
-    INC_vxWorks += H5overflow.h
-    INC_vxWorks += H5PLextern.h
-    INC_vxWorks += H5PLpublic.h
-    INC_vxWorks += H5Ppublic.h
-    INC_vxWorks += H5public.h
-    INC_vxWorks += H5Rpublic.h
-    INC_vxWorks += H5Spublic.h
-    INC_vxWorks += H5Tpublic.h
-    INC_vxWorks += H5version.h
-    INC_vxWorks += H5Zpublic.h
-    INC_vxWorks += hdf5.h
-    INC_vxWorks += H5pubconf.h
     INC_vxWorks += H5vxWorks.h 
 
     LIB_SRCS += H5.c
@@ -369,20 +332,13 @@ ifeq ($(WITH_HDF5),YES)
     LIB_SRCS += H5Zszip.c
     LIB_SRCS += H5Ztrans.c
 
+    # H5Tinit.c is architecture specific
+    LIB_SRCS += H5Tinit.c
+
     LIB_SRCS_vxWorks += H5vxWorks.c
 
-    ifeq (windows-x64, $(findstring windows-x64, $(T_A)))
-      LIB_SRCS += H5Tinit_win64.c
-    endif
-    ifeq (win32-x86, $(findstring win32-x86, $(T_A)))
-      ifeq (mingw, $(findstring mingw, $(T_A)))
-        LIB_SRCS += H5Tinit_mingw32.c
-      else
-        LIB_SRCS += H5Tinit_win32.c
-      endif
-    endif
-    LIB_SRCS_vxWorks += H5Tinit_vxWorks.c
-
+    # This file allows printing how the library was configured.
+    # It is not yet correct for each system.
     LIB_SRCS += H5lib_settings.c
 
     ifeq ($(SZIP_EXTERNAL),YES)
