@@ -1,4 +1,4 @@
-TOP=../../..
+TOP=../..
 include $(TOP)/configure/CONFIG
 #----------------------------------------
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
@@ -9,7 +9,7 @@ ifeq ($(WITH_TIFF),YES)
 
     INC += tiff.h 
     INC += tiffio.h 
-    inc += tiffvers.h 
+    INC += tiffvers.h 
     INC += tiffconf.h 
     INC_Linux += tiffconf_32.h
     INC_Linux += tiffconf_64.h
