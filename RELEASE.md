@@ -17,12 +17,14 @@ R1-0 (October XXX, 2016)
 ========================
 Initial release.  The versions of each support library are:
 
-- [HDF5]   (1.10.0-patch1)
-- [JPEG]   (9b)
-- [netCDF] (4.1.3)  
-- [NeXus]  (4.3.1)
-- [SZIP]   (2.1)
-- [TIFF]   (4.0.6)
-- [XML2]   (2.9.4)
-- [ZLIB]   (1.2.8)
+Library | Version
+========|=========
+HDF5    | 1.10.0-patch1
+JPEG    | 9b
+netCDF  | 4.1.3  
+NeXus   | 4.3.1
+SZIP    | 2.1
+TIFF    | 4.0.6
+XML2    | 2.9.4
+ZLIB    | 1.2.8
 
