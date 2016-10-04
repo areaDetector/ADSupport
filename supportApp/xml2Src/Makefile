@@ -19,6 +19,8 @@ ifeq ($(WITH_XML2),YES)
 
     INC_WIN32 += win32config.h
     INC_WIN32 += wsockcompat.h
+    INC_Linux += config_32.h
+    INC_Linux += config_64.h
     INC += libxml/DOCBparser.h
     INC += libxml/globals.h 
     INC += libxml/tree.h

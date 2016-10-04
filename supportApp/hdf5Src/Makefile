@@ -58,7 +58,9 @@ ifeq ($(WITH_HDF5),YES)
     INC += H5version.h
     INC += H5Zpublic.h
     INC += hdf5.h
-    INC += H5pubconf.h 
+    INC += H5pubconf.h
+    INC_Linux +=  H5pubconf_32.h
+    INC_Linux +=  H5pubconf_64.h
 
     INC_vxWorks += H5vxWorks.h 
 
@@ -346,10 +348,10 @@ ifeq ($(WITH_HDF5),YES)
         USR_INCLUDES += $(SZIP_INCLUDE)
       endif
       ifdef SZIP_LIB
-        sz_DIR             = $(SZIP_LIB)
-        LIB_LIBS_default   += sz
+        sz_DIR       = $(SZIP_LIB)
+        LIB_LIBS     += sz
       else
-        LIB_SYS_LIBS_default  += sz
+        LIB_SYS_LIBS += sz
       endif
     else
       LIB_LIBS += szip
@@ -360,11 +362,10 @@ ifeq ($(WITH_HDF5),YES)
         USR_INCLUDES += $(ZLIB_INCLUDE)
       endif
       ifdef ZLIB_LIB
-        z_DIR             = $(ZLIB_LIB)
-        LIB_LIBS_default  += z
+        z_DIR        = $(ZLIB_LIB)
+        LIB_LIBS     += z
       else
-        LIB_SYS_LIBS_default  += z
-        LIB_SYS_LIBS_cygwin32 += libz
+        LIB_SYS_LIBS += z
       endif
     else
       LIB_LIBS += zlib

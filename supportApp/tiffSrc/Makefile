@@ -11,6 +11,8 @@ ifeq ($(WITH_TIFF),YES)
     INC += tiffio.h 
     inc += tiffvers.h 
     INC += tiffconf.h 
+    INC_Linux += tiffconf_32.h
+    INC_Linux += tiffconf_64.h
 
     LIBRARY_IOC = tiff
     ifeq ($(SHARED_LIBRARIES),YES)
