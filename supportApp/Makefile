@@ -5,13 +5,15 @@ DIRS += netCDFSrc
 
 DIRS += jpegSrc
 
+DIRS += zlibSrc
+
 DIRS += tiffSrc
+tiffSrc_DEPEND_DIRS += zlibSrc
 
 DIRS += xml2Src
 
 DIRS += szipSrc
 
-DIRS += zlibSrc
 
 DIRS += hdf5Src
 hsf5Src_DEPEND_DIRS += szipSrc zlibSrc
