@@ -18,7 +18,7 @@ R1-0 (October XXX, 2016)
 Initial release.  The versions of each support library are:
 
 Library | Version
-========|=========
+------- | -------
 HDF5    | 1.10.0-patch1
 JPEG    | 9b
 netCDF  | 4.1.3  
