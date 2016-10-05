@@ -9,8 +9,7 @@ include $(TOP)/configure/CONFIG
 ifeq ($(WITH_SZIP),YES)
   ifeq ($(SZIP_EXTERNAL),NO)
 
-    LIBRARY_IOC_WIN32 = szip
-    LIBRARY_IOC_vxWorks = szip
+    LIBRARY_IOC = szip
 
     ifeq ($(SHARED_LIBRARIES),YES)
       USR_CFLAGS += -DSZ_BUILT_AS_DYNAMIC_LIB -Dszip_EXPORTS
