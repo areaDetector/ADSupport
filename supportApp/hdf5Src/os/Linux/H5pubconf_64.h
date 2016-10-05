@@ -189,7 +189,7 @@
 /* #undef H5_HAVE_LIBMPE */
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
-/* #undef H5_HAVE_LIBPTHREAD */
+#define H5_HAVE_LIBPTHREAD 1
 
 /* Define to 1 if you have the `sz' library (-lsz). */
 #define H5_HAVE_LIBSZ 1
@@ -228,7 +228,7 @@
 /* #undef H5_HAVE_PARALLEL */
 
 /* Define to 1 if you have the <pthread.h> header file. */
-/* #undef H5_HAVE_PTHREAD_H */
+#define H5_HAVE_PTHREAD_H 1
 
 /* Define to 1 if you have the <quadmath.h> header file. */
 #define H5_HAVE_QUADMATH_H 1
@@ -330,7 +330,7 @@
 #define H5_HAVE_SZLIB_H 1
 
 /* Define if we have thread safe support */
-/* #undef H5_HAVE_THREADSAFE */
+#define H5_HAVE_THREADSAFE 1
 
 /* Define if timezone is a global variable */
 #define H5_HAVE_TIMEZONE 1
@@ -381,7 +381,7 @@
 #define H5_HAVE___INLINE__ 1
 
 /* Define if the high-level library headers should be included in hdf5.h */
-#define H5_INCLUDE_HL 1
+/* #undef H5_INCLUDE_HL */
 
 /* Define if your system can convert long double to (unsigned) long long
    values correctly. */
@@ -575,7 +575,7 @@
 
 /* Define if your system supports pthread_attr_setscope(&attribute,
    PTHREAD_SCOPE_SYSTEM) call. */
-/* #undef H5_SYSTEM_SCOPE_THREADS */
+#define H5_SYSTEM_SCOPE_THREADS 1
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #define H5_TIME_WITH_SYS_TIME 1
