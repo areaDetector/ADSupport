@@ -283,9 +283,7 @@
 #define HAVE_VPRINTF 1
 
 /* Define to 1 if the system has the type `_Bool'. */
-#if defined(_MINGW)
-  #define HAVE__BOOL 1
-#endif
+/* #define HAVE__BOOL 1 */
 
 /* do large file tests */
 /* #undef LARGE_FILE_TESTS */
