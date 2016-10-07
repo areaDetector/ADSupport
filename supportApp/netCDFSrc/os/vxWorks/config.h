@@ -180,7 +180,7 @@
 #define HAVE_STDARG_H 1
 
 /* Define to 1 if stdbool.h conforms to C99. */
-#if defined(vxWorks) && defined(_WRS_VXWORKS_MAJOR) && (_WRS_VXWORKS_MAJOR >= 6) && (_WRS_VXWORKS_MINOR >= 8)
+#if defined(vxWorks) && defined(_WRS_VXWORKS_MAJOR) && (_WRS_VXWORKS_MAJOR >= 6) && (_WRS_VXWORKS_MINOR >= 6)
   #define HAVE_STDBOOL_H 1
 #endif
 

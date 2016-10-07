@@ -65,12 +65,12 @@
 #else
 # if ! HAVE__BOOL
 #  ifdef __cplusplus
-typedef bool _Bool;
+typedef bool utf8proc_bool;
 #  else
-typedef unsigned char _Bool;
+typedef unsigned char utf8proc_bool;
 #  endif
 # endif
-# define bool _Bool
+# define bool utf8proc_bool
 # define false 0
 # define true 1
 # define __bool_true_false_are_defined 1
