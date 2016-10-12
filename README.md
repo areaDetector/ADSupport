@@ -7,7 +7,7 @@ software.  It contains third party libraries required for some plugins and
 drivers.  These are provided in source-code form compatible with the EPICS
 build system.  This makes it convenient to use these libraries on systems
 like Windows and vxWorks for which there are not binary packages available
-AS there are on Linux.  For Linux the code here can be useful when the
+as there are on Linux.  For Linux the code here can be useful when the
 Linux system being used does not have one of the packages installed, or
 has a different version from the one required by areaDetector.
 
