@@ -32,7 +32,7 @@ are set.
     WITH_HDF5=YES
     HDF5_EXTERNAL=NO
 
-This allows areaDetector to not use a library at all (USE_XXX=NO) or to 
+This allows areaDetector to not use a library at all (WITH_XXX=NO) or to 
 use an external version of the library if desired (XXX_EXTERNAL=YES)
 rather than the version in ADSupport.
 
