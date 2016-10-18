@@ -12,7 +12,7 @@ ifeq ($(WITH_SZIP),YES)
     LIBRARY_IOC = szip
 
     ifeq ($(SHARED_LIBRARIES),YES)
-      USR_CFLAGS += -DSZ_BUILT_AS_DYNAMIC_LIB -Dszip_EXPORTS
+      USR_CFLAGS_WIN32 += -DSZ_BUILT_AS_DYNAMIC_LIB -Dszip_EXPORTS
     endif
 
     INC += SZconfig.h
