@@ -620,7 +620,9 @@ typedef uint64_t      uint_fast64_t;
 /* #undef H5_SYSTEM_SCOPE_THREADS */
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
-#define H5_TIME_WITH_SYS_TIME 1
+#if defined(vxWorks) && defined(_WRS_VXWORKS_MAJOR) && (_WRS_VXWORKS_MAJOR >= 6)
+  #define H5_TIME_WITH_SYS_TIME 1
+#endif
 
 /* Define using v1.6 public API symbols by default */
 /* #undef H5_USE_16_API_DEFAULT */
