@@ -10,6 +10,7 @@
 #define H5_HAVE_VXWORKS
 #include <H5vxWorks.h>
 #include <hostLib.h>
+#include <epicsStdio.h>
 typedef int8_t        int_least8_t  ;
 typedef uint8_t       uint_least8_t;
 typedef int8_t        int_fast8_t  ;
@@ -280,7 +281,11 @@ typedef uint64_t      uint_fast64_t;
 /* #undef H5_HAVE_SIGSETJMP */
 
 /* Define to 1 if you have the `snprintf' function. */
-/* #undef H5_HAVE_SNPRINTF */
+#if defined(vxWorks) && defined(_WRS_VXWORKS_MAJOR) && (_WRS_VXWORKS_MAJOR >= 6)
+  #define H5_HAVE_SNPRINTF 1
+#else
+  #define HDsnprintf epicsSnprintf
+#endif
 
 /* Define to 1 if you have the `srandom' function. */
 /* #undef H5_HAVE_SRANDOM */
@@ -295,7 +300,9 @@ typedef uint64_t      uint_fast64_t;
 #define H5_HAVE_STDDEF_H 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#define H5_HAVE_STDINT_H 1
+#if defined(vxWorks) && defined(_WRS_VXWORKS_MAJOR) && (_WRS_VXWORKS_MAJOR >= 6)
+  #define H5_HAVE_STDINT_H 1
+#endif
 
 /* Define to 1 if you have the <stdint.h> header file for Cplusplus. */
 #define H5_HAVE_STDINT_H_CXX 1
@@ -340,8 +347,9 @@ typedef uint64_t      uint_fast64_t;
 #define H5_HAVE_SYS_TIMEB_H 1
 
 /* Define to 1 if you have the <sys/time.h> header file. */
-#define H5_HAVE_SYS_TIME_H 1
-
+#if defined(vxWorks) && defined(_WRS_VXWORKS_MAJOR) && (_WRS_VXWORKS_MAJOR >= 6)
+  #define H5_HAVE_SYS_TIME_H 1
+#endif
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define H5_HAVE_SYS_TYPES_H 1
 
@@ -373,7 +381,11 @@ typedef uint64_t      uint_fast64_t;
 /* #undef H5_HAVE_VASPRINTF */
 
 /* Define to 1 if you have the `vsnprintf' function. */
-#define H5_HAVE_VSNPRINTF 1
+#if defined(vxWorks) && defined(_WRS_VXWORKS_MAJOR) && (_WRS_VXWORKS_MAJOR >= 6)
+  #define H5_HAVE_VSNPRINTF 1
+#else
+  #define HDvsnprintf(S,N,FMT,A) epicsVsnprintf(S,N,FMT,A)
+#endif
 
 /* Define to 1 if you have the `waitpid' function. */
 /* #undef H5_HAVE_WAITPID */
