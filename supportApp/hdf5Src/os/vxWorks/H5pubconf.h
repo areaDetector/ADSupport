@@ -10,7 +10,6 @@
 #define H5_HAVE_VXWORKS
 #include <H5vxWorks.h>
 #include <hostLib.h>
-#include <epicsStdio.h>
 typedef int8_t        int_least8_t  ;
 typedef uint8_t       uint_least8_t;
 typedef int8_t        int_fast8_t  ;
@@ -281,11 +280,7 @@ typedef uint64_t      uint_fast64_t;
 /* #undef H5_HAVE_SIGSETJMP */
 
 /* Define to 1 if you have the `snprintf' function. */
-#if defined(vxWorks) && defined(_WRS_VXWORKS_MAJOR) && (_WRS_VXWORKS_MAJOR >= 6)
-  #define H5_HAVE_SNPRINTF 1
-#else
-  #define HDsnprintf epicsSnprintf
-#endif
+/* #undef H5_HAVE_SNPRINTF */
 
 /* Define to 1 if you have the `srandom' function. */
 /* #undef H5_HAVE_SRANDOM */
@@ -300,9 +295,7 @@ typedef uint64_t      uint_fast64_t;
 #define H5_HAVE_STDDEF_H 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#if defined(vxWorks) && defined(_WRS_VXWORKS_MAJOR) && (_WRS_VXWORKS_MAJOR >= 6)
-  #define H5_HAVE_STDINT_H 1
-#endif
+#define H5_HAVE_STDINT_H 1
 
 /* Define to 1 if you have the <stdint.h> header file for Cplusplus. */
 #define H5_HAVE_STDINT_H_CXX 1
@@ -347,9 +340,8 @@ typedef uint64_t      uint_fast64_t;
 #define H5_HAVE_SYS_TIMEB_H 1
 
 /* Define to 1 if you have the <sys/time.h> header file. */
-#if defined(vxWorks) && defined(_WRS_VXWORKS_MAJOR) && (_WRS_VXWORKS_MAJOR >= 6)
-  #define H5_HAVE_SYS_TIME_H 1
-#endif
+#define H5_HAVE_SYS_TIME_H 1
+
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define H5_HAVE_SYS_TYPES_H 1
 
@@ -381,11 +373,7 @@ typedef uint64_t      uint_fast64_t;
 /* #undef H5_HAVE_VASPRINTF */
 
 /* Define to 1 if you have the `vsnprintf' function. */
-#if defined(vxWorks) && defined(_WRS_VXWORKS_MAJOR) && (_WRS_VXWORKS_MAJOR >= 6)
-  #define H5_HAVE_VSNPRINTF 1
-#else
-  #define HDvsnprintf(S,N,FMT,A) epicsVsnprintf(S,N,FMT,A)
-#endif
+#define H5_HAVE_VSNPRINTF 1
 
 /* Define to 1 if you have the `waitpid' function. */
 /* #undef H5_HAVE_WAITPID */
@@ -620,9 +608,7 @@ typedef uint64_t      uint_fast64_t;
 /* #undef H5_SYSTEM_SCOPE_THREADS */
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
-#if defined(vxWorks) && defined(_WRS_VXWORKS_MAJOR) && (_WRS_VXWORKS_MAJOR >= 6)
-  #define H5_TIME_WITH_SYS_TIME 1
-#endif
+#define H5_TIME_WITH_SYS_TIME 1
 
 /* Define using v1.6 public API symbols by default */
 /* #undef H5_USE_16_API_DEFAULT */
