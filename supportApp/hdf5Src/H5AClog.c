@@ -109,8 +109,14 @@ H5AC__write_create_cache_log_msg(H5AC_t *cache)
     HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Create the log message string */
-    HDsnprintf(msg, MSG_SIZE, "{\n\"create_time\":%lld,\n\"messages\":\n[\n",
-      (long long)HDtime(NULL));
+    HDsnprintf(msg, MSG_SIZE, 
+"\
+{\n\
+\"create_time\":%lld,\n\
+\"messages\":\n\
+[\n\
+"
+    , (long long)HDtime(NULL));
 
     /* Since we're about to override the current logging flag,
      * check the "log enabled" flag to see if we didn't get here
