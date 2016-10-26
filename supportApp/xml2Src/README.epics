@@ -3,6 +3,8 @@ It has been slightly modified to build under the EPICS build system.
 
 It is intended for use on WIN32, vxWorks, and RTEMS.  
 On Linux and OS-X the standard package managers should be used instead.
+Note: Darwin's config.h was generated using the following:
+  ./configure --without-threads
 
 These are the files that have been modified from the original distribution
 catalog.c  
