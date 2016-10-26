@@ -14,6 +14,8 @@ os/[WIN32, vxWorks, Linux]/config.h
     ./configure --without-hdf4 --with-hdf5=/usr/local64
   For 32-bit
     ./configure --without-hdf4 --with-hdf5=/usr/local64 CFLAGS=-m32 CXXFLAGS=-m32 LDFLAGS=-m32
+  These files were enerated by running ./configure in the distribution on OS X (10.11.6):
+    ./configure --without-hdf4 --with-hdf5=/opt/local
   These files were then manually edited for WIN32 and vxWorks.  On Linux they were merged into a single file using
   the __LP64__ macro.
 
