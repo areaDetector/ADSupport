@@ -59,6 +59,25 @@ H5vxWorks.c, H5vxWorks.h
     implemented on DOS file system.
   flock (named vxWorks_flock).
 
+
+When building the 1.10-swmr-fixes release I also needed to do the following:
+
+Makefile
+  Commented out -D NDEBUG.  Compiling fails in H5C.c if NDEBUG is set.
+
+H5win32defs.h:
+  Added definition of HDnanosleep
+
+H5FDlog.c
+  Added brackets to fix Visual Studio compiler error.
+  
+H5system.c
+  Added definition of round() functions for Visual Studio pre-2013.
+  
+os/WIN32/H5pubconf.h
+  Added definition of timespec structure.
+
+
 These are the flags that were used by CMake with my comments:
 
 32-bit shared:
