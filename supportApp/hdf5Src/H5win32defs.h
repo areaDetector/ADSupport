@@ -51,6 +51,7 @@ typedef __int64             h5_stat_size_t;
 #define HDrmdir(S)          _rmdir(S)
 #define HDsetvbuf(F,S,M,Z)  setvbuf(F,S,M,(Z>1?Z:2))
 #define HDsleep(S)          Sleep(S*1000)
+#define HDnanosleep(N, O)   Sleep((int)(1000. * (N->tv_sec + N->tv_nsec/1.e9)))
 #define HDstat(S,B)         _stati64(S,B)
 #define HDstrcasecmp(A,B)   _stricmp(A,B)
 #define HDstrtoull(S,R,N)   _strtoui64(S,R,N)
