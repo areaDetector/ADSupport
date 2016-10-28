@@ -7,10 +7,7 @@
 #define H5_HAVE_WINDOWS 1
 
 /* This is a kludge for the 1.10-swmr-fixes release */
-struct timespec {
-  int tv_sec;
-  int tv_nsec;
-};
+#include <epicsTime.h>
 
 /* Define if using MinGW */
 #ifdef __MINGW32__
