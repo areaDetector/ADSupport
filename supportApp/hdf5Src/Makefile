@@ -11,7 +11,7 @@ ifeq ($(WITH_HDF5),YES)
     LIBRARY_IOC = hdf5
     PROD_IOC    = H5detect
 
-    USR_CFLAGS += -D NDEBUG
+#    USR_CFLAGS += -D NDEBUG
     ifeq ($(SHARED_LIBRARIES), YES)
       USR_CFLAGS_WIN32 += -D H5_BUILT_AS_DYNAMIC_LIB 
       USR_CFLAGS_WIN32 += -D hdf5_shared_EXPORTS
@@ -78,6 +78,8 @@ ifeq ($(WITH_HDF5),YES)
     LIB_SRCS += H5Atest.c
     LIB_SRCS += H5AC.c
     LIB_SRCS += H5AClog.c
+    LIB_SRCS += H5ACdbg.c
+    LIB_SRCS += H5ACproxy_entry.c
     LIB_SRCS += H5B.c
     LIB_SRCS += H5Bcache.c
     LIB_SRCS += H5Bdbg.c
@@ -89,6 +91,12 @@ ifeq ($(WITH_HDF5),YES)
     LIB_SRCS += H5B2stat.c
     LIB_SRCS += H5B2test.c
     LIB_SRCS += H5C.c
+    LIB_SRCS += H5Cdbg.c
+    LIB_SRCS += H5Cepoch.c
+    LIB_SRCS += H5Clog.c
+    LIB_SRCS += H5Cquery.c
+    LIB_SRCS += H5Ctag.c
+    LIB_SRCS += H5Ctest.c
     LIB_SRCS += H5CS.c
     LIB_SRCS += H5D.c
     LIB_SRCS += H5Dbtree.c
@@ -253,7 +261,7 @@ ifeq ($(WITH_HDF5),YES)
     LIB_SRCS += H5Oname.c
     LIB_SRCS += H5Onull.c
     LIB_SRCS += H5Opline.c
-    LIB_SRCS += H5Oproxy.c
+#    LIB_SRCS += H5Oproxy.c
     LIB_SRCS += H5Orefcount.c
     LIB_SRCS += H5Osdspace.c
     LIB_SRCS += H5Oshared.c
