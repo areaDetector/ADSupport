@@ -1585,7 +1585,7 @@ H5FD_log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_U
             HDgettimeofday(&timeval_start, NULL);
 #endif /* H5_HAVE_GETTIMEOFDAY */
 #ifdef H5_HAVE_WIN32_API
-        LARGE_INTEGER   li;         /* 64-bit (union) integer for SetFilePointer() call */
+{        LARGE_INTEGER   li;         /* 64-bit (union) integer for SetFilePointer() call */
         DWORD           dwPtrLow;   /* Low-order pointer bits from SetFilePointer()
                                      * Only used as an error code here.
                                      */
@@ -1610,6 +1610,7 @@ H5FD_log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_U
         bError = SetEndOfFile(file->hFile);
         if(0 == bError)
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+}
 #else /* H5_HAVE_WIN32_API */
         if(-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
