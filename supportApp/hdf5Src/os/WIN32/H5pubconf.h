@@ -6,6 +6,12 @@
 /* Define if the Windows virtual file driver should be compiled */
 #define H5_HAVE_WINDOWS 1
 
+/* This is a kludge for the 1.10-swmr-fixes release */
+struct timespec {
+  int tv_sec;
+  int tv_nsec;
+};
+
 /* Define if using MinGW */
 #ifdef __MINGW32__
 #define H5_HAVE_MINGW
