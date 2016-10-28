@@ -410,9 +410,6 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
-    /* Patch the top level file pointer for dt->shared->u.vlen.f if needed */
-    H5T_patch_vlen_file(dataset->shared->type, dataset->oloc.file);
-
     /* Set up datatype info for operation */
     if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, FALSE, &type_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
@@ -638,9 +635,6 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
-    /* Patch the top level file pointer for dt->shared->u.vlen.f if needed */
-    H5T_patch_vlen_file(dataset->shared->type, dataset->oloc.file);
-
     /* Set up datatype info for operation */
     if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, TRUE, &type_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
@@ -766,7 +760,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         else
             full_overwrite = (hbool_t)((hsize_t)file_nelmts == nelmts ? TRUE : FALSE);
 
- 	    /* Allocate storage */
+        /* Allocate storage */
         if(H5D__alloc_storage(&io_info, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
     } /* end if */
@@ -944,6 +938,10 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     /* check args */
     HDassert(type_info);
     HDassert(dset);
+
+    /* Patch the top level file pointer for dt->shared->u.vlen.f if needed */
+    if(H5T_patch_vlen_file(dset->shared->type, dset->oloc.file) < 0 )
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer")
 
     /* Initialize type info safely */
     HDmemset(type_info, 0, sizeof(*type_info));

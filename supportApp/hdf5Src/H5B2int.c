@@ -87,6 +87,7 @@ static herr_t H5B2__shadow_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
 static herr_t H5B2__create_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, void *parent,
     H5B2_node_ptr_t *node_ptr, uint16_t depth);
 #ifdef H5B2_DEBUG
+/* Don't label these with H5_ATTR_PURE or you'll get even more warnings... */
 static herr_t H5B2__assert_leaf(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf);
 static herr_t H5B2__assert_leaf2(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf, const H5B2_leaf_t *leaf2);
 static herr_t H5B2__assert_internal(hsize_t parent_all_nrec, const H5B2_hdr_t *hdr, const H5B2_internal_t *internal);
@@ -428,15 +429,11 @@ done:
     if(right_child && H5AC_unprotect(hdr->f, dxpl_id, child_class, right_addr, right_child, right_child_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
 
-    /* Release grandchild node if protected (only on error) */
-    if(grandchild && H5AC_unprotect(hdr->f, dxpl_id, grandchild_class, left_node_ptrs[u].addr, grandchild, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
-
-    /* Unprotect the grandchild on error */
+    /* Unprotect the grandchild (should only happen on error) */
     if(grandchild) {
         HDassert(ret_value < 0);
         if(H5AC_unprotect(hdr->f, dxpl_id, grandchild_class, grandchild_addr, grandchild, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -887,11 +884,11 @@ done:
     if(right_child && H5AC_unprotect(hdr->f, dxpl_id, child_class, right_addr, right_child, right_child_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
-    /* Unprotect the grandchild on error */
+    /* Unprotect the grandchild (should only happen on error) */
     if(grandchild) {
         HDassert(ret_value < 0);
         if(H5AC_unprotect(hdr->f, dxpl_id, grandchild_class, grandchild_addr, grandchild, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1543,11 +1540,11 @@ done:
     if(right_child && H5AC_unprotect(hdr->f, dxpl_id, child_class, right_addr, right_child, right_child_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
-    /* Unprotect the grandchild on error */
+    /* Unprotect the grandchild (should only happen on error) */
     if(grandchild) {
         HDassert(ret_value < 0);
         if(H5AC_unprotect(hdr->f, dxpl_id, grandchild_class, grandchild_addr, grandchild, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1782,11 +1779,11 @@ done:
     if(right_child && H5AC_unprotect(hdr->f, dxpl_id, child_class, right_addr, right_child, right_child_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
-    /* Unprotect the grandchild on error */
+    /* Unprotect the grandchild (should only happen on error) */
     if(grandchild) {
         HDassert(ret_value < 0);
         if(H5AC_unprotect(hdr->f, dxpl_id, grandchild_class, grandchild_addr, grandchild, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2160,11 +2157,11 @@ done:
     if(right_child && H5AC_unprotect(hdr->f, dxpl_id, child_class, right_addr, right_child, right_child_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
-    /* Unprotect the grandchild on error */
+    /* Unprotect the grandchild (should only happen on error) */
     if(grandchild) {
         HDassert(ret_value < 0);
         if(H5AC_unprotect(hdr->f, dxpl_id, grandchild_class, grandchild_addr, grandchild, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4820,7 +4817,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+H5_ATTR_PURE static herr_t
 H5B2__assert_leaf(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf)
 {
     /* General sanity checking on node */
@@ -4843,7 +4840,7 @@ H5B2__assert_leaf(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+H5_ATTR_PURE static herr_t
 H5B2__assert_leaf2(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf, const H5B2_leaf_t H5_ATTR_UNUSED *leaf2)
 {
     /* General sanity checking on node */
@@ -4866,7 +4863,7 @@ H5B2__assert_leaf2(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf, const H5B2_le
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+H5_ATTR_PURE static herr_t
 H5B2__assert_internal(hsize_t parent_all_nrec, const H5B2_hdr_t *hdr, const H5B2_internal_t *internal)
 {
     hsize_t tot_all_nrec;       /* Total number of records at or below this node */
@@ -4907,7 +4904,7 @@ H5B2__assert_internal(hsize_t parent_all_nrec, const H5B2_hdr_t *hdr, const H5B2
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+H5_ATTR_PURE static herr_t
 H5B2__assert_internal2(hsize_t parent_all_nrec, const H5B2_hdr_t *hdr, const H5B2_internal_t *internal, const H5B2_internal_t *internal2)
 {
     hsize_t tot_all_nrec;       /* Total number of records at or below this node */

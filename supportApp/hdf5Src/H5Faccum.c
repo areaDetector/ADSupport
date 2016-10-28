@@ -414,11 +414,6 @@ done:
  *		koziol@hdfgroup.org
  *		Jan 10 2008
  *
- * Modifications:
- *	Vailin Choi; June 2013
- *	This is a fix for SWMR:
- *	For a large write that is >= than H5F_ACCUM_MAX_SIZE,
- *	flush the metadata in the accumulator first before the write.
  *-------------------------------------------------------------------------
  */
 herr_t

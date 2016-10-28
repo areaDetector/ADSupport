@@ -133,7 +133,7 @@ static herr_t H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, had
 			      size_t size, void *_buf/*out*/);
 static herr_t H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 			       size_t size, const void *_buf);
-static herr_t H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t H5FD_multi_lock(H5FD_t *_file, hbool_t rw);
 static herr_t H5FD_multi_unlock(H5FD_t *_file);
@@ -899,25 +899,30 @@ H5FD_multi_fapl_copy(const void *_old_fa)
     memcpy(new_fa, old_fa, sizeof(H5FD_multi_fapl_t));
     ALL_MEMBERS(mt) {
 	if (old_fa->memb_fapl[mt]>=0) {
-	    new_fa->memb_fapl[mt] = H5Pcopy(old_fa->memb_fapl[mt]);
-	    if(new_fa->memb_fapl[mt]<0)
+	    if (H5Iinc_ref(old_fa->memb_fapl[mt]) < 0) {
                 nerrors++;
+                break;
+            }
+	    new_fa->memb_fapl[mt] = old_fa->memb_fapl[mt];
 	}
 	if (old_fa->memb_name[mt]) {
 	    new_fa->memb_name[mt] = my_strdup(old_fa->memb_name[mt]);
-	    assert(new_fa->memb_name[mt]);
+            if (NULL == new_fa->memb_name[mt]) {
+                nerrors++;
+                break;
+            }
 	}
     } END_MEMBERS;
 
     if (nerrors) {
         ALL_MEMBERS(mt) {
             if (new_fa->memb_fapl[mt]>=0)
-                (void)H5Pclose(new_fa->memb_fapl[mt]);
+                (void)H5Idec_ref(new_fa->memb_fapl[mt]);
             if (new_fa->memb_name[mt])
                 free(new_fa->memb_name[mt]);
         } END_MEMBERS;
         free(new_fa);
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "invalid freespace objects", NULL)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "can't release object on error", NULL)
     }
     return new_fa;
 }
@@ -948,7 +953,7 @@ H5FD_multi_fapl_free(void *_fa)
 
     ALL_MEMBERS(mt) {
 	if (fa->memb_fapl[mt]>=0)
-            if(H5Pclose(fa->memb_fapl[mt])<0)
+            if(H5Idec_ref(fa->memb_fapl[mt])<0)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTCLOSEOBJ, "can't close property list", -1)
 	if (fa->memb_name[mt])
             free(fa->memb_name[mt]);
@@ -1013,9 +1018,8 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
 	file->fa.memb_map[mt] = fa->memb_map[mt];
 	file->fa.memb_addr[mt] = fa->memb_addr[mt];
 	if (fa->memb_fapl[mt]>=0)
-	    file->fa.memb_fapl[mt] = H5Pcopy(fa->memb_fapl[mt]);
-	else
-	    file->fa.memb_fapl[mt] = fa->memb_fapl[mt];
+	    H5Iinc_ref(fa->memb_fapl[mt]);
+        file->fa.memb_fapl[mt] = fa->memb_fapl[mt];
 	if (fa->memb_name[mt])
 	    file->fa.memb_name[mt] = my_strdup(fa->memb_name[mt]);
 	else
@@ -1047,7 +1051,7 @@ error:
     if (file) {
 	ALL_MEMBERS(mt) {
 	    if (file->memb[mt]) (void)H5FDclose(file->memb[mt]);
-	    if (file->fa.memb_fapl[mt]>=0) (void)H5Pclose(file->fa.memb_fapl[mt]);
+	    if (file->fa.memb_fapl[mt]>=0) (void)H5Idec_ref(file->fa.memb_fapl[mt]);
 	    if (file->fa.memb_name[mt]) free(file->fa.memb_name[mt]);
 	} END_MEMBERS;
 	if (file->name) free(file->name);
@@ -1098,7 +1102,7 @@ H5FD_multi_close(H5FD_t *_file)
 
     /* Clean up other stuff */
     ALL_MEMBERS(mt) {
-	if (file->fa.memb_fapl[mt]>=0) (void)H5Pclose(file->fa.memb_fapl[mt]);
+	if (file->fa.memb_fapl[mt]>=0) (void)H5Idec_ref(file->fa.memb_fapl[mt]);
 	if (file->fa.memb_name[mt]) free(file->fa.memb_name[mt]);
     } END_MEMBERS;
     free(file->name);
@@ -1280,7 +1284,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
     } else {
         H5FD_mem_t mmt = file->fa.memb_map[type];
 
-        if(H5FD_MEM_DEFAULT==mmt)
+        if(H5FD_MEM_DEFAULT == mmt)
             mmt = type;
 
 	if(file->memb[mmt]) {
@@ -1348,18 +1352,24 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     H5Eclear2(H5E_DEFAULT);
 
     mmt = file->fa.memb_map[type];
-    if(H5FD_MEM_DEFAULT == mmt)
-        mmt = type;
+    if(H5FD_MEM_DEFAULT == mmt) {
+        if(H5FD_MEM_DEFAULT == type)
+            mmt = H5FD_MEM_SUPER;
+        else
+            mmt = type;
+    } /* end if */
 
-    /* Handle backward compatibility in a quick and simple way.  v1.6 library had EOA for the entire virtual 
-     * file.  But it wasn't meaningful.  So v1.8 library doesn't have it anymore.  It saves the EOA for the 
-     * metadata file, instead.  Here we try to figure out whether the EOA is from a v1.6 file by comparing its 
-     * value.  If it is a big value, we assume it's from v1.6 and simply discard it. This is the normal case 
-     * when the metadata file has the smallest starting address.  If the metadata file has the biggest address,
-     * the EOAs of v1.6 and v1.8 files are the same.  It won't cause any trouble.  (Please see Issue 2598 
-     * in Jira) SLU - 2011/6/21
+    /* Handle backward compatibility in a quick and simple way.  v1.6 library
+     * had EOA for the entire virtual file.  But it wasn't meaningful.  So v1.8
+     * library doesn't have it anymore.  It saves the EOA for the metadata file,
+     * instead.  Here we try to figure out whether the EOA is from a v1.6 file
+     * by comparing its value.  If it is a big value, we assume it's from v1.6
+     * and simply discard it. This is the normal case when the metadata file
+     * has the smallest starting address.  If the metadata file has the biggest
+     * address, the EOAs of v1.6 and v1.8 files are the same.  It won't cause
+     * any trouble.  (Please see Issue 2598 in Jira) SLU - 2011/6/21
      */
-    if(H5FD_MEM_SUPER == type && file->memb_eoa[H5FD_MEM_SUPER] > 0 && eoa > file->memb_eoa[H5FD_MEM_SUPER])
+    if(H5FD_MEM_SUPER == mmt && file->memb_eoa[H5FD_MEM_SUPER] > 0 && eoa > (file->memb_next[H5FD_MEM_SUPER] / 2))
         return 0;
 
     assert(eoa >= file->fa.memb_addr[mmt]);
@@ -1368,7 +1378,7 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     H5E_BEGIN_TRY {
 	status = H5FDset_eoa(file->memb[mmt], mmt, (eoa - file->fa.memb_addr[mmt]));
     } H5E_END_TRY;
-    if (status<0)
+    if(status < 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "member H5FDset_eoa failed", -1)
 
     return 0;
@@ -1682,7 +1692,7 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
+H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 {
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
     H5FD_mem_t		mt;

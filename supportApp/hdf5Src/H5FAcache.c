@@ -110,6 +110,7 @@ static herr_t H5FA__cache_dblk_page_image_len(const void *thing,
     size_t *compressed_image_len_ptr);
 static herr_t H5FA__cache_dblk_page_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5FA__cache_dblk_page_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5FA__cache_dblk_page_free_icr(void *thing);
 
 
@@ -165,7 +166,7 @@ const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1] = {{
     H5FA__cache_dblk_page_image_len,    /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5FA__cache_dblk_page_serialize,    /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5FA__cache_dblk_page_notify,	/* 'notify' callback */
     H5FA__cache_dblk_page_free_icr,     /* 'free_icr' callback */
     NULL,				/* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
@@ -488,34 +489,33 @@ H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing))
         /* Determine which action to take */
         switch(action) {
             case H5AC_NOTIFY_ACTION_AFTER_INSERT:
-	        case H5AC_NOTIFY_ACTION_AFTER_LOAD:
-	        case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+            case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
                 /* do nothing */
                 break;
 
-	        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-                /* If hdr->fd_parent_addr != HADDR_UNDEF, the fixed 
-                 * array header must be employed as the index for a chunked
-                 * data set which has been modified by the SWMR writer.
-                 * 
-                 * In this case, hdr->fd_parent_addr must contain the 
-                 * address of object header proxy which is the flush 
-                 * dependency parent of the fixed array header.
-                 *
-                 * hdr->fd_parent_addr (and hdr->fd_parent_ptr) are used to
-                 * destroy the flush dependency before the fixed array
-                 * header is evicted.
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* If hdr->parent != NULL, hdr->parent is used to destroy
+                 * the flush dependency before the header is evicted.
                  */
-                if(hdr->fd_parent_addr != HADDR_UNDEF) {
-                    HDassert(hdr->fd_parent_ptr);
-                    HDassert(hdr->fd_parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-                    HDassert(hdr->fd_parent_ptr->addr == hdr->fd_parent_addr);
-                    HDassert(hdr->fd_parent_ptr->type);
-                    HDassert(hdr->fd_parent_ptr->type->id == H5AC_OHDR_PROXY_ID);
+                if(hdr->parent) {
+                    /* Sanity check */
+                    HDassert(hdr->top_proxy);
 
-                    /* Destroy flush dependency on object header proxy */
-                    if(H5FA__destroy_flush_depend((H5AC_info_t *)hdr->fd_parent_ptr, (H5AC_info_t *)hdr) < 0)
-                        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between fa header and object header proxy, address = %llu", (unsigned long long)hdr->fd_parent_addr)
+		    /* Destroy flush dependency on object header proxy */
+		    if(H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent, (void *)hdr->top_proxy) < 0)
+		        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between fixed array and proxy")
+                    hdr->parent = NULL;
+		} /* end if */
+
+                /* Detach from 'top' proxy for fixed array */
+                if(hdr->top_proxy) {
+                    if(H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
+                        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between header and fixed array 'top' proxy")
                 } /* end if */
                 break;
 
@@ -527,10 +527,8 @@ H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing))
 #endif /* NDEBUG */
         } /* end switch */
     } /* end if */
-    else {
-        HDassert(hdr->fd_parent_addr == HADDR_UNDEF);
-        HDassert(hdr->fd_parent_ptr == NULL);
-    } /* end else */
+    else
+        HDassert(NULL == hdr->parent);
 
 CATCH
 
@@ -908,6 +906,10 @@ H5FA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing))
                 break;
 
 	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
                 /* do nothing */
                 break;
 
@@ -916,6 +918,12 @@ H5FA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing))
                 if(H5FA__destroy_flush_depend((H5AC_info_t *)dblock->hdr, (H5AC_info_t *)dblock) < 0)
                     H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency")
 
+                /* Detach from 'top' proxy for fixed array */
+                if(dblock->top_proxy) {
+                    if(H5AC_proxy_entry_remove_child(dblock->top_proxy, dblock) < 0)
+                        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block and fixed array 'top' proxy")
+                    dblock->top_proxy = NULL;
+                } /* end if */
                 break;
 
             default:
@@ -1242,6 +1250,66 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_serialize() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FA__cache_dblk_page_notify
+ *
+ * Purpose:	Handle cache action notifications
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@lbl.gov
+ *		Oct 17 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing))
+
+    /* Local variables */
+    H5FA_dblk_page_t *dblk_page = (H5FA_dblk_page_t *)_thing;      /* Pointer to the object */
+
+    /* Sanity check */
+    HDassert(dblk_page);
+
+    /* Determine which action to take */
+    switch(action) {
+        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+        case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+        case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+            /* Detach from 'top' proxy for fixed array */
+            if(dblk_page->top_proxy) {
+                if(H5AC_proxy_entry_remove_child(dblk_page->top_proxy, dblk_page) < 0)
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block page and fixed array 'top' proxy")
+                dblk_page->top_proxy = NULL;
+            } /* end if */
+            break;
+
+        case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+        case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+        case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+        case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+            /* do nothing */
+            break;
+
+        default:
+#ifdef NDEBUG
+            H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+    } /* end switch */
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FA__cache_dblk_page_free_icr
  *
  * Purpose:	Destroy/release an "in core representation" of a data
@@ -1269,3 +1337,4 @@ H5FA__cache_dblk_page_free_icr(void *thing))
 CATCH
 
 END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_free_icr() */
+

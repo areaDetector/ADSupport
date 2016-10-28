@@ -1054,7 +1054,15 @@ H5B__insert_helper(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud,
      * Handle changes/additions to children
      */
     HDassert(!(bt->level == 0) != !(child_bt_ud.bt));
-    if(H5B_INS_LEFT == my_ins || H5B_INS_RIGHT == my_ins) {
+    if(H5B_INS_CHANGE == my_ins) {
+	/*
+	 * The insertion simply changed the address for the child.
+	 */
+	HDassert(!child_bt_ud.bt);
+	HDassert(bt->level == 0);
+	bt->child[idx] = new_child_bt_ud.addr;
+        bt_ud->cache_flags |= H5AC__DIRTIED_FLAG;
+    } else if(H5B_INS_LEFT == my_ins || H5B_INS_RIGHT == my_ins) {
         unsigned *tmp_bt_flags_ptr = NULL;
         H5B_t	*tmp_bt;
 
@@ -1081,17 +1089,7 @@ H5B__insert_helper(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud,
 	/* Insert the child */
 	if(H5B__insert_child(tmp_bt, tmp_bt_flags_ptr, idx, new_child_bt_ud.addr, my_ins, md_key) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR, "can't insert child")
-    } else {
-        if(H5B_INS_CHANGE == my_ins) {
-            /*
-            * The insertion simply changed the address for the child.
-            */
-            HDassert(!child_bt_ud.bt);
-            HDassert(bt->level == 0);
-            bt->child[idx] = new_child_bt_ud.addr;
-            bt_ud->cache_flags |= H5AC__DIRTIED_FLAG;
-        } /* end if */
-    } /* end if */
+    } /* end else-if */
 
     /*
      * If this node split, return the mid key (the one that is shared

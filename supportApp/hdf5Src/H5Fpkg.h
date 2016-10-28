@@ -185,6 +185,7 @@ typedef struct H5F_superblock_cache_ud_t {
 			       */
 } H5F_superblock_cache_ud_t;
 
+/* Structure for passing 'user data' to driver info block cache callbacks */
 typedef struct H5F_drvrinfo_cache_ud_t {
     H5F_t   *f;               /* Pointer to file */
     haddr_t driver_addr;      /* address of driver info block */
@@ -302,7 +303,6 @@ struct H5F_file_t {
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
     unsigned	gc_ref;		/* Garbage-collect references?		*/
-    hbool_t	latest_format;	/* Always use the latest format?	*/
     unsigned	latest_flags;	/* The latest version support */
     hbool_t	store_msg_crt_idx;  /* Store creation index for object header messages?	*/
     unsigned	ncwfs;		/* Num entries on cwfs list		*/
@@ -431,12 +431,16 @@ H5_DLL herr_t H5F_efc_try_close(H5F_t *f);
 H5_DLL herr_t H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr);
 H5_DLL herr_t H5F__set_base_addr(const H5F_t *f, haddr_t addr);
 
+/* Functions that flush or evict */
+H5_DLL herr_t H5F__evict_cache_entries(H5F_t *f, hid_t dxpl_id);
+
 /* Testing functions */
 #ifdef H5F_TESTING
 H5_DLL herr_t H5F_get_sohm_mesg_count_test(hid_t fid, unsigned type_id,
     size_t *mesg_count);
 H5_DLL herr_t H5F_check_cached_stab_test(hid_t file_id);
 H5_DLL herr_t H5F_get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
+H5_DLL herr_t H5F_get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

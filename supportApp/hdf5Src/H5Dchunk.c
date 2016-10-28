@@ -519,7 +519,10 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
     for(u = 0, layout->nchunks = 1, layout->max_nchunks = 1; u < ndims; u++) {
         /* Round up to the next integer # of chunks, to accomodate partial chunks */
 	layout->chunks[u] = ((curr_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
-	layout->max_chunks[u] = ((max_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
+        if(H5S_UNLIMITED == max_dims[u])
+            layout->max_chunks[u] = H5S_UNLIMITED;
+        else
+            layout->max_chunks[u] = ((max_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
 
         /* Accumulate the # of chunks */
 	layout->nchunks *= layout->chunks[u];
@@ -5534,7 +5537,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     } /* end if */
 
     udata_dst.chunk_idx = H5VM_array_offset_pre(udata_dst.common.layout->ndims - 1, 
-			    udata_dst.common.layout->down_chunks, udata_dst.common.scaled);
+			    udata_dst.common.layout->max_down_chunks, udata_dst.common.scaled);
 
     /* Allocate chunk in the file */
     if(H5D__chunk_file_alloc(udata->idx_info_dst, NULL, &udata_dst.chunk_block, &need_insert, udata_dst.common.scaled) < 0)
@@ -6308,37 +6311,37 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
 
     /* Actually allocate space for the chunk in the file */
     if(alloc_chunk) {
-	switch(idx_info->storage->idx_type) {
-	    case H5D_CHUNK_IDX_NONE:
-	    {
-		H5D_chunk_ud_t udata;
+        switch(idx_info->storage->idx_type) {
+            case H5D_CHUNK_IDX_NONE:
+            {
+                H5D_chunk_ud_t udata;
 
-		udata.common.scaled = scaled;
+                udata.common.scaled = scaled;
                 if((idx_info->storage->ops->get_addr)(idx_info, &udata) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address")
-		new_chunk->offset = udata.chunk_block.offset;
-		HDassert(new_chunk->length == udata.chunk_block.length);
+                new_chunk->offset = udata.chunk_block.offset;
+                HDassert(new_chunk->length == udata.chunk_block.length);
                 break;
-	    }
+            }
 
-	    case H5D_CHUNK_IDX_EARRAY:
+            case H5D_CHUNK_IDX_EARRAY:
             case H5D_CHUNK_IDX_FARRAY:
             case H5D_CHUNK_IDX_BT2:
-	    case H5D_CHUNK_IDX_BTREE:
-	    case H5D_CHUNK_IDX_SINGLE:
+            case H5D_CHUNK_IDX_BTREE:
+            case H5D_CHUNK_IDX_SINGLE:
                 HDassert(new_chunk->length > 0);
-		H5_CHECK_OVERFLOW(new_chunk->length, /*From: */uint32_t, /*To: */hsize_t);
-		new_chunk->offset = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)new_chunk->length);
-		if(!H5F_addr_defined(new_chunk->offset))
-		    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "file allocation failed")
+                H5_CHECK_OVERFLOW(new_chunk->length, /*From: */uint32_t, /*To: */hsize_t);
+                new_chunk->offset = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)new_chunk->length);
+                if(!H5F_addr_defined(new_chunk->offset))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "file allocation failed")
                 *need_insert = TRUE;
-		break;
+                break;
 
-	    case H5D_CHUNK_IDX_NTYPES:
-	    default:
-		HDassert(0 && "This should never be executed!");
-		break;
-	} /* end switch */
+            case H5D_CHUNK_IDX_NTYPES:
+            default:
+                HDassert(0 && "This should never be executed!");
+                break;
+        } /* end switch */
     } /* end if */
 
     HDassert(H5F_addr_defined(new_chunk->offset));
@@ -6357,7 +6360,8 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Vailin Choi; Feb 2015
+ * Programmer:  Vailin Choi
+ *              Feb 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -6374,6 +6378,7 @@ H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     FUNC_ENTER_STATIC
 
+    /* Set up */
     new_idx_info = udata->new_idx_info;
     H5_CHECKED_ASSIGN(nbytes, size_t, chunk_rec->nbytes, uint32_t);
     chunk_addr = chunk_rec->chunk_addr;
@@ -6397,16 +6402,15 @@ H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed for raw data chunk")
 
 	/* Read the non-filtered edge chunk */
-    if(H5F_block_read(new_idx_info->f, H5FD_MEM_DRAW, chunk_addr, read_size, H5AC_rawdata_dxpl_id, buf) < 0)
+        if(H5F_block_read(new_idx_info->f, H5FD_MEM_DRAW, chunk_addr, read_size, H5AC_rawdata_dxpl_id, buf) < 0)
 	    HGOTO_ERROR(H5E_IO, H5E_READERROR, H5_ITER_ERROR, "unable to read raw data chunk")
 
 	/* Pass the chunk through the pipeline */
-	if(H5Z_pipeline(new_idx_info->pline, 0, &filter_mask, H5Z_NO_EDC, cb_struct, &nbytes, 
-			&read_size, &buf) < 0)
+	if(H5Z_pipeline(new_idx_info->pline, 0, &filter_mask, H5Z_NO_EDC, cb_struct, &nbytes, &read_size, &buf) < 0)
 	    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
 
 #if H5_SIZEOF_SIZE_T > 4
-	    /* Check for the chunk expanding too much to encode in a 32-bit value */
+        /* Check for the chunk expanding too much to encode in a 32-bit value */
 	if(nbytes > ((size_t)0xffffffff))
 	    HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, H5_ITER_ERROR, "chunk too large for 32-bit length")
 #endif /* H5_SIZEOF_SIZE_T > 4 */
@@ -6417,10 +6421,9 @@ H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 	HDassert(H5F_addr_defined(chunk_addr));
 
 	/* Write the filtered chunk to disk */
-	if(H5F_block_write(new_idx_info->f, H5FD_MEM_DRAW, chunk_addr, nbytes, 
-               H5AC_rawdata_dxpl_id, buf) < 0)
+	if(H5F_block_write(new_idx_info->f, H5FD_MEM_DRAW, chunk_addr, nbytes, H5AC_rawdata_dxpl_id, buf) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, H5_ITER_ERROR, "unable to write raw data to file")
-    }
+    } /* end if */
 
     /* Set up chunk information for insertion to chunk index */
     insert_udata.chunk_block.offset = chunk_addr;
@@ -6450,7 +6453,8 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; Feb 2015
+ * Programmer:  Vailin Choi
+ *              Feb 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -6471,10 +6475,10 @@ H5D__chunk_format_convert(H5D_t *dset, H5D_chk_idx_info_t *idx_info, H5D_chk_idx
     udata.dset_dims = dset->shared->curr_dims;
 
     /*  terate over the chunks in the current index and insert the chunk addresses into version 1 B-tree index */
-    if((dset->shared->layout.storage.u.chunk.ops->iterate)(idx_info, H5D__chunk_format_convert_cb, &udata) < 0)
+    if((idx_info->storage->ops->iterate)(idx_info, H5D__chunk_format_convert_cb, &udata) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk index to chunk info")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_format_convert() */
+

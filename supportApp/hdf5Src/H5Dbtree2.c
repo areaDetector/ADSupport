@@ -211,8 +211,6 @@ const H5B2_class_t H5D_BT2_FILT[1] = {{	/* B-tree class information */
 
 /* Declare a free list to manage the H5D_bt2_ctx_t struct */
 H5FL_DEFINE_STATIC(H5D_bt2_ctx_t);
-/* Declare a free list to manage the H5D_bt2_ctx_ud_t struct */
-H5FL_DEFINE_STATIC(H5D_bt2_ctx_ud_t);
 /* Declare a free list to manage the page elements */
 H5FL_BLK_DEFINE(chunk_dim);
 
@@ -643,8 +641,9 @@ H5D__bt2_idx_init(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info,
 static herr_t
 H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
 {
+    H5O_t *oh = NULL;                   /* Object header */
     H5O_loc_t oloc;                     /* Temporary object header location for dataset */
-    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
+    H5AC_proxy_entry_t *oh_proxy;       /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -666,18 +665,22 @@ H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
     oloc.file = idx_info->f;
     oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
 
-    /* Pin the dataset's object header proxy */
-    if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
+    /* Get header */
+    if(NULL == (oh = H5O_protect(&oloc, idx_info->dxpl_id, H5AC__READ_ONLY_FLAG, TRUE)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect object header")
 
-    /* Make the v2 B-tree a child flush dependency of the dataset's object header */
-    if(H5B2_depend((H5AC_info_t *)oh_proxy, idx_info->storage->u.btree2.bt2) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
+    /* Retrieve the dataset's object header proxy */
+    if(NULL == (oh_proxy = H5O_get_proxy(oh)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset object header proxy")
+
+    /* Make the v2 B-tree a child flush dependency of the dataset's object header proxy */
+    if(H5B2_depend(idx_info->storage->u.btree2.bt2, idx_info->dxpl_id, oh_proxy) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header proxy")
 
 done:
-    /* Unpin the dataset's object header proxy */
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
+    /* Release the object header from the cache */
+    if(oh && H5O_unprotect(&oloc, idx_info->dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree2_idx_depend() */
@@ -923,8 +926,10 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
 	/* Open existing v2 B-tree */
         if(H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
-    } else  /* Patch the top level file pointer contained in bt2 if needed */
-	H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f);
+    } /* end if */
+    else  /* Patch the top level file pointer contained in bt2 if needed */
+	if(H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer")
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -1016,8 +1021,10 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 	/* Open existing v2 B-tree */
         if(H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
-    } else  /* Patch the top level file pointer contained in bt2 if needed */
-	H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f);
+    } /* end if */
+    else  /* Patch the top level file pointer contained in bt2 if needed */
+	if(H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer")
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -1137,8 +1144,10 @@ H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 	/* Open existing v2 B-tree */
         if(H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
-    } else  /* Patch the top level file pointer contained in bt2 if needed */
-	H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f);
+    } /* end if */
+    else  /* Patch the top level file pointer contained in bt2 if needed */
+	if(H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer")
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -1226,10 +1235,14 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
     HDassert(udata);
 
     /* Check if the v2 B-tree is open yet */
-    if(NULL == idx_info->storage->u.btree2.bt2)
+    if(NULL == idx_info->storage->u.btree2.bt2) {
 	/* Open existing v2 B-tree */
         if(H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
+    } /* end if */
+    else  /* Patch the top level file pointer contained in bt2 if needed */
+	if(H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer")
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -1547,6 +1560,11 @@ H5D__bt2_idx_dest(const H5D_chk_idx_info_t *idx_info)
 
     /* Check if the v2-btree is open */
     if(idx_info->storage->u.btree2.bt2) {
+
+	/* Patch the top level file pointer contained in bt2 if needed */
+	if(H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer")
+
         /* Close v2 B-tree */
 	if(H5B2_close(idx_info->storage->u.btree2.bt2, idx_info->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree")

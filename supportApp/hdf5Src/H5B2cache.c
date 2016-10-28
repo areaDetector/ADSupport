@@ -206,7 +206,7 @@ H5B2__cache_hdr_get_load_size(const void *_image, void *_udata, size_t *image_le
 	*image_len = H5B2_HEADER_SIZE_FILE(udata->f);
     } else {
 	HDassert(actual_len);
-	HDassert(*actual_len == *actual_len);
+	HDassert(*actual_len == *image_len);
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -505,30 +505,22 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
             case H5AC_NOTIFY_ACTION_AFTER_INSERT:
 	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
 	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
 		/* do nothing */
                 break;
 
 	    case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-                /* If hdr->parent != NULL, the v2 B-tree header
-                 * must be employed as the index for a chunked
-                 * data set which has been modified by the SWMR writer.
-                 * 
-                 * In this case, hdr->parent must contain a
-                 * pointer to the object header proxy which is the flush 
-                 * dependency parent of the v2 B-tree header.
-                 *
-                 * hdr->parent is used to destroy the flush dependency
-                 * before the v2 B-tree header is evicted.
+                /* If hdr->parent != NULL, hdr->parent is used to destroy
+                 * the flush dependency before the header is evicted.
                  */
                 if(hdr->parent) {
-                    /* Sanity checks */
-                    HDassert(((H5AC_info_t *)hdr->parent)->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-                    HDassert(((H5AC_info_t *)hdr->parent)->type);
-                    HDassert(((H5AC_info_t *)hdr->parent)->type->id == H5AC_OHDR_PROXY_ID);
-
-		    /* Destroy flush dependency on object header proxy */
-		    if(H5B2__destroy_flush_depend((H5AC_info_t *)hdr->parent, (H5AC_info_t *)hdr) < 0)
+		    /* Destroy flush dependency */
+		    if(H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent, (void *)hdr) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                    hdr->parent = NULL;
 		} /* end if */
 		break;
 
@@ -540,6 +532,8 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
 #endif /* NDEBUG */
         } /* end switch */
     } /* end if */
+    else
+        HDassert(NULL == hdr->parent);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -936,6 +930,10 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
                 break;
 
 	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
 		/* do nothing */
 		break;
 
@@ -943,7 +941,6 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
 		/* Destroy flush dependency on parent */
 		if(H5B2__destroy_flush_depend((H5AC_info_t *)internal->parent, (H5AC_info_t *)internal) < 0)
 		    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-
                 break;
 
             default:
@@ -1344,6 +1341,10 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
                 break;
 
 	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
                 /* do nothing */
                 break;
 

@@ -127,10 +127,10 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 {
     H5P_genplist_t *new_plist;              /* New property list */
     H5P_genplist_t *old_plist;              /* Old property list */
-    H5F_object_flush_t  flush_info;         /* Object flush property values */
     H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
     hbool_t driver_prop_copied = FALSE;     /* Whether the driver property has been set up */
     unsigned    efc_size = 0;
+    hbool_t	latest_format = FALSE;	    /* Always use the latest format? */
     hid_t	ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -167,17 +167,13 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't sieve buffer size")
     if(H5P_set(new_plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(f->shared->sdata_aggr.alloc_size)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' cache size")
-    if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
+    if(f->shared->latest_flags > 0)
+        latest_format = TRUE;
+    if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &latest_format) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
     if(H5P_set(new_plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, &(f->shared->read_attempts)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'read attempts ' flag")
-
-    /* Obtain object flush property values */
-    flush_info.func = f->shared->object_flush.func;
-    flush_info.udata = f->shared->object_flush.udata;
-
-    /* Set values */
-    if(H5P_set(new_plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &flush_info) < 0)
+    if(H5P_set(new_plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set object flush callback")
 
     if(f->shared->efc)
@@ -577,16 +573,17 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (f = H5FL_CALLOC(H5F_t)))
-	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
     f->file_id = -1;
 
     if(shared) {
         HDassert(lf == NULL);
-	f->shared = shared;
+        f->shared = shared;
     } /* end if */
     else {
         H5P_genplist_t *plist;          /* Property list */
         unsigned        efc_size;       /* External file cache size */
+        hbool_t	latest_format;	        /* Always use the latest format?	*/
         size_t u;                       /* Local index variable */
 
         HDassert(lf != NULL);
@@ -594,18 +591,18 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
 
         f->shared->flags = flags;
-	f->shared->sohm_addr = HADDR_UNDEF;
-	f->shared->sohm_vers = HDF5_SHAREDHEADER_VERSION;
+        f->shared->sohm_addr = HADDR_UNDEF;
+        f->shared->sohm_vers = HDF5_SHAREDHEADER_VERSION;
         for(u = 0; u < NELMTS(f->shared->fs_addr); u++)
             f->shared->fs_addr[u] = HADDR_UNDEF;
-	f->shared->accum.loc = HADDR_UNDEF;
+        f->shared->accum.loc = HADDR_UNDEF;
         f->shared->lf = lf;
 
-	/*
-	 * Copy the file creation and file access property lists into the
-	 * new file handle.  We do this early because some values might need
-	 * to change as the file is being opened.
-	 */
+        /*
+         * Copy the file creation and file access property lists into the
+         * new file handle.  We do this early because some values might need
+         * to change as the file is being opened.
+         */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list")
         f->shared->fcpl_id = H5P_copy_plist(plist, FALSE);
@@ -642,16 +639,12 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get garbage collect reference")
         if(H5P_get(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &(f->shared->sieve_buf_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get sieve buffer size")
-        if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
+        if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest_format) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'latest format' flag")
-        /* Require the latest format to use SWMR */
-        /* (Need to revisit this when the 1.10 release is made, and require
-         *      1.10 or later -QAK)
-         */
-	/* For latest format or SWMR_WRITE, activate all latest version support */
-	if((f->shared->latest_format) || (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE))
-	    f->shared->latest_flags |= H5F_LATEST_ALL_FLAGS;
-	if(H5P_get(plist, H5F_ACS_USE_MDC_LOGGING_NAME, &(f->shared->use_mdc_logging)) < 0)
+        /* For latest format or SWMR_WRITE, activate all latest version support */
+        if(latest_format || (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE))
+            f->shared->latest_flags |= H5F_LATEST_ALL_FLAGS;
+        if(H5P_get(plist, H5F_ACS_USE_MDC_LOGGING_NAME, &(f->shared->use_mdc_logging)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'use mdc logging' flag")
         if(H5P_get(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, &(f->shared->start_mdc_log_on_access)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'start mdc log on access' flag")
@@ -680,7 +673,7 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         if(H5FD_get_feature_flags(lf, &f->shared->feature_flags) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get feature flags from VFD")
 
-	/* Require the SWMR feature flag if SWMR I/O is desired */
+        /* Require the SWMR feature flag if SWMR I/O is desired */
         if(!H5F_HAS_FEATURE(f, H5FD_FEAT_SUPPORTS_SWMR_IO) && (H5F_INTENT(f) & (H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ)))
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "must use a SWMR-compatible VFD when SWMR is specified")
 
@@ -716,18 +709,18 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
                 f->shared->read_attempts = H5F_SWMR_METADATA_READ_ATTEMPTS;
 
             /* Turn off accumulator with SWMR */
-	    f->shared->feature_flags &= ~(unsigned)H5FD_FEAT_ACCUMULATE_METADATA;
+            f->shared->feature_flags &= ~(unsigned)H5FD_FEAT_ACCUMULATE_METADATA;
             if(H5FD_set_feature_flags(f->shared->lf, f->shared->feature_flags) < 0)
                  HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set feature_flags in VFD")
         } /* end if */
         else
             f->shared->read_attempts = H5F_METADATA_READ_ATTEMPTS;
 
-	/* Determine the # of bins for metdata read retries */
- 	if(H5F_set_retries(f) < 0)
- 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't set retries and retries_nbins")
+        /* Determine the # of bins for metdata read retries */
+        if(H5F_set_retries(f) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't set retries and retries_nbins")
 
-	/* Get the metadata cache log location (if we're logging) */
+        /* Get the metadata cache log location (if we're logging) */
         {
             char *mdc_log_location = NULL;      /* location of metadata cache log location */
 
@@ -735,33 +728,33 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get mdc log location")
             if(mdc_log_location != NULL) {
                 size_t len = HDstrlen(mdc_log_location);
-                if(NULL == (f->shared->mdc_log_location = (char *)HDcalloc(len + 1, sizeof(char))))
+                if(NULL == (f->shared->mdc_log_location = (char *)H5MM_calloc((len + 1) * sizeof(char))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate memory for mdc log file name")
                 HDstrncpy(f->shared->mdc_log_location, mdc_log_location, len);
             }
             else
                 f->shared->mdc_log_location = NULL;
-        }
+        } /* end block */
 
- 	/* Get object flush callback information */
- 	if(H5P_get(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
- 	    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get object flush cb info")
+        /* Get object flush callback information */
+        if(H5P_get(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get object flush cb info")
 
-	/*
-	 * Create a metadata cache with the specified number of elements.
-	 * The cache might be created with a different number of elements and
-	 * the access property list should be updated to reflect that.
-	 */
-	if(H5AC_create(f, &(f->shared->mdc_initCacheCfg)) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create metadata cache")
+        /*
+         * Create a metadata cache with the specified number of elements.
+         * The cache might be created with a different number of elements and
+         * the access property list should be updated to reflect that.
+         */
+        if(H5AC_create(f, &(f->shared->mdc_initCacheCfg)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create metadata cache")
 
         /* Create the file's "open object" information */
         if(H5FO_create(f) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create open object data structure")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create open object data structure")
 
         /* Add new "shared" struct to list of open files */
         if(H5F_sfile_add(f->shared) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to append to list of open files")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to append to list of open files")
     } /* end else */
 
     f->shared->nrefs++;
@@ -775,7 +768,7 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
 
 done:
     if(!ret_value && f) {
-	if(!shared) {
+        if(!shared) {
             /* Attempt to clean up some of the shared file structures */
             if(f->shared->efc)
                 if(H5F_efc_destroy(f->shared->efc) < 0)
@@ -786,7 +779,7 @@ done:
 
             f->shared = H5FL_FREE(H5F_file_t, f->shared);
         } /* end if */
-	f = H5FL_FREE(H5F_t, f);
+        f = H5FL_FREE(H5F_t, f);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -821,6 +814,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
     HDassert(f->shared);
 
     if(1 == f->shared->nrefs) {
+        int actype;                         /* metadata cache type (enum value) */
         H5F_io_info_t fio_info;             /* I/O info for operation */
 
         /* Flush at this point since the file will be closed.
@@ -859,8 +853,8 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                  */
                 if(flush) {
 		    /* Clear status_flags */
-                    f->shared->sblock->status_flags &= ~H5F_SUPER_WRITE_ACCESS;
-                    f->shared->sblock->status_flags &= ~H5F_SUPER_SWMR_WRITE_ACCESS;
+                    f->shared->sblock->status_flags &= (uint8_t)(~H5F_SUPER_WRITE_ACCESS);
+                    f->shared->sblock->status_flags &= (uint8_t)(~H5F_SUPER_SWMR_WRITE_ACCESS);
                     /* Mark superblock dirty in cache, so change will get encoded */
                     /* Push error, but keep going*/
                     if(H5F_super_dirty(f) < 0)
@@ -869,7 +863,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                     if(H5F_flush(f, dxpl_id, TRUE) < 0)
                         /* Push error, but keep going*/
                         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-		}
+		} /* end if */
             } /* end if */
 
             /* if it exists, unpin the driver information block cache entry,
@@ -899,7 +893,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
 
         /* Clean up the metadata cache log location string */
         if(f->shared->mdc_log_location)
-            HDfree(f->shared->mdc_log_location);
+            f->shared->mdc_log_location = (char *)H5MM_xfree(f->shared->mdc_log_location);
 
         /*
          * Do not close the root group since we didn't count it, but free
@@ -946,6 +940,11 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         /* Free mount table */
         f->shared->mtab.child = (H5F_mount_t *)H5MM_xfree(f->shared->mtab.child);
         f->shared->mtab.nalloc = 0;
+
+        /* Clean up the metadata retries array */
+        for(actype = 0; actype < (int)H5AC_NTYPES; actype++)
+            if(f->shared->retries[actype])
+                f->shared->retries[actype] = (uint32_t *)H5MM_xfree(f->shared->retries[actype]);
 
         /* Destroy shared file struct */
         f->shared = (H5F_file_t *)H5FL_FREE(H5F_file_t, f->shared);
@@ -1166,7 +1165,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             if(H5FD_close(lf) < 0) /* Closing will remove the lock */
                 HDONE_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to lock the file or initialize file structure")
-        }
+        } /* end if */
 
 	/* Need to set status_flags in the superblock if the driver has a 'lock' method */
 	if(drvr->lock)
@@ -1230,10 +1229,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     if(H5P_exist_plist(a_plist, H5F_ACS_CLEAR_STATUS_FLAGS_NAME) > 0) {
         if(H5P_get(a_plist, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, &clear) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get clearance for status_flags")
-        else if(clear) {
+        else if(clear)
             file->shared->sblock->status_flags = 0;
-        }
-    }
+    } /* end if */
 
     if(shared->nrefs == 1) {
         if(fc_degree == H5F_CLOSE_DEFAULT)
@@ -1272,7 +1270,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             /* Flush the superblock */
             if(H5F_super_dirty(file) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, NULL, "unable to mark superblock as dirty")
-            if(H5F_flush_tagged_metadata(file, (haddr_t)0, H5AC_ind_read_dxpl_id) < 0)
+            if(H5F_flush_tagged_metadata(file, H5AC__SUPERBLOCK_TAG, H5AC_ind_read_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "unable to flush superblock")
 
 	    /* Remove the file lock for SWMR_WRITE */
@@ -1725,6 +1723,10 @@ H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *na
     char **actual_name/*out*/)
 {
     hid_t       new_fapl_id = -1;       /* ID for duplicated FAPL */
+#ifdef H5_HAVE_SYMLINK
+    /* This has to be declared here to avoid unfreed resources on errors */
+    char *realname = NULL;              /* Fully resolved path name of file */
+#endif /* H5_HAVE_SYMLINK */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1756,8 +1758,11 @@ H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *na
             int *fd;                    /* POSIX I/O file descriptor */
             h5_stat_t st;               /* Stat info from stat() call */
             h5_stat_t fst;              /* Stat info from fstat() call */
-            char realname[PATH_MAX];    /* Fully resolved path name of file */
             hbool_t want_posix_fd;      /* Flag for retrieving file descriptor from VFD */
+
+            /* Allocate realname buffer */
+            if(NULL == (realname = (char *)H5MM_calloc((size_t)PATH_MAX * sizeof(char))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             /* Perform a sanity check that the file or link wasn't switched
              * between when we opened it and when we called lstat().  This is
@@ -1815,6 +1820,10 @@ done:
     if(new_fapl_id > 0)
         if(H5I_dec_app_ref(new_fapl_id) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close duplicated FAPL")
+#ifdef H5_HAVE_SYMLINK
+    if(realname)
+        realname = (char *)H5MM_xfree(realname);
+#endif /* H5_HAVE_SYMLINK */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_build_actual_name() */
@@ -2285,8 +2294,8 @@ H5F_track_metadata_read_retries(H5F_t *f, unsigned actype, unsigned retries)
 
     /* Allocate memory for retries */
     if(NULL == f->shared->retries[actype])
-        if(NULL == (f->shared->retries[actype] = (uint32_t *)HDcalloc((size_t)f->shared->retries_nbins, sizeof(uint32_t))))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        if(NULL == (f->shared->retries[actype] = (uint32_t *)H5MM_calloc((size_t)f->shared->retries_nbins * sizeof(uint32_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Index to retries based on log10 */
     tmp = HDlog10((double)retries);

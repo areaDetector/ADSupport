@@ -70,10 +70,8 @@
 #define H5C__CLASS_SPECULATIVE_LOAD_FLAG	((unsigned)0x1)
 #define H5C__CLASS_COMPRESSED_FLAG		((unsigned)0x2)
 /* The following flags may only appear in test code */
-/* The H5C__CLASS_SKIP_READS & H5C__CLASS_SKIP_WRITES flags are used in H5Oproxy.c */
-#define H5C__CLASS_NO_IO_FLAG			((unsigned)0x4)
-#define H5C__CLASS_SKIP_READS			((unsigned)0x8)
-#define H5C__CLASS_SKIP_WRITES			((unsigned)0x10)
+#define H5C__CLASS_SKIP_READS			((unsigned)0x4)
+#define H5C__CLASS_SKIP_WRITES			((unsigned)0x8)
 
 /* Flags for pre-serialize callback */
 #define H5C__SERIALIZE_NO_FLAGS_SET	((unsigned)0)
@@ -173,12 +171,16 @@
  * These flags apply to H5C_expunge_entry():
  * 	H5C__FREE_FILE_SPACE_FLAG
  *
+ * These flags apply to H5C_evict():
+ * 	H5C__EVICT_ALLOW_LAST_PINS_FLAG
+ *
  * These flags apply to H5C_flush_cache():
  * 	H5C__FLUSH_INVALIDATE_FLAG
  * 	H5C__FLUSH_CLEAR_ONLY_FLAG
  * 	H5C__FLUSH_MARKED_ENTRIES_FLAG
  *	H5C__FLUSH_IGNORE_PROTECTED_FLAG (can't use this flag in combination
  *					  with H5C__FLUSH_INVALIDATE_FLAG)
+ * 	H5C__DURING_FLUSH_FLAG
  *
  * These flags apply to H5C_flush_single_entry():
  * 	H5C__FLUSH_INVALIDATE_FLAG
@@ -187,28 +189,24 @@
  *      H5C__TAKE_OWNERSHIP_FLAG
  *      H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG
  */
-#define H5C__NO_FLAGS_SET			0x0000
-#define H5C__SET_FLUSH_MARKER_FLAG		0x0001
-#define H5C__DELETED_FLAG			0x0002
-#define H5C__DIRTIED_FLAG			0x0004
-#define H5C__PIN_ENTRY_FLAG			0x0008
-#define H5C__UNPIN_ENTRY_FLAG			0x0010
-#define H5C__FLUSH_INVALIDATE_FLAG		0x0020
-#define H5C__FLUSH_CLEAR_ONLY_FLAG		0x0040
-#define H5C__FLUSH_MARKED_ENTRIES_FLAG		0x0080
-#define H5C__FLUSH_IGNORE_PROTECTED_FLAG	0x0100
-#define H5C__READ_ONLY_FLAG			0x0200
-#define H5C__FREE_FILE_SPACE_FLAG		0x0400
-#define H5C__TAKE_OWNERSHIP_FLAG		0x0800
-#define H5C__FLUSH_LAST_FLAG			0x1000
-#define H5C__FLUSH_COLLECTIVELY_FLAG		0x2000
-#define H5C__EVICT_ALLOW_LAST_PINS_FLAG         0x4000
-#define H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG     0x8000
-
-/* Definitions for cache "tag" property */
-#define H5C_TAG_NAME           "H5C_tag"
-#define H5C_TAG_SIZE           sizeof(H5C_tag_t)
-#define H5C_TAG_DEF            {(haddr_t)0, H5C_GLOBALITY_NONE}
+#define H5C__NO_FLAGS_SET			0x00000
+#define H5C__SET_FLUSH_MARKER_FLAG		0x00001
+#define H5C__DELETED_FLAG			0x00002
+#define H5C__DIRTIED_FLAG			0x00004
+#define H5C__PIN_ENTRY_FLAG			0x00008
+#define H5C__UNPIN_ENTRY_FLAG			0x00010
+#define H5C__FLUSH_INVALIDATE_FLAG		0x00020
+#define H5C__FLUSH_CLEAR_ONLY_FLAG		0x00040
+#define H5C__FLUSH_MARKED_ENTRIES_FLAG		0x00080
+#define H5C__FLUSH_IGNORE_PROTECTED_FLAG	0x00100
+#define H5C__READ_ONLY_FLAG			0x00200
+#define H5C__FREE_FILE_SPACE_FLAG		0x00400
+#define H5C__TAKE_OWNERSHIP_FLAG		0x00800
+#define H5C__FLUSH_LAST_FLAG			0x01000
+#define H5C__FLUSH_COLLECTIVELY_FLAG		0x02000
+#define H5C__EVICT_ALLOW_LAST_PINS_FLAG         0x04000
+#define H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG     0x08000
+#define H5C__DURING_FLUSH_FLAG                  0x10000 /* Set when the entire cache is being flushed */
 
 /* Debugging/sanity checking/statistics settings */
 #ifndef NDEBUG
@@ -271,19 +269,6 @@
 
 /* Typedef for the main structure for the cache (defined in H5Cpkg.h) */
 typedef struct H5C_t H5C_t;
-
-/* Cache entry tag structure */
-typedef struct H5C_tag_t {
-    haddr_t value;
-    int globality;
-} H5C_tag_t;
-
-/* Define enum for cache entry tag 'globality' value */
-typedef enum {
-    H5C_GLOBALITY_NONE=0, /* Non-global tag */
-    H5C_GLOBALITY_MINOR,  /* global, not flushed during single object flush */
-    H5C_GLOBALITY_MAJOR   /* global, needs flushed during single obect flush */
-} H5C_tag_globality_t;
 
 /*
  *
@@ -381,12 +366,6 @@ typedef enum {
  *		instance of H5C_class_t.
  *
  *      The following flags may only appear in test code.
- *
- *	H5C__CLASS_NO_IO_FLAG:  This flag is intended only for use in test 
- *		code.  When it is set, any attempt to load an entry of 
- *		the type with this flag set will trigger an assertion 
- *		failure, and any flush of an entry with this flag set 
- *		will not result in any write to file.
  *
  *	H5C__CLASS_SKIP_READS: This flags is intended only for use in test
  *		code.  When it is set, reads on load will be skipped,
@@ -1164,9 +1143,13 @@ typedef enum H5C_notify_action_t {
     H5C_NOTIFY_ACTION_AFTER_FLUSH,	/* Entry has just been flushed to
  					 * file.
                                          */
-    H5C_NOTIFY_ACTION_BEFORE_EVICT      /* Entry is about to be evicted 
+    H5C_NOTIFY_ACTION_BEFORE_EVICT,     /* Entry is about to be evicted 
                                          * from cache.
                                          */
+    H5C_NOTIFY_ACTION_ENTRY_DIRTIED,    /* Entry has been marked dirty. */
+    H5C_NOTIFY_ACTION_ENTRY_CLEANED,    /* Entry has been marked clean. */
+    H5C_NOTIFY_ACTION_CHILD_DIRTIED,    /* Dependent child has been marked dirty. */
+    H5C_NOTIFY_ACTION_CHILD_CLEANED     /* Dependent child has been marked clean. */
 } H5C_notify_action_t;
 
 /* Cache client callback function pointers */
@@ -1374,9 +1357,6 @@ typedef int H5C_ring_t;
  *		The name is not particularly descriptive, but is retained
  *		to avoid changes in existing code.
  *
- * is_corked:	Boolean flag indicating whether the cache entry associated
- *		with an object is corked or not corked.
- *
  * is_dirty:	Boolean flag indicating whether the contents of the cache
  *		entry has been modified since the last time it was written
  *		to disk.
@@ -1552,7 +1532,7 @@ typedef int H5C_ring_t;
  *
  * Fields supporting the 'flush dependency' feature:
  *
- * Entries in the cache may have a 'flush dependencies' on other entries in the
+ * Entries in the cache may have 'flush dependencies' on other entries in the
  * cache.  A flush dependency requires that all dirty child entries be flushed
  * to the file before a dirty parent entry (of those child entries) can be
  * flushed to the file.  This can be used by cache clients to create data
@@ -1695,9 +1675,6 @@ typedef struct H5C_cache_entry_t {
     void  		      *	image_ptr;
     hbool_t			image_up_to_date;
     const H5C_class_t	      *	type;
-    haddr_t		        tag;
-    int				globality;
-    hbool_t			is_corked;
     hbool_t			is_dirty;
     hbool_t			dirtied;
     hbool_t			is_protected;
@@ -1740,6 +1717,11 @@ typedef struct H5C_cache_entry_t {
     struct H5C_cache_entry_t  *	coll_next;
     struct H5C_cache_entry_t  *	coll_prev;
 #endif /* H5_HAVE_PARALLEL */
+
+    /* fields supporting tag lists */
+    struct H5C_cache_entry_t  *	tl_next;
+    struct H5C_cache_entry_t  *	tl_prev;
+    struct H5C_tag_info_t     * tag_info;
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     /* cache entry stats fields */
@@ -2054,19 +2036,21 @@ H5_DLL herr_t H5C_stop_logging(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_get_logging_status(const H5C_t *cache_ptr, /*OUT*/ hbool_t *is_enabled,
     /*OUT*/ hbool_t *is_currently_logging);
 H5_DLL herr_t H5C_write_log_message(const H5C_t *cache_ptr, const char message[]);
-
 H5_DLL void H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr, int32_t version,
     double hit_rate, enum H5C_resize_status status,
     size_t old_max_cache_size, size_t new_max_cache_size,
     size_t old_min_clean_size, size_t new_min_clean_size);
 H5_DLL herr_t H5C_dest(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5C_evict(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5C_expunge_entry(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type, haddr_t addr, unsigned flags);
-
-
+H5_DLL herr_t H5C_expunge_entry(H5F_t *f, hid_t dxpl_id,
+    const H5C_class_t *type, haddr_t addr, unsigned flags);
 H5_DLL herr_t H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5C_flush_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag); 
 H5_DLL herr_t H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag);
+H5_DLL herr_t H5C_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags);
+#if H5C_DO_TAGGING_SANITY_CHECKS
+herr_t H5C_verify_tag(int id, haddr_t tag);
+#endif
 H5_DLL herr_t H5C_flush_to_min_clean(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5C_get_cache_auto_resize_config(const H5C_t *cache_ptr,
     H5C_auto_size_ctl_t *config_ptr);
@@ -2085,6 +2069,7 @@ H5_DLL FILE *H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_pt
 H5_DLL herr_t H5C_insert_entry(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type,
     haddr_t addr, void *thing, unsigned int flags);
 H5_DLL herr_t H5C_mark_entry_dirty(void *thing);
+H5_DLL herr_t H5C_mark_entry_clean(void *thing);
 H5_DLL herr_t H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type,
     haddr_t old_addr, haddr_t new_addr);
 H5_DLL herr_t H5C_pin_protected_entry(void *thing);
@@ -2108,9 +2093,11 @@ H5_DLL herr_t H5C_unprotect(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *thing,
 H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr,
     unsigned int tests);
 H5_DLL herr_t H5C_ignore_tags(H5C_t *cache_ptr);
-H5_DLL void H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag);
+H5_DLL hbool_t H5C_get_ignore_tags(const H5C_t *cache_ptr);
+H5_DLL herr_t H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag);
 H5_DLL herr_t H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked);
 H5_DLL herr_t H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring);
+H5_DLL herr_t H5C_remove_entry(void * thing);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,
@@ -2122,14 +2109,6 @@ H5_DLL herr_t H5C_clear_coll_entries(H5C_t * cache_ptr, hbool_t partial);
 H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, hid_t dxpl_id, int32_t ce_array_len,
     haddr_t *ce_array_ptr);
 #endif /* H5_HAVE_PARALLEL */
-
-#ifndef NDEBUG	/* debugging functions */
-H5_DLL herr_t H5C_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr,
-    void **entry_ptr_ptr);
-H5_DLL herr_t H5C_verify_entry_type(const H5F_t *f, haddr_t addr,
-    const H5C_class_t *expected_type, hbool_t *in_cache_ptr,
-    hbool_t *type_ok_ptr);
-#endif /* NDEBUG */
 
 #endif /* !_H5Cprivate_H */
 

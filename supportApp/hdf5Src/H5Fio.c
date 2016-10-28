@@ -264,19 +264,19 @@ H5F_evict_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Unpin the superblock, as this will be marked for eviction and it can't 
-        be pinned. */
-    if(H5AC_unpin_entry(f->shared->sblock) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
-    f->shared->sblock = NULL;
+//    /* Unpin the superblock, as this will be marked for eviction and it can't 
+//        be pinned. */
+//    if(H5AC_unpin_entry(f->shared->sblock) < 0)
+//        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
+//    f->shared->sblock = NULL;
 
     /* Evict the object's metadata */
-    if(H5AC_evict_tagged_metadata(f, tag, dxpl_id)<0)
+    if(H5AC_evict_tagged_metadata(f, tag, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "unable to evict tagged metadata")
 
-    /* Re-read the superblock. */
-    if(H5F__super_read(f, dxpl_id, FALSE) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "unable to read superblock")
+//    /* Re-read the superblock. */
+//    if(H5F__super_read(f, dxpl_id, FALSE) < 0)
+//	HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "unable to read superblock")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -284,24 +284,25 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_evict_cache_entries
+ * Function:    H5F__evict_cache_entries
  *
- * Purpose:     To revict all cache entries except the pinned superblock entry
+ * Purpose:     To evict all cache entries except the pinned superblock entry
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; Dec 2013
+ * Programmer:  Vailin Choi
+ *		Dec 2013
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_evict_cache_entries(H5F_t *f, hid_t dxpl_id)
+H5F__evict_cache_entries(H5F_t *f, hid_t dxpl_id)
 {
     unsigned status = 0;
     int32_t    cur_num_entries;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(f->shared);
@@ -328,7 +329,7 @@ H5F_evict_cache_entries(H5F_t *f, hid_t dxpl_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5F_evict_cache_entries() */
+} /* end H5F__evict_cache_entries() */
 
 
 /*-------------------------------------------------------------------------
@@ -413,10 +414,10 @@ H5F_read_check_metadata(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
     do {
         /* Read header from disk */
         if(H5F_block_read(f, type, addr, read_size, dxpl_id, buf) < 0)
-	    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read metadata")
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read metadata")
 
-	/* Get stored and computed checksums */
-	H5F_get_checksums(buf, chk_size, &stored_chksum, &computed_chksum);
+        /* Get stored and computed checksums */
+        H5F_get_checksums(buf, chk_size, &stored_chksum, &computed_chksum);
 
         /* Verify checksum */
         if(stored_chksum == computed_chksum)
@@ -425,15 +426,16 @@ H5F_read_check_metadata(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
 
     /* Check for too many tries */
     if(tries == 0)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "incorrect metadatda checksum after all read attempts (%u) for %u bytes:c_chksum=%u, s_chkum=%u", 
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "incorrect metadatda checksum after all read attempts (%u) for %lu bytes:c_chksum=%u, s_chkum=%u", 
 	    max_tries, chk_size, computed_chksum, stored_chksum)
 
     /* Calculate and track the # of retries */
     retries = max_tries - tries;
     if(retries)         /* Does not track 0 retry */
-	if(H5F_track_metadata_read_retries(f, actype, retries) < 0)
+        if(H5F_track_metadata_read_retries(f, actype, retries) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "cannot track read tries = %u ", retries)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5F_read_check_metadata */
+

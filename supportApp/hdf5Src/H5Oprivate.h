@@ -47,7 +47,6 @@
 typedef struct H5O_msg_class_t H5O_msg_class_t;
 typedef struct H5O_mesg_t H5O_mesg_t;
 typedef struct H5O_t H5O_t;
-typedef struct H5O_proxy_t H5O_proxy_t;
 
 /* Values used to create the shared message & attribute heaps */
 /* (Note that these parameters have been tuned so that the resulting heap ID
@@ -455,10 +454,10 @@ typedef struct H5O_storage_chunk_t {
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked storage operations */
     union {
         H5O_storage_chunk_btree_t btree;   /* Information for v1 B-tree index   */
-	H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */	
+        H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */	
         H5O_storage_chunk_earray_t earray; /* Information for extensible array index   */
         H5O_storage_chunk_farray_t farray; /* Information for fixed array index   */
-	H5O_storage_chunk_single_filt_t single; /* Information for single chunk w/ filters index */
+        H5O_storage_chunk_single_filt_t single; /* Information for single chunk w/ filters index */
     } u;
 } H5O_storage_chunk_t;
 
@@ -830,7 +829,8 @@ H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
 H5_DLL herr_t H5O_open(H5O_loc_t *loc);
 H5_DLL herr_t H5O_close(H5O_loc_t *loc);
 H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id);
-H5_DLL H5O_t *H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, unsigned prot_flags);
+H5_DLL H5O_t *H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id,
+    unsigned prot_flags, hbool_t pin_all_chunks);
 H5_DLL H5O_t *H5O_pin(const H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5O_unpin(H5O_t *oh);
 H5_DLL herr_t H5O_dec_rc_by_loc(const H5O_loc_t *loc, hid_t dxpl_id);
@@ -853,10 +853,7 @@ H5_DLL herr_t H5O_get_nlinks(const H5O_loc_t *loc, hid_t dxpl_id, hsize_t *nlink
 H5_DLL void *H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id);
 H5_DLL haddr_t H5O_get_oh_addr(const H5O_t *oh);
 H5_DLL herr_t H5O_get_rc_and_type(const H5O_loc_t *oloc, hid_t dxpl_id, unsigned *rc, H5O_type_t *otype);
-H5_DLL H5O_proxy_t *H5O_pin_flush_dep_proxy(H5O_loc_t *loc, hid_t dxpl_id);
-H5_DLL H5O_proxy_t *H5O_pin_flush_dep_proxy_oh(H5F_t *f, hid_t dxpl_id,
-    H5O_t *oh);
-H5_DLL herr_t H5O_unpin_flush_dep_proxy(H5O_proxy_t *proxy);
+H5_DLL H5AC_proxy_entry_t *H5O_get_proxy(const H5O_t *oh);
 
 /* Object header message routines */
 H5_DLL herr_t H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
@@ -903,9 +900,6 @@ H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned type_id, const unsigned char *buf);
 H5_DLL herr_t H5O_msg_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned type_id, void *mesg);
-H5_DLL int H5O_msg_get_chunkno(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
-H5_DLL herr_t H5O_msg_lock(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
-H5_DLL herr_t H5O_msg_unlock(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
 
 /* Object metadata flush/refresh routines */
 H5_DLL herr_t H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id, hid_t dxpl_id);

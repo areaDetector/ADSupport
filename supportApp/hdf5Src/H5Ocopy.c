@@ -322,7 +322,6 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     unsigned               mesgno = 0;
     haddr_t                addr_new = HADDR_UNDEF;
     hbool_t                *deleted = NULL;      /* Array of flags indicating whether messages should be copied */
-    hbool_t                inserted = FALSE;        /* Whether the destination object header has been inserted into the cache */
     size_t                 null_msgs;               /* Number of NULL messages found in each loop */
     size_t                 orig_dst_msgs;           /* Original # of messages in dest. object */
     H5O_mesg_t             *mesg_src;               /* Message in source object header */
@@ -351,9 +350,9 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 
     /* Check if the object at the address is already open in the file */
     if(H5FO_opened(oloc_src->file, oloc_src->addr) != NULL) {
-	H5G_loc_t tmp_loc; 	/* Location of object */
-	H5O_loc_t tmp_oloc; 	/* Location of object */
-	H5G_name_t tmp_path;	/* Object's path */
+	H5G_loc_t   tmp_loc; 	/* Location of object */
+	H5O_loc_t   tmp_oloc; 	/* Location of object */
+	H5G_name_t  tmp_path;	/* Object's path */
 	void *obj_ptr = NULL;	/* Object pointer */
 	hid_t tmp_id = -1;	/* Object ID */
 
@@ -381,7 +380,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     } /* end if */
 
     /* Get source object header */
-    if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Retrieve user data for particular type of object to copy */
@@ -463,12 +462,13 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     oh_dst->min_dense = oh_src->min_dense;
 
     /* Create object header proxy if doing SWMR writes */
-    if(H5F_INTENT(oloc_dst->file) & H5F_ACC_SWMR_WRITE) {
-        if(H5O__proxy_create(oloc_dst->file, dxpl_id, oh_dst) < 0)
+    if(oh_dst->swmr_write) {
+        /* Create virtual entry, for use as proxy */
+        if(NULL == (oh_dst->proxy = H5AC_proxy_entry_create()))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header proxy")
     } /* end if */
     else
-        oh_dst->proxy_addr = HADDR_UNDEF;
+        oh_dst->proxy = NULL;
 
     /* Initialize size of chunk array.  Start off with zero chunks so this field
      * is consistent with the current state of the chunk array.  This is
@@ -867,6 +867,10 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
         oh_dst->nlink += (unsigned)addr_map->inc_ref_count;
     } /* end if */
 
+    /* Retag all copied metadata to apply the destination object's tag */
+    if(H5AC_retag_copied_metadata(oloc_dst->file, oloc_dst->addr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to re-tag metadata entries")
+
     /* Set metadata tag for destination object's object header */
     H5_BEGIN_TAG(dxpl_id, oloc_dst->addr, FAIL);
 
@@ -874,14 +878,9 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     if(H5AC_insert_entry(oloc_dst->file, dxpl_id, H5AC_OHDR, oloc_dst->addr, oh_dst, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
     oh_dst = NULL;
-    inserted = TRUE;
 
     /* Reset metadat tag */
     H5_END_TAG(FAIL);
-
-    /* Retag all copied metadata to apply the destination object's tag */
-    if(H5AC_retag_copied_metadata(oloc_dst->file, oloc_dst->addr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to re-tag metadata entries")
 
     /* Set obj_type and udata, if requested */
     if(obj_type) {
@@ -900,8 +899,8 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     /* Free destination object header on failure */
-    if(ret_value < 0 && oh_dst && !inserted) {
-        if(H5O_free(oh_dst) < 0)
+    if(ret_value < 0 && oh_dst) {
+        if(H5O__free(oh_dst) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
         if(H5O_loc_reset(oloc_dst) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")

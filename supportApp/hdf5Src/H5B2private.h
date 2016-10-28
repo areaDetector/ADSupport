@@ -147,8 +147,7 @@ H5_DLL herr_t H5B2_update(H5B2_t *bt2, hid_t dxpl_id, void *udata,
 H5_DLL herr_t H5B2_remove(H5B2_t *b2, hid_t dxpl_id, void *udata,
     H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2_remove_by_idx(H5B2_t *bt2, hid_t dxpl_id,
-    H5_iter_order_t order, hsize_t idx, H5B2_remove_t op,
-    void *op_data);
+    H5_iter_order_t order, hsize_t idx, H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2_get_nrec(const H5B2_t *bt2, hsize_t *nrec);
 H5_DLL herr_t H5B2_size(H5B2_t *bt2, hid_t dxpl_id,
     hsize_t *btree_size);
@@ -159,7 +158,7 @@ H5_DLL htri_t H5B2_support(H5B2_t *bt2, hid_t dxpl_id, void *udata,
     H5AC_info_t *child);
 H5_DLL herr_t H5B2_unsupport(H5B2_t *bt2, hid_t dxpl_id, void *udata,
     H5AC_info_t *child);
-H5_DLL herr_t H5B2_depend(H5AC_info_t *parent_entry, H5B2_t *bt2);
+H5_DLL herr_t H5B2_depend(H5B2_t *bt2, hid_t dxpl_id, H5AC_proxy_entry_t *parent);
 H5_DLL herr_t H5B2_patch_file(H5B2_t *fa, H5F_t *f);
 
 /* Statistics routines */

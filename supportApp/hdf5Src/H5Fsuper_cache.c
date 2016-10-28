@@ -241,9 +241,8 @@ H5F__cache_superblock_get_load_size(const void *_image, void *_udata, size_t *im
 		HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "set end of space allocation request failed")
 
 	    *actual_len = H5F_SUPERBLOCK_FIXED_SIZE + variable_size;
-
 	} /* end if */
-    }
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -330,6 +329,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata,
     if(NULL == (sblock = H5FL_CALLOC(H5F_super_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
+    /* Skip over signature (already checked when locating the superblock) */
     image += H5F_SIGNATURE_LEN;
 
     /* Superblock version */

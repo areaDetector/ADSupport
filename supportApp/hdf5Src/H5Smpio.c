@@ -176,7 +176,7 @@ H5S_mpio_create_point_datatype (size_t elmt_size, hsize_t num_points,
 #else
     /* Allocate block sizes for MPI datatype call */
     if(NULL == (blocks = (int *)H5MM_malloc(sizeof(int) * num_points)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks")
 
     for(u = 0; u < num_points; u++)
         blocks[u] = 1;
@@ -244,12 +244,12 @@ H5S_mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type
 
     /* Allocate array for element displacements */
     if(NULL == (disp = (MPI_Aint *)H5MM_malloc(sizeof(MPI_Aint) * num_points)))
-         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
+         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
 
     /* Allocate array for element permutation - returned to caller */
     if(do_permute)
         if(NULL == (*permute = (hsize_t *)H5MM_malloc(sizeof(hsize_t) * num_points)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate permutation array")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate permutation array")
 
     /* Iterate through list of elements */
     curr = space->select.sel_info.pnt_lst->head;
@@ -380,7 +380,7 @@ H5S_mpio_permute_type(const H5S_t *space, size_t elmt_size, hsize_t **permute,
 
     /* Allocate array to store point displacements */
     if(NULL == (disp = (MPI_Aint *)H5MM_malloc(sizeof(MPI_Aint) * num_points)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
 
     /* Initialize selection iterator */
     if(H5S_select_iter_init(&sel_iter, space, elmt_size) < 0)
@@ -842,9 +842,9 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span,
     /* Allocate the initial displacement & block length buffers */
     alloc_count = H5S_MPIO_INITIAL_ALLOC_COUNT;
     if(NULL == (disp = (MPI_Aint *)H5MM_malloc(alloc_count * sizeof(MPI_Aint))))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
     if(NULL == (blocklen = (int *)H5MM_malloc(alloc_count * sizeof(int))))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths")
 
     /* if this is the fastest changing dimension, it is the base case for derived datatype. */
     if(NULL == span->down) {
@@ -861,10 +861,10 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span,
 
                 /* Re-allocate the buffers */
                 if(NULL == (tmp_disp = (MPI_Aint *)H5MM_realloc(disp, alloc_count * sizeof(MPI_Aint))))
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
                 disp = tmp_disp;
                 if(NULL == (tmp_blocklen = (int *)H5MM_realloc(blocklen, alloc_count * sizeof(int))))
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths")
                 blocklen = tmp_blocklen;
             } /* end if */
 
@@ -885,7 +885,7 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span,
         size_t u;               /* Local index variable */
 
         if(NULL == (inner_type = (MPI_Datatype *)H5MM_malloc(alloc_count * sizeof(MPI_Datatype))))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of inner MPI datatypes")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate array of inner MPI datatypes")
 
         tspan = span;
         outercount = 0;
@@ -904,13 +904,13 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span,
 
                 /* Re-allocate the buffers */
                 if(NULL == (tmp_disp = (MPI_Aint *)H5MM_realloc(disp, alloc_count * sizeof(MPI_Aint))))
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate array of displacements")
                 disp = tmp_disp;
                 if(NULL == (tmp_blocklen = (int *)H5MM_realloc(blocklen, alloc_count * sizeof(int))))
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate array of block lengths")
                 blocklen = tmp_blocklen;
                 if(NULL == (tmp_inner_type = (MPI_Datatype *)H5MM_realloc(inner_type, alloc_count * sizeof(MPI_Datatype))))
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of inner MPI datatypes")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate array of inner MPI datatypes")
                 inner_type = tmp_inner_type;
             } /* end if */
 

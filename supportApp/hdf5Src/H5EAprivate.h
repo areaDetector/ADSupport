@@ -15,12 +15,12 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:        H5EAprivate.h
- *            Jun 17 2008
- *            Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5EAprivate.h
+ *              Jun 17 2008
+ *              Quincey Koziol <koziol@hdfgroup.org>
  *
- * Purpose:        Private header for library accessible extensible
- *                      array routines.
+ * Purpose:     Private header for library accessible extensible
+ *              array routines.
  *
  *-------------------------------------------------------------------------
  */
@@ -34,8 +34,8 @@
 #endif /* NOT_YET */
 
 /* Private headers needed by this file */
-#include "H5ACprivate.h"    /* Metadata cache            */
-#include "H5Fprivate.h"        /* File access                */
+#include "H5ACprivate.h"        /* Metadata cache               */
+#include "H5Fprivate.h"         /* File access                  */
 
 
 /**************************/
@@ -54,7 +54,7 @@ typedef enum H5EA_cls_id_t {
 
     /* Start real class IDs at 0 -QAK */
     /* (keep these last) */
-    H5EA_CLS_TEST_ID,            /* Extensible array is for testing (do not use for actual data) */
+    H5EA_CLS_TEST_ID,           /* Extensible array is for testing (do not use for actual data) */
     H5EA_NUM_CLS_ID             /* Number of Extensible Array class IDs (must be last) */
 } H5EA_cls_id_t;
 
@@ -142,7 +142,7 @@ H5_DLL herr_t H5EA_get_nelmts(const H5EA_t *ea, hsize_t *nelmts);
 H5_DLL herr_t H5EA_get_addr(const H5EA_t *ea, haddr_t *addr);
 H5_DLL herr_t H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt);
 H5_DLL herr_t H5EA_get(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, void *elmt);
-H5_DLL herr_t H5EA_depend(H5AC_info_t *parent_entry, H5EA_t *ea);
+H5_DLL herr_t H5EA_depend(H5EA_t *ea, hid_t dxpl_id, H5AC_proxy_entry_t *parent);
 H5_DLL herr_t H5EA_iterate(H5EA_t *fa, hid_t dxpl_id, H5EA_operator_t op, void *udata);
 H5_DLL herr_t H5EA_close(H5EA_t *ea, hid_t dxpl_id);
 H5_DLL herr_t H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata);

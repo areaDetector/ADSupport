@@ -1121,7 +1121,7 @@ H5HF_huge_term(H5HF_hdr_t *hdr, hid_t dxpl_id)
     if(H5F_addr_defined(hdr->huge_bt2_addr) && hdr->huge_nobjs == 0) {
         /* Sanity check */
         HDassert(hdr->huge_size == 0);
-        
+
         /* Delete the v2 B-tree */
         /* (any v2 B-tree class will work here) */
         if(H5B2_delete(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f, NULL, NULL) < 0)

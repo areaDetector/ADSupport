@@ -804,8 +804,6 @@ done:
  * Programmer: Mike McGreevy
  *             Wednesday, July 21, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t

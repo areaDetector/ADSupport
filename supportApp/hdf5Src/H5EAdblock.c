@@ -168,10 +168,7 @@ H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
     /* Local variables */
     H5EA_dblock_t *dblock = NULL;       /* Extensible array data block */
     haddr_t dblock_addr;                /* Extensible array data block address */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called, hdr->dblk_page_nelmts = %Zu, nelmts = %Zu\n", FUNC, hdr->dblk_page_nelmts, nelmts);
-#endif /* QAK */
+    hbool_t inserted = FALSE;           /* Whether the header was inserted into cache */
 
     /* Sanity check */
     HDassert(hdr);
@@ -184,15 +181,9 @@ HDfprintf(stderr, "%s: Called, hdr->dblk_page_nelmts = %Zu, nelmts = %Zu\n", FUN
 
     /* Set size of data block on disk */
     dblock->size = H5EA_DBLOCK_SIZE(dblock);
-#ifdef QAK
-HDfprintf(stderr, "%s: dblock->size = %Zu\n", FUNC, dblock->size);
-#endif /* QAK */
 
     /* Set offset of block in array's address space */
     dblock->block_off = dblk_off;
-#ifdef QAK
-HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
-#endif /* QAK */
 
     /* Allocate space for the data block on disk */
     if(HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
@@ -208,6 +199,14 @@ HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
     /* Cache the new extensible array data block */
     if(H5AC_insert_entry(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array data block to cache")
+    inserted = TRUE;
+
+    /* Add data block as child of 'top' proxy */
+    if(hdr->top_proxy) {
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, dblock) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
+        dblock->top_proxy = hdr->top_proxy;
+    } /* end if */
 
     /* Update extensible array data block statistics */
     hdr->stats.stored.ndata_blks++;
@@ -225,6 +224,11 @@ HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
 CATCH
     if(!H5F_addr_defined(ret_value))
         if(dblock) {
+            /* Remove from cache, if inserted */
+            if(inserted)
+                if(H5AC_remove_entry(dblock) < 0)
+                    H5E_THROW(H5E_CANTREMOVE, "unable to remove extensible array data block from cache")
+
             /* Release data block's disk space */
             if(H5F_addr_defined(dblock->addr) && H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, dblock->addr, (hsize_t)dblock->size) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to release extensible array data block")
@@ -262,25 +266,12 @@ H5EA__dblock_sblk_idx(const H5EA_hdr_t *hdr, hsize_t idx))
     HDassert(hdr);
     HDassert(idx >= hdr->cparam.idx_blk_elmts);
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Entering - idx = %Hu\n", FUNC, idx);
-#endif /* QAK */
     /* Adjust index for elements in index block */
     idx -= hdr->cparam.idx_blk_elmts;
-#ifdef QAK
-HDfprintf(stderr, "%s: after adjusting for index block elements, idx = %Hu\n", FUNC, idx);
-#endif /* QAK */
 
     /* Determine the superblock information for the index */
     H5_CHECK_OVERFLOW(idx, /*From:*/hsize_t, /*To:*/uint64_t);
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->cparam.data_blk_min_elmts = %u\n", FUNC, (unsigned)hdr->cparam.data_blk_min_elmts);
-#endif /* QAK */
     sblk_idx = H5VM_log2_gen((uint64_t)((idx / hdr->cparam.data_blk_min_elmts) + 1));
-#ifdef QAK
-HDfprintf(stderr, "%s: sblk_idx = %u\n", FUNC, sblk_idx);
-HDfprintf(stderr, "%s: hdr->sblk_info[%u] = {%Hu, %Zu, %Hu, %Hu}\n", FUNC, sblk_idx, hdr->sblk_info[sblk_idx].ndblks, hdr->sblk_info[sblk_idx].dblk_nelmts, hdr->sblk_info[sblk_idx].start_idx, hdr->sblk_info[sblk_idx].start_dblk);
-#endif /* QAK */
 
     /* Set return value */
     ret_value = sblk_idx;
@@ -307,11 +298,8 @@ H5EA__dblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
     haddr_t dblk_addr, size_t dblk_nelmts, unsigned flags))
 
     /* Local variables */
-    H5EA_dblock_cache_ud_t udata;      /* Information needed for loading data block */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
+    H5EA_dblock_t *dblock;              /* Extensible array data block */
+    H5EA_dblock_cache_ud_t udata;       /* Information needed for loading data block */
 
     /* Sanity check */
     HDassert(hdr);
@@ -328,10 +316,28 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     udata.dblk_addr = dblk_addr;
 
     /* Protect the data block */
-    if(NULL == (ret_value = (H5EA_dblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblk_addr, &udata, flags)))
+    if(NULL == (dblock = (H5EA_dblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblk_addr, &udata, flags)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long long)dblk_addr)
 
+    /* Create top proxy, if it doesn't exist */
+    if(hdr->top_proxy && NULL == dblock->top_proxy) {
+        /* Add data block as child of 'top' proxy */
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, dblock) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
+        dblock->top_proxy = hdr->top_proxy;
+    } /* end if */
+
+    /* Set return value */
+    ret_value = dblock;
+
 CATCH
+
+    /* Clean up on error */
+    if(!ret_value) {
+        /* Release the data block, if it was protected */
+        if(dblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblock->addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+            H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array data block, address = %llu", (unsigned long long)dblock->addr)
+    } /* end if */
 
 END_FUNC(PKG)   /* end H5EA__dblock_protect() */
 
@@ -354,10 +360,6 @@ herr_t, SUCCEED, FAIL,
 H5EA__dblock_unprotect(H5EA_dblock_t *dblock, hid_t dxpl_id, unsigned cache_flags))
 
     /* Local variables */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
 
     /* Sanity check */
     HDassert(dblock);
@@ -392,10 +394,6 @@ H5EA__dblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
     /* Local variables */
     H5EA_dblock_t *dblock = NULL;       /* Pointer to data block */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
-
     /* Sanity check */
     HDassert(hdr);
     HDassert(parent);
@@ -420,16 +418,10 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
         /* Iterate over pages in data block */
         for(u = 0; u < npages; u++) {
-#ifdef QAK
-HDfprintf(stderr, "%s: Expunging data block page from cache\n", FUNC);
-#endif /* QAK */
             /* Evict the data block page from the metadata cache */
             /* (OK to call if it doesn't exist in the cache) */
             if(H5AC_expunge_entry(hdr->f, dxpl_id, H5AC_EARRAY_DBLK_PAGE, dblk_page_addr, H5AC__NO_FLAGS_SET) < 0)
                 H5E_THROW(H5E_CANTEXPUNGE, "unable to remove array data block page from metadata cache")
-#ifdef QAK
-HDfprintf(stderr, "%s: Done expunging data block page from cache\n", FUNC);
-#endif /* QAK */
 
             /* Advance to next page address */
             dblk_page_addr += dblk_page_size;
@@ -463,6 +455,7 @@ H5EA__dblock_dest(H5EA_dblock_t *dblock))
 
     /* Sanity check */
     HDassert(dblock);
+    HDassert(!dblock->has_hdr_depend);
 
     /* Check if shared header field has been initialized */
     if(dblock->hdr) {
@@ -481,6 +474,9 @@ H5EA__dblock_dest(H5EA_dblock_t *dblock))
             H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
         dblock->hdr = NULL;
     } /* end if */
+
+    /* Sanity check */
+    HDassert(NULL == dblock->top_proxy);
 
     /* Free the data block itself */
     dblock = H5FL_FREE(H5EA_dblock_t, dblock);

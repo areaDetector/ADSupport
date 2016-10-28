@@ -31,7 +31,6 @@
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5Pprivate.h"         /* Property lists                           */
-#include "H5Sprivate.h"         /* Dataspaces                               */
 
 
 /* Local macros */
@@ -125,7 +124,7 @@ H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for layout message")
 
     if(mesg->version < H5O_LAYOUT_VERSION_3) {
-        unsigned    ndims;                      /* Num dimensions in chunk */
+        unsigned        ndims;          /* Num dimensions in chunk */
 
         /* Dimensionality */
         ndims = *p++;

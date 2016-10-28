@@ -529,7 +529,7 @@ H5FS__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
          * Note that while we may alter the contents of the free space 
          * header in cases 1) and 2), there is no need to mark the header 
          * as dirty, as the metadata cache would not be attempting to 
-         * serialize the header if it though it was clean.
+         * serialize the header if it thought it was clean.
          */
         if(fspace->serial_sect_count > 0 && H5F_addr_defined(fspace->addr)) {
 	    /* Sanity check */
@@ -1303,6 +1303,10 @@ H5FS__cache_sinfo_notify(H5AC_notify_action_t action, void *_thing)
                 break;
 
 	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
                 /* do nothing */
                 break;
 

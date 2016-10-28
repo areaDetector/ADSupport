@@ -459,8 +459,6 @@ typedef struct H5D_shared_t {
     H5D_dcpl_cache_t    dcpl_cache;     /* Cached DCPL values */
     H5O_layout_t        layout;         /* Data layout                  */
     hbool_t             checked_filters;/* TRUE if dataset passes can_apply check */
-    H5O_t              *oh;             /* Pointer to dataset's object header, pinned */
-    hbool_t             is_swimming;    /* TRUE if dataset has SWMR access enabled */
 
     /* Cached dataspace info */
     unsigned            ndims;          /* The dataset's dataspace rank */
@@ -478,8 +476,7 @@ typedef struct H5D_shared_t {
         H5D_rdcc_t      chunk;          /* Information about chunked data */
     } cache;
 
-    H5D_append_flush_t  append_flush;	/* Append flush property information */
-
+    H5D_append_flush_t  append_flush;   /* Append flush property information */
     char                *extfile_prefix; /* expanded external file prefix */
 } H5D_shared_t;
 
@@ -565,7 +562,6 @@ H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BT2[1];
 /* The v2 B-tree class for indexing chunked datasets with >1 unlimited dimensions */
 H5_DLLVAR const H5B2_class_t H5D_BT2[1];
 H5_DLLVAR const H5B2_class_t H5D_BT2_FILT[1];
-
 
 
 /******************************/

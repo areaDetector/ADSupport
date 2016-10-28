@@ -155,7 +155,7 @@ H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size)
     H5_CHECK_OVERFLOW(size, size_t, hsize_t);
     if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_GHEAP, dxpl_id, (hsize_t)size)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate file space for global heap")
-    if(NULL == (heap = H5FL_MALLOC(H5HG_heap_t)))
+    if(NULL == (heap = H5FL_CALLOC(H5HG_heap_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
     heap->addr = addr;
     heap->size = size;
@@ -183,7 +183,7 @@ H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size)
      * which was always at least H5HG_ALIGNMENT aligned then we could just
      * align the pointer, but this might not be the case.
      */
-    n = H5HG_ALIGN(p - heap->chunk) - (size_t)(p - heap->chunk);
+    n = (size_t)H5HG_ALIGN(p - heap->chunk) - (size_t)(p - heap->chunk);
 #ifdef OLD_WAY
 /* Don't bother zeroing out the rest of the info in the heap -QAK */
     HDmemset(p, 0, n);

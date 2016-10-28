@@ -801,31 +801,6 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
  *
  *-------------------------------------------------------------------------
  */
-/* mingw does not have getenv_s or _putenv_s to work around */
-#ifdef __MINGW32__
-
-int
-Wsetenv(const char *name, const char *value, int overwrite)
-{
-    char buffer[256];
-    char *envName;
-
-    /* If we're not overwriting, check if the environment variable exists.
-     * If it does (i.e.: the required buffer size to store the variable's
-     * value is non-zero), then return an error code.
-     */
-    if(!overwrite) {
-        envName = getenv(name);
-        if (envName)
-            return -1;
-    } /* end if */
-
-    snprintf(buffer, sizeof(buffer)-1, "%s=%s", name, value);
-    return putenv(buffer);
-} /* end Wsetenv() */
-
-#else
-
 int
 Wsetenv(const char *name, const char *value, int overwrite)
 {
@@ -844,8 +819,6 @@ Wsetenv(const char *name, const char *value, int overwrite)
 
     return (int)_putenv_s(name, value);
 } /* end Wsetenv() */
-
-#endif /* __MINGW32__ */
 
 #ifdef H5_HAVE_WINSOCK2_H
 #pragma comment(lib, "advapi32.lib")
@@ -879,13 +852,6 @@ int c99_snprintf(char* str, size_t size, const char* format, ...)
     return count;
 }
 
-#ifdef __MINGW32__
-/* mingw does not have _vsnprintf_s or vcsprintf */
-int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
-{
-    return vsnprintf(str, size, format, ap);
-}
-#else
 int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
 {
     int count = -1;
@@ -897,7 +863,6 @@ int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
 
     return count;
 }
-#endif /* __MING32__ */
 
 
 /*-------------------------------------------------------------------------
@@ -1142,5 +1107,65 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5_combine_name() */
+} /* end H5_combine_path() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5_nanosleep
+ *
+ * Purpose:     Sleep for a given # of nanoseconds
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              October 01, 2016
+ *--------------------------------------------------------------------------
+ */
+void
+H5_nanosleep(uint64_t nanosec)
+{
+    struct timespec sleeptime;  /* Struct to hold time to sleep */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Set up time to sleep */
+    sleeptime.tv_sec = 0;
+    sleeptime.tv_nsec = (long)nanosec;
+
+    HDnanosleep(&sleeptime, NULL);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5_nanosleep() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5_get_time
+ *
+ * Purpose:     Get the current time, as the time of seconds after the UNIX epoch
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              October 05, 2016
+ *--------------------------------------------------------------------------
+ */
+double
+H5_get_time(void)
+{
+#ifdef H5_HAVE_GETTIMEOFDAY
+    struct timeval curr_time;
+#endif /* H5_HAVE_GETTIMEOFDAY */
+    double ret_value = (double)0.0f;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+#ifdef H5_HAVE_GETTIMEOFDAY
+    HDgettimeofday(&curr_time, NULL);
+
+    ret_value = (double)curr_time.tv_sec + ((double)curr_time.tv_usec / (double)1000000.0f);
+#endif /* H5_HAVE_GETTIMEOFDAY */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_get_time() */
+
 

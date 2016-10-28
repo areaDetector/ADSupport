@@ -802,35 +802,6 @@ H5F_gc_ref(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_use_latest_format
- *
- * Purpose:	Retrieve the 'use the latest version of the format' flag for
- *              the file.
- *
- * Return:	Success:	Non-negative, the 'use the latest format' flag
- *
- * 		Failure:	(can't happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Oct  2 2006
- *
- *-------------------------------------------------------------------------
- */
-hbool_t
-H5F_use_latest_format(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(f);
-    HDassert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->latest_format)
-} /* end H5F_use_latest_format() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5F_use_latest_flags
  *
  * Purpose:	Retrieve the 'latest version support' for the file.
@@ -1151,4 +1122,88 @@ H5F_coll_md_read(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->coll_md_read)
 } /* end H5F_coll_md_read() */
 #endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_use_mdc_logging
+ *
+ * Purpose:	Quick and dirty routine to determine if using MDC logging
+ *		is enabled for this file.
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		June  5, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_use_mdc_logging(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->use_mdc_logging)
+} /* end H5F_use_mdc_logging() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_start_mdc_log_on_access
+ *
+ * Purpose:	Quick and dirty routine to determine if we should start MDC
+ *		logging on access for this file.
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		June  5, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_start_mdc_log_on_access(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->start_mdc_log_on_access)
+} /* end H5F_start_mdc_log_on_access() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_mdc_log_location
+ *
+ * Purpose:	Quick and dirty routine to retrieve the MDC log location
+ *		for this file.
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		June  5, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+H5F_mdc_log_location(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->mdc_log_location)
+} /* end H5F_mdc_log_location() */
 

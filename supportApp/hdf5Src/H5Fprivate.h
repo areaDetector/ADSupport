@@ -309,7 +309,6 @@
 #define H5F_RDCC_W0(F)          ((F)->shared->rdcc_w0)
 #define H5F_SIEVE_BUF_SIZE(F)   ((F)->shared->sieve_buf_size)
 #define H5F_GC_REF(F)           ((F)->shared->gc_ref)
-#define H5F_USE_LATEST_FORMAT(F) ((F)->shared->latest_format)
 #define H5F_USE_LATEST_FLAGS(F,FL)  ((F)->shared->latest_flags & (FL))
 #define H5F_STORE_MSG_CRT_IDX(F)    ((F)->shared->store_msg_crt_idx)
 #define H5F_SET_STORE_MSG_CRT_IDX(F, FL)    ((F)->shared->store_msg_crt_idx = (FL))
@@ -320,6 +319,9 @@
 #ifdef H5_HAVE_PARALLEL
 #define H5F_COLL_MD_READ(F)     ((F)->coll_md_read)
 #endif /* H5_HAVE_PARALLEL */
+#define H5F_USE_MDC_LOGGING(F)  ((F)->shared->use_mdc_logging)
+#define H5F_START_MDC_LOG_ON_ACCESS(F)  ((F)->shared->start_mdc_log_on_access)
+#define H5F_MDC_LOG_LOCATION(F) ((F)->shared->mdc_log_location)
 #else /* H5F_MODULE */
 #define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_OPEN_NAME(F)        (H5F_get_open_name(F))
@@ -356,7 +358,6 @@
 #define H5F_RDCC_W0(F)          (H5F_rdcc_w0(F))
 #define H5F_SIEVE_BUF_SIZE(F)   (H5F_sieve_buf_size(F))
 #define H5F_GC_REF(F)           (H5F_gc_ref(F))
-#define H5F_USE_LATEST_FORMAT(F) (H5F_use_latest_format(F))
 #define H5F_USE_LATEST_FLAGS(F,FL) (H5F_use_latest_flags(F,FL))
 #define H5F_STORE_MSG_CRT_IDX(F) (H5F_store_msg_crt_idx(F))
 #define H5F_SET_STORE_MSG_CRT_IDX(F, FL)    (H5F_set_store_msg_crt_idx((F), (FL)))
@@ -367,6 +368,9 @@
 #ifdef H5_HAVE_PARALLEL
 #define H5F_COLL_MD_READ(F)     (H5F_coll_md_read(F))
 #endif /* H5_HAVE_PARALLEL */
+#define H5F_USE_MDC_LOGGING(F)  (H5F_use_mdc_logging(F))
+#define H5F_START_MDC_LOG_ON_ACCESS(F)  (H5F_start_mdc_log_on_access(F))
+#define H5F_MDC_LOG_LOCATION(F) (H5F_mdc_log_location(F))
 #endif /* H5F_MODULE */
 
 
@@ -525,7 +529,7 @@
 
 /* Size of signature information (on disk) */
 /* (all on-disk signatures should be this length) */
-#define H5_SIZEOF_MAGIC               4
+#define H5_SIZEOF_MAGIC                 4
 
 /* Size of checksum information (on disk) */
 /* (all on-disk checksums should be this length) */
@@ -584,9 +588,9 @@
 #define H5F_LATEST_FILL_MSG             0x0008
 #define H5F_LATEST_PLINE_MSG            0x0010
 #define H5F_LATEST_LAYOUT_MSG           0x0020
-#define H5F_LATEST_NO_MOD_TIME_MSG	0x0040
+#define H5F_LATEST_NO_MOD_TIME_MSG      0x0040
 #define H5F_LATEST_STYLE_GROUP          0x0080
-#define H5F_LATEST_OBJ_HEADER		0x0100
+#define H5F_LATEST_OBJ_HEADER           0x0100
 #define H5F_LATEST_SUPERBLOCK           0x0200
 #define H5F_LATEST_ALL_FLAGS            (H5F_LATEST_DATATYPE | H5F_LATEST_DATASPACE | H5F_LATEST_ATTRIBUTE | H5F_LATEST_FILL_MSG | H5F_LATEST_PLINE_MSG | H5F_LATEST_LAYOUT_MSG | H5F_LATEST_NO_MOD_TIME_MSG | H5F_LATEST_STYLE_GROUP | H5F_LATEST_OBJ_HEADER | H5F_LATEST_SUPERBLOCK)
 
@@ -617,7 +621,6 @@ typedef struct H5F_object_flush_t {
     H5F_flush_cb_t func;        /* The callback function */
     void *udata;                /* User data */
 } H5F_object_flush_t;
-
 
 /* I/O Info for an operation */
 typedef struct H5F_io_info_t {
@@ -687,7 +690,6 @@ H5_DLL size_t H5F_rdcc_nslots(const H5F_t *f);
 H5_DLL double H5F_rdcc_w0(const H5F_t *f);
 H5_DLL size_t H5F_sieve_buf_size(const H5F_t *f);
 H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
-H5_DLL hbool_t H5F_use_latest_format(const H5F_t *f);
 H5_DLL unsigned H5F_use_latest_flags(const H5F_t *f, unsigned fl);
 H5_DLL hbool_t H5F_store_msg_crt_idx(const H5F_t *f);
 H5_DLL herr_t H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag);
@@ -699,6 +701,9 @@ H5_DLL hbool_t H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
 H5_DLL H5P_coll_md_read_flag_t H5F_coll_md_read(const H5F_t *f);
 H5_DLL void H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t flag);
 #endif /* H5_HAVE_PARALLEL */
+H5_DLL hbool_t H5F_use_mdc_logging(const H5F_t *f);
+H5_DLL hbool_t H5F_start_mdc_log_on_access(const H5F_t *f);
+H5_DLL char *H5F_mdc_log_location(const H5F_t *f);
 
 /* Functions that retrieve values from VFD layer */
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
@@ -722,8 +727,6 @@ H5_DLL herr_t H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
 /* Functions that flush or evict */
 H5_DLL herr_t H5F_flush_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id);
 H5_DLL herr_t H5F_evict_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id);
-H5_DLL herr_t H5F_evict_cache_entries(H5F_t *f, hid_t dxpl_id);
-
 
 /* Functions that read & verify a piece of metadata with checksum */
 H5_DLL herr_t H5F_read_check_metadata(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
@@ -737,7 +740,6 @@ H5_DLL herr_t H5F_set_retries(H5F_t *f);
 
 /* Routine to invoke callback function upon object flush */
 H5_DLL herr_t H5F_object_flush_cb(H5F_t *f, hid_t obj_id);
-
 
 /* Address-related functions */
 H5_DLL void H5F_addr_encode(const H5F_t *f, uint8_t **pp, haddr_t addr);

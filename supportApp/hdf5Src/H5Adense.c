@@ -339,8 +339,7 @@ H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
  *-------------------------------------------------------------------------
  */
 H5A_t *
-H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
-    const char *name)
+H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *name)
 {
     H5A_bt2_ud_common_t udata;          /* User data for v2 B-tree modify */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
@@ -889,8 +888,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
-    const char *old_name, const char *new_name)
+H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *old_name,
+    const char *new_name)
 {
     H5A_bt2_ud_common_t udata;          /* User data for v2 B-tree modify */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
@@ -1141,9 +1140,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id,
-    const H5O_ainfo_t *ainfo, H5_index_t idx_type, H5_iter_order_t order,
-    hsize_t skip, hsize_t *last_attr,
+H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id, const H5O_ainfo_t *ainfo,
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_attr,
     const H5A_attr_iter_op_t *attr_op, void *op_data)
 {
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
@@ -1344,8 +1342,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
-    const char *name)
+H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *name)
 {
     H5A_bt2_ud_rm_t udata;              /* User data for v2 B-tree record removal */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
@@ -1695,8 +1692,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
-    const char *name)
+H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *name)
 {
     H5A_bt2_ud_common_t udata;          /* User data for v2 B-tree modify */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
