@@ -1204,3 +1204,51 @@ H5_get_time(void)
 } /* end H5_get_time() */
 
 
+#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER < 1800)  /* pre- VS 2013 */
+
+  double round(double x)
+  {
+    return x >= 0.0 ? floor(x + 0.5) : ceil(x - 0.5);
+  }
+
+  float roundf(float x)
+  {
+    return x >= 0.0f ? floorf(x + 0.5f) : ceilf(x - 0.5f);
+  }
+
+  long double roundl(long double x)
+  {
+    return x >= 0.0 ? floorl(x + 0.5) : ceill(x - 0.5);
+  }
+
+  long int lround(double x)
+  {
+    return round(x);
+  }
+
+  long int lroundf(float x)
+  {
+    return roundf(x);
+  }
+
+  long int lroundl(long double x)
+  {
+    return roundl(x);
+  }
+
+  long long int llround(double x)
+  {
+    return round(x);
+  }
+
+  long long int llroundf(float x)
+  {
+    return roundf(x);
+  }
+
+  long long int llroundl(long double x)
+  {
+    return roundl(x);
+  }
+
+#endif
