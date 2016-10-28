@@ -7,8 +7,8 @@ software.  It contains third party libraries required for some plugins and
 drivers.  These are provided in source-code form compatible with the EPICS
 build system.  This makes it convenient to use these libraries on systems
 like Windows and vxWorks for which there are not binary packages available
-as there are on Linux.  For Linux the code here can be useful when the
-Linux system being used does not have one of the packages installed, or
+as there are on Linux and Darwin.  For Linux and Darwin the code here can be 
+useful when the system not have one of the packages installed, or
 has a different version from the one required by areaDetector.
 
 This module contains the following libraries:
@@ -21,6 +21,10 @@ This module contains the following libraries:
 - [TIFF]   (http://simplesystems.org/libtiff/)
 - [XML2]   (http://www.xmlsoft.org/index.html)
 - [ZLIB]   (http://www.zlib.net/)
+
+These libraries have had minor changes made so they will build with the EPICS
+build system on all of the supported platforms.  These changes are documented
+in a README.epics file in each library source directory.
 
 The build system will build each library XXX only if the following make variables
 are set.
