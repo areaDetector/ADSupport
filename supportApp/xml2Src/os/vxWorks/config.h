@@ -267,7 +267,9 @@
 #define HAVE_VSPRINTF 1
 
 /* Define to 1 if you have the <zlib.h> header file. */
-#define HAVE_ZLIB_H 1
+/* On vxWorks we do have zlib.h, but xmlIO.c requires the dup() function to use zlib,
+ * and vxWorks does not have dup(), at least not in 6.9.4 */
+/* #undef HAVE_ZLIB_H 1 */
 
 /* Define to 1 if you have the `_stat' function. */
 /* #undef HAVE__STAT */
