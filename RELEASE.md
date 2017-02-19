@@ -13,7 +13,7 @@ files respectively, in the configure/ directory of the appropriate release of th
 Release Notes
 =============
 
-R1-1 (February XXX, 2017)
+R1-1 (February 19, 2017)
 ========================
 * Fixed a problem with XML2 on vxWorks.  xml2Src/os/vxWorks/config.h was previously defining HAVE_ZLIB_H.
   However, on vxWorks we do have zlib.h, but xmlIO.c requires the dup() function to use zlib, and vxWorks 
