@@ -31,6 +31,11 @@
 
 #define SIZEOF_LONG_INT 4
 
+/* Define to the type of a signed integer type of width exactly 64 bits if
+   such a type exists and the standard includes do not define it. */
+typedef long long int64_t;
+
+
 #ifdef _MSC_VER
   #ifdef _M_X64
     #define SIZEOF_SIZE_T 8
