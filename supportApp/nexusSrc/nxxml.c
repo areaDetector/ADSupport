@@ -21,14 +21,16 @@
  *  For further information, see <http://www.nexusformat.org>
  */
 
+#include <nxconfig.h>
 
-#ifdef NXXML 
+#ifdef WITH_MXML 
 
 #include <stdio.h>
 #include <assert.h>
 #include <stdint.h>
 #include <mxml.h>
 #include <napi.h>
+#include <napi_internal.h>
 #include <nxxml.h>
 #include "nxio.h"
 #include "nxdataset.h"
@@ -267,6 +269,10 @@ NXstatus  NXXmakegroup (NXhandle fid, CONSTCHAR *name,
     NXReportError(buffer);
     return NX_ERROR;
   }
+  if ( strlen(nxclass) == 0 ) /* xml node must have a name */
+  {
+      nxclass = "NXcollection";
+  }
 
   if(isDataNode(xmlHandle->stack[xmlHandle->stackPointer].current)){
     NXReportError("Close dataset before trying to create a group");
@@ -331,6 +337,10 @@ NXstatus  NXXopengroup (NXhandle fid, CONSTCHAR *name,
   if(isDataNode(xmlHandle->stack[xmlHandle->stackPointer].current)){
     NXReportError("Close dataset before trying to open a group");
     return NX_ERROR;
+  }
+  if ( strlen(nxclass) == 0 ) /* xml node must have a name */
+  {
+      nxclass = "NXcollection";
   }
   newGroup = mxmlFindElement(xmlHandle->stack[xmlHandle->stackPointer].current,
 			     xmlHandle->stack[xmlHandle->stackPointer].current,
@@ -966,7 +976,7 @@ NXstatus  NXXgetinfo64 (NXhandle fid, int *rank,
       *iType = NX_CHAR;
       dimension[0]= strlen(userData->value.opaque);
     } else {
-      *iType = translateTypeCode(attr);
+      *iType = translateTypeCode(attr, "");
       analyzeDim(attr,rank,dimension,iType);
       if (dimension[0] == -1) /* 1D strings are NX_CHAR not NX_CHAR[] so length will not be correct */
       {
@@ -1330,7 +1340,7 @@ NXstatus  NXXputattr (NXhandle fid, CONSTCHAR *name, const void *data,
   return NX_OK;
 }
 /*--------------------------------------------------------------------------*/
-NXstatus  NXXgetattr (NXhandle fid, char *name, 
+NXstatus  NXXgetattr (NXhandle fid, const char *name, 
 				   void *data, int* datalen, int* iType){
   pXMLNexus xmlHandle = NULL;
   mxml_node_t *current = NULL;
@@ -1350,7 +1360,7 @@ NXstatus  NXXgetattr (NXhandle fid, char *name,
     NXReportError(error);
     return NX_ERROR;
   }
-  nx_type = translateTypeCode((char *)attribute);
+  nx_type = translateTypeCode((char *)attribute, ":");
   if(nx_type < 0) {
     /*
       no type code == text attribute
@@ -1366,7 +1376,8 @@ NXstatus  NXXgetattr (NXhandle fid, char *name,
     } else {
       attData = strchr(attribute,(int)':');
       if(attData == NULL){
-	NXReportError("ERROR: bad attribute string, : missing");
+        snprintf(error,1023,"ERROR: bad attribute string, : missing for attribute \"%s\"", name);
+	NXReportError(error);
 	return NX_ERROR;
       }
       attData++;
@@ -1619,7 +1630,7 @@ NXstatus  NXXgetnextattr (NXhandle fid, NXname pName,
 
   strcpy(pName,current->value.element.attrs[currentAtt].name);
   attVal = current->value.element.attrs[currentAtt].value;
-  nx_type = translateTypeCode((char *)attVal);
+  nx_type = translateTypeCode((char *)attVal, ":");
   if(nx_type < 0 || strcmp(pName,TYPENAME) == 0){
     /*
       no type == NX_CHAR
@@ -1945,16 +1956,54 @@ NXstatus  NXXsameID (NXhandle fileid, NXlink* pFirstID,
     return NX_ERROR;
   }
 }
+
 /*--------------------------------------------------------------------*/
+
 int  NXXcompress(NXhandle fid, int comp){
   /* that will throw an exception in the Java API, errors have to be fatal */
   /* NXReportError("NXcompress is deprecated, IGNORED"); */
   return NX_OK;
 }
+
+/*--------------------------------------------------------------------*/
+NXstatus  NXXputattra(NXhandle handle, CONSTCHAR* name, const void* data, const int rank, const int dim[], const int iType) 
+{
+  if (rank > 1) {
+          NXReportError("This is an XML file, there is only rudimentary support for attribute arrays wirh rank <=1");
+          return NX_ERROR;
+  } 
+
+  return NXXputattr(handle, name, data, dim[0], iType);
+}
+
+/*--------------------------------------------------------------------*/
+NXstatus  NXXgetnextattra(NXhandle handle, NXname pName, int *rank, int dim[], int *iType)
+{
+  NXstatus ret = NXXgetnextattr(handle, pName, dim, iType);
+  if (ret != NX_OK) return ret;
+  (*rank) = 1;
+  if (dim[0] <= 1 ) (*rank) = 0;
+  return NX_OK;
+}
+
+/*--------------------------------------------------------------------*/
+NXstatus  NXXgetattra(NXhandle handle, const char* name, void* data)
+{
+  NXReportError("This is an XML file, attribute array API is not supported here");
+  return NX_ERROR;
+}
+
+/*--------------------------------------------------------------------*/
+NXstatus  NXXgetattrainfo(NXhandle handle, NXname pName, int *rank, int dim[], int *iType)
+{
+  NXReportError("This is an XML file, attribute array API is not supported here");
+  return NX_ERROR;
+}
+
 /*----------------------------------------------------------------------*/
 void NXXassignFunctions(pNexusFunction fHandle){
       fHandle->nxclose=NXXclose;
-	  fHandle->nxreopen=NULL;
+      fHandle->nxreopen=NULL;
       fHandle->nxflush=NXXflush;
       fHandle->nxmakegroup=NXXmakegroup;
       fHandle->nxopengroup=NXXopengroup;
@@ -1985,8 +2034,10 @@ void NXXassignFunctions(pNexusFunction fHandle){
       fHandle->nxsetnumberformat=NXXsetnumberformat;
       fHandle->nxprintlink=NXXprintlink;
       fHandle->nxnativeexternallink=NULL;
+      fHandle->nxputattra = NXXputattra;
+      fHandle->nxgetnextattra = NXXgetnextattra;
+      fHandle->nxgetattra = NXXgetattra;
+      fHandle->nxgetattrainfo = NXXgetattrainfo;
 }
-
-
 
 #endif /*NXXML*/
