@@ -21,7 +21,7 @@
  
   For further information, see <http://www.nexus.anl.gov/>
   
-  $Id: napiu.c 1863 2012-12-17 14:06:34Z Tobias Richter $
+  $Id$
 
  ----------------------------------------------------------------------------*/
 
@@ -30,6 +30,7 @@
 #include <string.h>
 #include <time.h>
 #include "napiu.h"
+#include "napi_internal.h"
 
 #define DO_GLOBAL(__name) \
 	if (__name != NULL) \

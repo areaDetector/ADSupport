@@ -21,11 +21,13 @@
              
   For further information, see <http://www.nexusformat.org>
   
-  $Id: napi4.c 1814 2012-02-07 14:37:57Z Freddie Akeroyd $
+  $Id$
 
 ----------------------------------------------------------------------------*/
 
-#ifdef HDF4 
+#include <nxconfig.h>
+
+#ifdef WITH_HDF4 
 
 #include <stdlib.h>
 #include <assert.h>
@@ -33,7 +35,9 @@
 #include <time.h>
 
 #include "napi.h"
+#include "napi_internal.h"
 #include "napi4.h"
+
 
 extern	void *NXpData;
 
@@ -574,7 +578,9 @@ static int findNapiClass(pNexusFile pFile, int groupRef, NXname nxclass)
     /* create and configure the group */
     iNew = Vattach (pFile->iVID, -1, "w");
     if (iNew < 0) {
-      NXReportError( "ERROR: HDF could not create Vgroup");
+      sprintf (pBuffer, "ERROR: HDF could not create Vgroup %s, class %s", 
+                        name, nxclass);
+      NXReportError( pBuffer);
       return NX_ERROR;
     }
     Vsetname (iNew, name);
@@ -921,7 +927,7 @@ static int findNapiClass(pNexusFile pFile, int groupRef, NXname nxclass)
       iRet = SDsetcompress(iNew, COMP_CODE_DEFLATE, &compstruct);
       if (iRet < 0) 
       {
-        NXReportError( "LZW-Compression failure!");
+        NXReportError( "Deflate-Compression failure!");
         return NX_ERROR;
       } 
     }
@@ -1696,7 +1702,7 @@ static int findNapiClass(pNexusFile pFile, int groupRef, NXname nxclass)
   /*-------------------------------------------------------------------------*/
 
 
-  NXstatus  NX4getattr (NXhandle fid, char *name, void *data, int* datalen, int* iType)
+  NXstatus  NX4getattr (NXhandle fid, const char *name, void *data, int* datalen, int* iType)
   {
     pNexusFile pFile;
     int32 iNew, iType32, count;
@@ -1945,10 +1951,46 @@ static int findNapiClass(pNexusFile pFile, int groupRef, NXname nxclass)
   }
  
 /*--------------------------------------------------------------------*/
+NXstatus  NX4putattra(NXhandle handle, CONSTCHAR* name, const void* data, const int rank, const int dim[], const int iType)
+{
+  if (rank > 1) {
+	  NXReportError("This is a HDF4 file, there is only rudimentary support for attribute arrays wirh rank <=1");
+	  return NX_ERROR;
+  } 
+
+  return NX4putattr(handle, name, data, dim[0], iType);
+}
+
+/*--------------------------------------------------------------------*/
+NXstatus  NX4getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], int *iType)
+{
+  NXstatus ret = NX4getnextattr(handle, pName, dim, iType);
+  if (ret != NX_OK) return ret;
+  (*rank) = 1;
+  if (dim[0] <= 1 ) (*rank) = 0;
+  return NX_OK;
+}
+
+/*--------------------------------------------------------------------*/
+NXstatus  NX4getattra(NXhandle handle, const char* name, void* data)
+{
+  NXReportError("This is a HDF4 file, attribute array API is not supported here");
+  return NX_ERROR;
+}
+
+/*--------------------------------------------------------------------*/
+NXstatus  NX4getattrainfo(NXhandle handle, NXname pName, int *rank, int dim[], int *iType)
+{
+  NXReportError("This is a HDF4 file, attribute array API is not supported here");
+  return NX_ERROR;
+}
+
+
+/*--------------------------------------------------------------------*/
 void NX4assignFunctions(pNexusFunction fHandle)
 {
       fHandle->nxclose=NX4close;
-	  fHandle->nxreopen=NULL;
+      fHandle->nxreopen=NULL;
       fHandle->nxflush=NX4flush;
       fHandle->nxmakegroup=NX4makegroup;
       fHandle->nxopengroup=NX4opengroup;
@@ -1978,6 +2020,10 @@ void NX4assignFunctions(pNexusFunction fHandle)
       fHandle->nxinitattrdir=NX4initattrdir;
       fHandle->nxprintlink=NX4printlink;
       fHandle->nxnativeexternallink=NULL;
+      fHandle->nxputattra = NX4putattra;
+      fHandle->nxgetnextattra = NX4getnextattra;
+      fHandle->nxgetattra = NX4getattra;
+      fHandle->nxgetattrainfo = NX4getattrainfo;
 }
 
 #endif /*HDF4*/

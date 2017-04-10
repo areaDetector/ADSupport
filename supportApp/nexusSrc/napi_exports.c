@@ -1,5 +1,5 @@
 /*
- * $Id: napi_exports.c 1104 2008-10-08 12:42:42Z Freddie Akeroyd $
+ * $Id$
  *
  *  __stdcall uppercase aliases for Windows
  */
