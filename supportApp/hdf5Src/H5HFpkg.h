@@ -559,15 +559,6 @@ typedef struct H5HF_dblock_cache_ud_t {
 /* Package Private Variables */
 /*****************************/
 
-/* H5HF header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FHEAP_HDR[1];
-
-/* H5HF indirect block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FHEAP_IBLOCK[1];
-
-/* H5HF direct block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FHEAP_DBLOCK[1];
-
 /* The v2 B-tree class for tracking indirectly accessed 'huge' objects */
 H5_DLLVAR const H5B2_class_t H5HF_HUGE_BT2_INDIR[1];
 
@@ -615,12 +606,6 @@ H5FL_BLK_EXTERN(direct_block);
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-
-/* Generic routines */
-H5_DLL herr_t H5HF__create_flush_depend(H5AC_info_t *parent_entry,
-    H5AC_info_t *child_entry);
-H5_DLL herr_t H5HF__destroy_flush_depend(H5AC_info_t *parent_entry,
-    H5AC_info_t *child_entry);
 
 /* Doubling table routines */
 H5_DLL herr_t H5HF_dtable_init(H5HF_dtable_t *dtable);

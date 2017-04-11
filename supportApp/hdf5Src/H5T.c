@@ -927,8 +927,6 @@ H5T__init_package(void)
      *------------------------------------------------------------
      */
 
-#ifndef H5_HAVE_VXWORKS
-/* These functions are not working on vxWorks, need to figure out why */
     /* Little-endian 32-bit UNIX time_t */
     H5T_INIT_TYPE(TIME, H5T_UNIX_D32LE_g, COPY, std_u32le, NOSET, -)
 
@@ -940,7 +938,7 @@ H5T__init_package(void)
 
     /* Big-endian 64-bit UNIX time_t */
     H5T_INIT_TYPE(TIME, H5T_UNIX_D64BE_g, COPY, std_u64be, NOSET, -)
-#endif
+
 
     /* Indicate that the types that are created from here down are allocated
      * H5FL_ALLOC(), not copied with H5T_copy()
@@ -3527,7 +3525,7 @@ H5T__free(H5T_t *dt)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
         if(H5FO_delete(dt->sh_loc.file, H5AC_ind_read_dxpl_id, dt->sh_loc.u.loc.oh_addr) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't remove datatype from list of open objects")
-        if(H5O_close(&dt->oloc) < 0)
+        if(H5O_close(&dt->oloc, NULL) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close data type object header")
         dt->shared->state = H5T_STATE_NAMED;
     } /* end if */
@@ -3647,7 +3645,7 @@ H5T_close(H5T_t *dt)
             /* Check reference count for this object in the top file */
             if(H5FO_top_count(dt->sh_loc.file, dt->sh_loc.u.loc.oh_addr) == 0) {
                 /* Close object location for named datatype */
-                if(H5O_close(&dt->oloc) < 0)
+                if(H5O_close(&dt->oloc, NULL) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close")
             } /* end if */
             else

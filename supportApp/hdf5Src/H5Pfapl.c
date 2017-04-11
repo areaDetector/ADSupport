@@ -80,18 +80,18 @@
 #define H5F_ACS_PREEMPT_READ_CHUNKS_DEC         H5P__decode_double
 /* Definition for threshold for alignment */
 #define H5F_ACS_ALIGN_THRHD_SIZE                sizeof(hsize_t)
-#define H5F_ACS_ALIGN_THRHD_DEF                 1
+#define H5F_ACS_ALIGN_THRHD_DEF                 H5F_ALIGN_THRHD_DEF
 #define H5F_ACS_ALIGN_THRHD_ENC                 H5P__encode_hsize_t
 #define H5F_ACS_ALIGN_THRHD_DEC                 H5P__decode_hsize_t
 /* Definition for alignment */
 #define H5F_ACS_ALIGN_SIZE                      sizeof(hsize_t)
-#define H5F_ACS_ALIGN_DEF                       1
+#define H5F_ACS_ALIGN_DEF                       H5F_ALIGN_DEF
 #define H5F_ACS_ALIGN_ENC                       H5P__encode_hsize_t
 #define H5F_ACS_ALIGN_DEC                       H5P__decode_hsize_t
 /* Definition for minimum metadata allocation block size (when
    aggregating metadata allocations. */
 #define H5F_ACS_META_BLOCK_SIZE_SIZE            sizeof(hsize_t)
-#define H5F_ACS_META_BLOCK_SIZE_DEF             2048
+#define H5F_ACS_META_BLOCK_SIZE_DEF             H5F_META_BLOCK_SIZE_DEF
 #define H5F_ACS_META_BLOCK_SIZE_ENC             H5P__encode_hsize_t
 #define H5F_ACS_META_BLOCK_SIZE_DEC             H5P__decode_hsize_t
 /* Definition for maximum sieve buffer size (when data sieving
@@ -103,7 +103,7 @@
 /* Definition for minimum "small data" allocation block size (when
    aggregating "small" raw data allocations. */
 #define H5F_ACS_SDATA_BLOCK_SIZE_SIZE           sizeof(hsize_t)
-#define H5F_ACS_SDATA_BLOCK_SIZE_DEF            2048
+#define H5F_ACS_SDATA_BLOCK_SIZE_DEF            H5F_SDATA_BLOCK_SIZE_DEF
 #define H5F_ACS_SDATA_BLOCK_SIZE_ENC            H5P__encode_hsize_t
 #define H5F_ACS_SDATA_BLOCK_SIZE_DEC            H5P__decode_hsize_t
 /* Definition for garbage-collect references */
@@ -208,7 +208,11 @@
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF     FALSE
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC     H5P__encode_hbool_t
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC     H5P__decode_hbool_t
-
+/* Definition for evict on close property */
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE                sizeof(hbool_t)
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF                 FALSE
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_ENC                 H5P__encode_hbool_t
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEC                 H5P__decode_hbool_t
 #ifdef H5_HAVE_PARALLEL
 /* Definition of collective metadata read mode flag */
 #define H5F_ACS_COLL_MD_READ_FLAG_SIZE   sizeof(H5P_coll_md_read_flag_t)
@@ -221,6 +225,28 @@
 #define H5F_ACS_COLL_MD_WRITE_FLAG_ENC    H5P__encode_hbool_t
 #define H5F_ACS_COLL_MD_WRITE_FLAG_DEC    H5P__decode_hbool_t
 #endif /* H5_HAVE_PARALLEL */
+/* Definitions for the initial metadata cache image configuration */
+#define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_SIZE sizeof(H5AC_cache_image_config_t)
+#define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_DEF  H5AC__DEFAULT_CACHE_IMAGE_CONFIG
+#define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_ENC  H5P__facc_cache_image_config_enc
+#define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_DEC  H5P__facc_cache_image_config_dec
+#define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_CMP  H5P__facc_cache_image_config_cmp
+/* Definition for total size of page buffer(bytes) */
+#define H5F_ACS_PAGE_BUFFER_SIZE_SIZE           sizeof(size_t)
+#define H5F_ACS_PAGE_BUFFER_SIZE_DEF            0
+#define H5F_ACS_PAGE_BUFFER_SIZE_ENC            H5P__encode_size_t
+#define H5F_ACS_PAGE_BUFFER_SIZE_DEC            H5P__decode_size_t
+/* Definition for minimum metadata size of page buffer(bytes) */
+#define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_SIZE           sizeof(unsigned)
+#define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF            0
+#define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_ENC            H5P__encode_unsigned
+#define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEC            H5P__decode_unsigned
+/* Definition for minimum raw data size of page buffer(bytes) */
+#define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_SIZE           sizeof(unsigned)
+#define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF            0
+#define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC            H5P__encode_unsigned
+#define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC            H5P__decode_unsigned
+
 
 /******************/
 /* Local Typedefs */
@@ -274,6 +300,11 @@ static herr_t H5P_facc_mdc_log_location_del(hid_t prop_id, const char *name, siz
 static herr_t H5P_facc_mdc_log_location_copy(const char *name, size_t size, void *value);
 static int    H5P_facc_mdc_log_location_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P_facc_mdc_log_location_close(const char *name, size_t size, void *value);
+
+/* Metadata cache image property callbacks */
+static int H5P__facc_cache_image_config_cmp(const void *_config1, const void *_config2, size_t H5_ATTR_UNUSED size);
+static herr_t H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__facc_cache_image_config_dec(const void **_pp, void *_value);
 
 
 /*********************/
@@ -337,10 +368,15 @@ static const hbool_t H5F_def_clear_status_flags_g = H5F_ACS_CLEAR_STATUS_FLAGS_D
 static const hbool_t H5F_def_use_mdc_logging_g = H5F_ACS_USE_MDC_LOGGING_DEF;                 /* Default metadata cache logging flag */
 static const char *H5F_def_mdc_log_location_g = H5F_ACS_MDC_LOG_LOCATION_DEF;                 /* Default mdc log location */
 static const hbool_t H5F_def_start_mdc_log_on_access_g = H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF; /* Default mdc log start on access flag */
+static const hbool_t H5F_def_evict_on_close_flag_g = H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF;         /* Default setting for evict on close property */
 #ifdef H5_HAVE_PARALLEL
 static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g = H5F_ACS_COLL_MD_READ_FLAG_DEF;  /* Default setting for the collective metedata read flag */
 static const hbool_t H5F_def_coll_md_write_flag_g = H5F_ACS_COLL_MD_WRITE_FLAG_DEF;  /* Default setting for the collective metedata write flag */
 #endif /* H5_HAVE_PARALLEL */
+static const H5AC_cache_image_config_t H5F_def_mdc_initCacheImageCfg_g = H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_DEF;  /* Default metadata cache image settings */
+static const size_t H5F_def_page_buf_size_g = H5F_ACS_PAGE_BUFFER_SIZE_DEF;      /* Default page buffer size */
+static const unsigned H5F_def_page_buf_min_meta_perc_g = H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF;      /* Default page buffer minimum metadata size */
+static const unsigned H5F_def_page_buf_min_raw_perc_g = H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF;      /* Default page buffer minumum raw data size */
 
 
 /*-------------------------------------------------------------------------
@@ -530,6 +566,12 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC, H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+    /* Register the evict on close flag */
+    if(H5P_register_real(pclass, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE, &H5F_def_evict_on_close_flag_g, 
+            NULL, NULL, NULL, H5F_ACS_EVICT_ON_CLOSE_FLAG_ENC, H5F_ACS_EVICT_ON_CLOSE_FLAG_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
 #ifdef H5_HAVE_PARALLEL
     /* Register the metadata collective read flag */
     if(H5P_register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5F_ACS_COLL_MD_READ_FLAG_SIZE, &H5F_def_coll_md_read_flag_g, 
@@ -543,6 +585,28 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 #endif /* H5_HAVE_PARALLEL */
+
+    /* Register the initial metadata cache image configuration */
+    if(H5P_register_real(pclass, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_SIZE, &H5F_def_mdc_initCacheImageCfg_g, 
+            NULL, NULL, NULL, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_ENC, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_DEC, 
+            NULL, NULL, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_CMP, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the size of the page buffer size */
+    if(H5P_register_real(pclass, H5F_ACS_PAGE_BUFFER_SIZE_NAME, H5F_ACS_PAGE_BUFFER_SIZE_SIZE, &H5F_def_page_buf_size_g, 
+            NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_SIZE_ENC, H5F_ACS_PAGE_BUFFER_SIZE_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+    /* Register the size of the page buffer minimum metadata size */
+    if(H5P_register_real(pclass, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_SIZE, &H5F_def_page_buf_min_meta_perc_g, 
+            NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_ENC, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+    /* Register the size of the page buffer minimum raw data size */
+    if(H5P_register_real(pclass, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_SIZE, &H5F_def_page_buf_min_raw_perc_g, 
+            NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -846,7 +910,7 @@ done:
 const void *
 H5P_peek_driver_info(H5P_genplist_t *plist)
 {
-    void *ret_value = NULL;     /* Return value */
+    const void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -885,11 +949,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
+const void *
 H5Pget_driver_info(hid_t plist_id)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    void *ret_value;            /* Return value */
+    H5P_genplist_t *plist = NULL;       /* Property list pointer            */
+    const void *ret_value = NULL;       /* Return value                     */
 
     FUNC_ENTER_API(NULL)
     H5TRACE1("*x", "i", plist_id);
@@ -898,7 +962,7 @@ H5Pget_driver_info(hid_t plist_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
 
     /* Get the driver info */
-    if(NULL == (ret_value = (void *)H5P_peek_driver_info(plist)))
+    if(NULL == (ret_value = (const void *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver info")
 
 done:
@@ -1529,6 +1593,101 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_cache() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_mdc_image_config
+ *
+ * Purpose:	Set the initial metadata cache image configuration in the
+ *		target FAPL.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	J. Mainzer
+ *              Thursday, June 25, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*x", plist_id, config_ptr);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* validate the new configuration */
+    if(H5AC_validate_cache_image_config(config_ptr) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid metadata cache image configuration")
+
+    /* set the modified metadata cache image config */
+
+    /* If we ever support multiple versions of H5AC_cache_image_config_t, we
+     * will have to test the version and do translation here.
+     */
+
+    if(H5P_set(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, config_ptr) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set metadata cache image initial config")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pset_mdc_image_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_mdc_image_config
+ *
+ * Purpose:	Retrieve the metadata cache initial image configuration
+ *		from the target FAPL.
+ *
+ *		Observe that the function will fail if config_ptr is
+ *		NULL, or if config_ptr->version specifies an unknown
+ *		version of H5AC_cache_image_config_t.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	J. Mainzer
+ *              Friday, June 26, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*x", plist_id, config_ptr);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* validate the config_ptr */
+    if(config_ptr == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
+
+    if(config_ptr->version != H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown image config version.")
+
+    /* If we ever support multiple versions of H5AC_cache_config_t, we
+     * will have to get the cannonical version here, and then translate
+     * to the version of the structure supplied.
+     */
+
+    /* Get the current initial metadata cache resize configuration */
+    if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, config_ptr) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get metadata cache initial image config")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pget_mdc_image_config() */
 
 
 /*-------------------------------------------------------------------------
@@ -2740,6 +2899,147 @@ H5P__file_image_info_free(void *value)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_image_info_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5P__facc_cache_image_config_cmp
+ *
+ * Purpose: Compare two cache image configurations.
+ *
+ * Return: positive if VALUE1 is greater than VALUE2, negative if VALUE2 is
+ *		greater than VALUE1 and zero if VALUE1 and VALUE2 are equal.
+ *
+ * Programmer:     John Mainzer
+ *                 June 26, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P__facc_cache_image_config_cmp(const void *_config1, const void *_config2, size_t H5_ATTR_UNUSED size)
+{
+    const H5AC_cache_image_config_t *config1 = (const H5AC_cache_image_config_t *)_config1; /* Create local aliases for values */
+    const H5AC_cache_image_config_t *config2 = (const H5AC_cache_image_config_t *)_config2; /* Create local aliases for values */
+    int ret_value = 0;               /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check for a property being set */
+    if(config1 == NULL && config2 != NULL) HGOTO_DONE(-1);
+    if(config1 != NULL && config2 == NULL) HGOTO_DONE(1);
+
+    if(config1->version < config2->version) HGOTO_DONE(-1);
+    if(config1->version > config2->version) HGOTO_DONE(1);
+
+    if(config1->generate_image < config2->generate_image) HGOTO_DONE(-1);
+    if(config1->generate_image > config2->generate_image) HGOTO_DONE(1);
+
+    if(config1->save_resize_status < config2->save_resize_status) HGOTO_DONE(-1);
+    if(config1->save_resize_status > config2->save_resize_status) HGOTO_DONE(1);
+
+    if(config1->entry_ageout < config2->entry_ageout) HGOTO_DONE(-1);
+    if(config1->entry_ageout > config2->entry_ageout) HGOTO_DONE(1);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_cache_image_config_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_cache_image_config_enc
+ *
+ * Purpose:        Callback routine which is called whenever the default
+ *                 cache image config property in the file creation 
+ *		   property list is encoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     John Mainzer
+ *                 June 26, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size)
+{
+    const H5AC_cache_image_config_t *config = (const H5AC_cache_image_config_t *)value; /* Create local aliases for value */
+    uint8_t **pp = (uint8_t **)_pp;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(value);
+
+    if(NULL != *pp) {
+        /* Encode type sizes (as a safety check) */
+        *(*pp)++ = (uint8_t)sizeof(unsigned);
+
+        INT32ENCODE(*pp, (int32_t)config->version);
+
+        H5_ENCODE_UNSIGNED(*pp, config->generate_image);
+
+        H5_ENCODE_UNSIGNED(*pp, config->save_resize_status);
+
+        INT32ENCODE(*pp, (int32_t)config->entry_ageout);
+    } /* end if */
+
+    /* Compute encoded size of fixed-size values */
+    *size += (1 + (2 * sizeof(unsigned)) + (2 * sizeof(int32_t)));
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__facc_cache_image_config_enc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_cache_image_config_dec
+ *
+ * Purpose:        Callback routine which is called whenever the default
+ *                 cache image config property in the file creation property 
+ *		   list is  decoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     John Mainzer
+ *                 June 26, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_cache_image_config_dec(const void **_pp, void *_value)
+{
+    H5AC_cache_image_config_t *config = (H5AC_cache_image_config_t *)_value;
+    const uint8_t **pp = (const uint8_t **)_pp;
+    unsigned enc_size;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(config);
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+
+    /* Set property to default value */
+    HDmemcpy(config, &H5F_def_mdc_initCacheImageCfg_g, sizeof(H5AC_cache_image_config_t));
+
+    /* Decode type sizes */
+    enc_size = *(*pp)++;
+    if(enc_size != sizeof(unsigned))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
+
+    INT32DECODE(*pp, config->version);
+
+    H5_DECODE_UNSIGNED(*pp, config->generate_image);
+
+    H5_DECODE_UNSIGNED(*pp, config->save_resize_status);
+
+    INT32DECODE(*pp, config->entry_ageout);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_cache_image_config_dec() */
 
 
 /*-------------------------------------------------------------------------
@@ -4061,6 +4361,93 @@ H5P_facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_close() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_evict_on_close
+ *
+ * Purpose:     Sets the evict_on_close property value.
+ *
+ *              When this property is set, closing an HDF5 object will
+ *              cause the object's metadata cache entries to be flushed
+ *              and evicted from the cache.
+ *
+ *              Currently only implemented for datasets.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close)
+{
+    H5P_genplist_t *plist;          /* property list pointer */
+    herr_t ret_value = SUCCEED;     /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", fapl_id, evict_on_close);
+
+    /* Compare the property list's class against the other class */
+    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist")
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set values */
+    if(H5P_set(plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set evict on close property")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_evict_on_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_evict_on_close
+ *
+ * Purpose:     Gets the evict_on_close property value.
+ *
+ *              When this property is set, closing an HDF5 object will
+ *              cause the object's metadata cache entries to be flushed
+ *              and evicted from the cache.
+ *
+ *              Currently only implemented for datasets.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_evict_on_close(hid_t fapl_id, hbool_t *evict_on_close)
+{
+    H5P_genplist_t *plist;          /* property list pointer */
+    herr_t ret_value = SUCCEED;     /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*b", fapl_id, evict_on_close);
+
+    /* Compare the property list's class against the other class */
+    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    if(H5P_get(plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, evict_on_close) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get evict on close property")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_evict_on_close() */
+
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
@@ -4327,4 +4714,94 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_coll_metadata_write() */
 #endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_page_buffer_size
+ *
+ * Purpose:     Set the maximum page buffering size. This has to be a
+ *              multiple of the page allocation size which must be enabled;
+ *              otherwise file create/open will fail.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned min_meta_perc, unsigned min_raw_perc)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "izIuIu", plist_id, buf_size, min_meta_perc, min_raw_perc);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    if(min_meta_perc > 100)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Minimum metadata fractions must be between 0 and 100 inclusive")
+    if(min_raw_perc > 100)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Minimum rawdata fractions must be between 0 and 100 inclusive")
+
+    if(min_meta_perc + min_raw_perc > 100)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Sum of minimum metadata and raw data fractions can't be bigger than 100");
+
+    /* Set size */
+    if(H5P_set(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &buf_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set page buffer size")
+    if(H5P_set(plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &min_meta_perc) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set percentage of min metadata entries")
+    if(H5P_set(plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &min_raw_perc) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set percentage of min rawdata entries")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_page_buffer_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_page_buffer_size
+ *
+ * Purpose:	Retrieves the maximum page buffer size.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned *min_meta_perc, unsigned *min_raw_perc)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "i*z*Iu*Iu", plist_id, buf_size, min_meta_perc, min_raw_perc);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get size */
+
+    if(buf_size)
+        if(H5P_get(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, buf_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get page buffer size")
+    if(min_meta_perc)
+        if(H5P_get(plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, min_meta_perc) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get page buffer minimum metadata percent")
+    if(min_raw_perc)
+        if(H5P_get(plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, min_raw_perc) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get page buffer minimum raw data percent")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_page_buffer_size() */
 

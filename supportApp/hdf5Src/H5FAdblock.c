@@ -304,11 +304,10 @@ H5FA__dblock_protect(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_addr,
 CATCH
 
     /* Clean up on error */
-    if(!ret_value) {
+    if(!ret_value)
         /* Release the data block, if it was protected */
         if(dblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblock->addr, dblock, H5AC__NO_FLAGS_SET) < 0)
             H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect fixed array data block, address = %llu", (unsigned long long)dblock->addr)
-    } /* end if */
 
 END_FUNC(PKG)   /* end H5FA__dblock_protect() */
 

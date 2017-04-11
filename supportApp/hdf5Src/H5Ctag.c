@@ -221,7 +221,7 @@ H5C__tag_entry(H5C_t *cache, H5C_cache_entry_t *entry, hid_t dxpl_id)
         /* Perform some sanity checks to ensure that a correct tag is being applied */
         if(H5C_verify_tag(entry->type->id, tag) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "tag verification failed")
-    } /* end if */
+    } /* end else */
 #endif
 
     /* Search the list of tagged object addresses in the cache */
@@ -465,11 +465,12 @@ H5C__evict_tagged_entries_cb(H5C_cache_entry_t *entry, void *_ctx)
             entry and we'll loop back around again (as evicting other
             entries will hopefully unpin this entry) */
         ctx->pinned_entries_need_evicted = TRUE;
-    else
+    else if(!entry->prefetched_dirty) {
         /* Evict the Entry */
-        if(H5C__flush_single_entry(ctx->f, ctx->dxpl_id, entry, H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
+        if(H5C__flush_single_entry(ctx->f, ctx->dxpl_id, entry, H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, H5_ITER_ERROR, "Entry eviction failed.")
-    ctx->evicted_entries_last_pass = TRUE;
+        ctx->evicted_entries_last_pass = TRUE;
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -490,7 +491,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag)
+H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag, hbool_t match_global)
 {
     H5C_t *cache;                   /* Pointer to cache structure */
     H5C_tag_iter_evict_ctx_t ctx;   /* Context for iterator callback */
@@ -512,15 +513,15 @@ H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag)
 
     /* Start evicting entries */
     do {
-	/* Reset pinned/evicted tracking flags */
-	ctx.pinned_entries_need_evicted = FALSE;
-	ctx.evicted_entries_last_pass = FALSE;
+        /* Reset pinned/evicted tracking flags */
+        ctx.pinned_entries_need_evicted = FALSE;
+        ctx.evicted_entries_last_pass = FALSE;
 
-	/* Iterate through entries in the cache */
-        if(H5C__iter_tagged_entries(cache, tag, TRUE, H5C__evict_tagged_entries_cb, &ctx) < 0)
+        /* Iterate through entries in the cache */
+        if(H5C__iter_tagged_entries(cache, tag, match_global, H5C__evict_tagged_entries_cb, &ctx) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed")
 
-    /* Keep doing this until we have stopped evicted entries */
+        /* Keep doing this until we have stopped evicted entries */
     } while(TRUE == ctx.evicted_entries_last_pass);
 
     /* Fail if we have finished evicting entries and pinned entries still need evicted */
@@ -646,20 +647,13 @@ H5C_verify_tag(int id, haddr_t tag)
         } /* end else */
     
         /* Free Space Manager */
-        if((id == H5AC_FSPACE_HDR_ID) || (id == H5AC_FSPACE_SINFO_ID)) {
-            if(tag != H5AC__FREESPACE_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "freespace entry not tagged with H5AC__FREESPACE_TAG")
-        } /* end if */
-        else {
-            if(tag == H5AC__FREESPACE_TAG)
+        if(tag == H5AC__FREESPACE_TAG && ((id != H5AC_FSPACE_HDR_ID) && (id != H5AC_FSPACE_SINFO_ID)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__FREESPACE_TAG applied to non-freespace entry")
-        } /* end else */
     
         /* SOHM */
-        if((id == H5AC_SOHM_TABLE_ID) || (id == H5AC_SOHM_LIST_ID)) { 
+        if((id == H5AC_SOHM_TABLE_ID) || (id == H5AC_SOHM_LIST_ID))
             if(tag != H5AC__SOHM_TAG)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "sohm entry not tagged with H5AC__SOHM_TAG")
-        } /* end if */
     
         /* Global Heap */
         if(id == H5AC_GHEAP_ID) {
@@ -844,4 +838,35 @@ H5C_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_expunge_tag_type_metadata() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_get_tag()
+ *
+ * Purpose:     Get the tag for a metadata cache entry.
+ *
+ * Return:      SUCCEED (can't fail)
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5C_get_tag(const void *thing, haddr_t *tag /*OUT*/)
+{
+    const H5C_cache_entry_t *entry = (const H5C_cache_entry_t *)thing;  /* Pointer to cache entry */
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    HDassert(entry);
+    HDassert(entry->tag_info);
+    HDassert(tag);
+
+    /* Return the tag */
+    *tag = entry->tag_info->tag;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5C_get_tag() */
 

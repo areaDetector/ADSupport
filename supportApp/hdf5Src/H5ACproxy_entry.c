@@ -58,8 +58,7 @@
 /********************/
 
 /* Metadata cache (H5AC) callbacks */
-static herr_t H5AC__proxy_entry_image_len(const void *thing, size_t *image_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5AC__proxy_entry_image_len(const void *thing, size_t *image_len);
 static herr_t H5AC__proxy_entry_serialize(const H5F_t *f, void *image_ptr,
     size_t len, void *thing);
 static herr_t H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *thing);
@@ -75,7 +74,8 @@ const H5AC_class_t H5AC_PROXY_ENTRY[1] = {{
     "Proxy entry",           		/* Metadata client name (for debugging) */
     H5FD_MEM_SUPER,                     /* File space memory type for client */
     0,					/* Client class behavior flags */
-    NULL,    				/* 'get_load_size' callback */
+    NULL,    				/* 'get_initial_load_size' callback */
+    NULL,    				/* 'get_final_load_size' callback */
     NULL,				/* 'verify_chksum' callback */
     NULL,    				/* 'deserialize' callback */
     H5AC__proxy_entry_image_len,	/* 'image_len' callback */
@@ -83,7 +83,6 @@ const H5AC_class_t H5AC_PROXY_ENTRY[1] = {{
     H5AC__proxy_entry_serialize,	/* 'serialize' callback */
     H5AC__proxy_entry_notify,		/* 'notify' callback */
     H5AC__proxy_entry_free_icr,        	/* 'free_icr' callback */
-    NULL,                              	/* 'clear' callback */
     NULL,                              	/* 'fsf_size' callback */
 }};
 
@@ -313,6 +312,10 @@ H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f, hid_t dxpl_id,
         if(H5AC_mark_entry_clean(pentry) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark proxy entry clean")
 
+        /* Proxies start out serialized (insertions are automatically marked unserialized) */
+        if(H5AC_mark_entry_serialized(pentry) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "can't mark proxy entry clean")
+
         /* If there are currently parents, iterate over the list of parents, creating flush dependency on them */
         if(pentry->parents)
             if(H5SL_iterate(pentry->parents, H5AC__proxy_entry_add_child_cb, pentry) < 0)
@@ -439,6 +442,7 @@ H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry)
     HDassert(NULL == pentry->parents);
     HDassert(0 == pentry->nchildren);
     HDassert(0 == pentry->ndirty_children);
+    HDassert(0 == pentry->nunser_children);
 
     /* Free the proxy entry object */
     pentry = H5FL_FREE(H5AC_proxy_entry_t, pentry);
@@ -461,8 +465,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__proxy_entry_image_len(const void H5_ATTR_UNUSED *thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5AC__proxy_entry_image_len(const void H5_ATTR_UNUSED *thing, size_t *image_len)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -551,6 +554,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
         case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
             /* Sanity checks */
             HDassert(0 == pentry->ndirty_children);
+            HDassert(0 == pentry->nunser_children);
 
             /* No action */
             break;
@@ -590,6 +594,29 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
             if(0 == pentry->ndirty_children)
                 if(H5AC_mark_entry_clean(pentry) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark proxy entry clean")
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
+            /* Increment # of unserialized children */
+            pentry->nunser_children++;
+
+            /* Check for first unserialized child */
+            if(1 == pentry->nunser_children)
+                if(H5AC_mark_entry_unserialized(pentry) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTUNSERIALIZE, FAIL, "can't mark proxy entry unserialized")
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+            /* Sanity check */
+            HDassert(pentry->nunser_children > 0);
+
+            /* Decrement # of unserialized children */
+            pentry->nunser_children--;
+
+            /* Check for last unserialized child */
+            if(0 == pentry->nunser_children)
+                if(H5AC_mark_entry_serialized(pentry) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "can't mark proxy entry serialized")
             break;
 
         default:
@@ -633,166 +660,4 @@ H5AC__proxy_entry_free_icr(void *_thing)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC__proxy_entry_free_icr() */
-
-#ifdef OLD_CODE
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC_virt_entry_dirty_parent
- *
- * Purpose:     Indicate that a virtual entry's parent became dirty
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              July 23, 2016
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC_virt_entry_dirty_parent(H5AC_virt_entry_t *ventry)
-{
-    herr_t ret_value = SUCCEED;         	/* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(ventry);
-    HDassert(ventry->track_parents);
-    HDassert(ventry->nparents > 0);
-
-    /* If this is the first dirty parent or child, mark the virtual entry dirty */
-    if(ventry->in_cache && 0 == ventry->ndirty_parents && 0 == ventry->ndirty_children)
-        if(H5AC_mark_entry_dirty(ventry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTDIRTY, FAIL, "can't mark virtual entry dirty")
-    
-    /* Increment the number of dirty parents */
-    ventry->ndirty_parents++;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_virt_entry_dirty_parent() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC_virt_entry_clean_parent
- *
- * Purpose:     Indicate that a virtual entry's parent became clean
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              July 23, 2016
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC_virt_entry_clean_parent(H5AC_virt_entry_t *ventry)
-{
-    herr_t ret_value = SUCCEED;         	/* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(ventry);
-    HDassert(ventry->track_parents);
-//    HDassert(ventry->nparents > 0);
-    HDassert(ventry->ndirty_parents > 0);
-
-    /* Decrement the number of dirty parents */
-    ventry->ndirty_parents--;
-
-    /* If this is the last dirty parent or child, mark the virtual entry clean */
-    if(ventry->in_cache && 0 == ventry->ndirty_parents && 0 == ventry->ndirty_children)
-        if(H5AC_mark_entry_clean(ventry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark virtual entry clean")
-    
-    /* Destroy the skip list, if no more parents */
-    if(0 == ventry->nparents && 0 == ventry->ndirty_parents) {
-//        /* Sanity check */
-//        HDassert(0 == ventry->ndirty_parents);
-
-        if(H5SL_close(ventry->parents) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CLOSEERROR, FAIL, "can't close parent list")
-        ventry->parents = NULL;
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_virt_entry_clean_parent() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC_virt_entry_dirty_child
- *
- * Purpose:     Indicate that a virtual entry's child became dirty
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              July 24, 2016
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC_virt_entry_dirty_child(H5AC_virt_entry_t *ventry)
-{
-    herr_t ret_value = SUCCEED;         	/* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(ventry);
-    HDassert(ventry->nchildren > 0);
-
-    /* If this is the first dirty parent or child, mark the virtual entry dirty */
-    if(ventry->in_cache && 0 == ventry->ndirty_parents && 0 == ventry->ndirty_children)
-        if(H5AC_mark_entry_dirty(ventry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTDIRTY, FAIL, "can't mark virtual entry dirty")
-    
-    /* Increment the number of dirty children */
-    ventry->ndirty_children++;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_virt_entry_dirty_child() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC_virt_entry_clean_child
- *
- * Purpose:     Indicate that a virtual entry's child became clean
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              July 24, 2016
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC_virt_entry_clean_child(H5AC_virt_entry_t *ventry)
-{
-    herr_t ret_value = SUCCEED;         	/* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(ventry);
-    HDassert(ventry->nchildren > 0);
-    HDassert(ventry->ndirty_children > 0);
-
-    /* Decrement the number of dirty children */
-    ventry->ndirty_children--;
-
-    /* If this is the last dirty parent or child, mark the virtual entry clean */
-    if(ventry->in_cache && 0 == ventry->ndirty_parents && 0 == ventry->ndirty_children)
-        if(H5AC_mark_entry_clean(ventry) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark virtual entry clean")
-    
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_virt_entry_clean_child() */
-
-#endif /* OLD_CODE */
-
 

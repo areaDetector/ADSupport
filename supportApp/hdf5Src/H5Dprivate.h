@@ -150,7 +150,6 @@ typedef struct H5D_copy_file_ud_t {
     H5O_copy_file_ud_common_t common;   /* Shared information (must be first) */
     struct H5S_extent_t *src_space_extent;     /* Copy of dataspace extent for dataset */
     H5T_t *src_dtype;                   /* Copy of datatype for dataset */
-    H5O_layout_t *src_layout;           /* Copy of layout for dataset */
 } H5D_copy_file_ud_t;
 
 /* Structure for dataset append flush property (H5Pset_append_flush) */

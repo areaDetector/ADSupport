@@ -8,7 +8,7 @@
 /* #undef CXX_HAVE_OFFSETOF */
 
 /* Define if this is a debug build. */
-/* #undef DEBUG_BUILD */
+#define DEBUG_BUILD 1
 
 /* Define the default plugins path to compile */
 #define DEFAULT_PLUGINDIR "/usr/local/hdf5/lib/plugin"
@@ -119,7 +119,7 @@
 #define HAVE_FILTER_DEFLATE 1
 
 /* Define if support for szip filter is enabled */
-/* #undef HAVE_FILTER_SZIP */
+#define HAVE_FILTER_SZIP 1
 
 /* Determine if __float128 is available */
 #define HAVE_FLOAT128 1
@@ -189,10 +189,10 @@
 /* #undef HAVE_LIBMPE */
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
-/* #undef HAVE_LIBPTHREAD */
+#define HAVE_LIBPTHREAD 1
 
 /* Define to 1 if you have the `sz' library (-lsz). */
-/* #undef HAVE_LIBSZ */
+#define HAVE_LIBSZ 1
 
 /* Define to 1 if you have the `ws2_32' library (-lws2_32). */
 /* #undef HAVE_LIBWS2_32 */
@@ -200,8 +200,20 @@
 /* Define to 1 if you have the `z' library (-lz). */
 #define HAVE_LIBZ 1
 
+/* Define to 1 if you have the `llround' function. */
+#define HAVE_LLROUND 1
+
+/* Define to 1 if you have the `llroundf' function. */
+#define HAVE_LLROUNDF 1
+
 /* Define to 1 if you have the `longjmp' function. */
 #define HAVE_LONGJMP 1
+
+/* Define to 1 if you have the `lround' function. */
+#define HAVE_LROUND 1
+
+/* Define to 1 if you have the `lroundf' function. */
+#define HAVE_LROUNDF 1
 
 /* Define to 1 if you have the `lstat' function. */
 #define HAVE_LSTAT 1
@@ -228,7 +240,7 @@
 /* #undef HAVE_PARALLEL */
 
 /* Define to 1 if you have the <pthread.h> header file. */
-/* #undef HAVE_PTHREAD_H */
+#define HAVE_PTHREAD_H 1
 
 /* Define to 1 if you have the <quadmath.h> header file. */
 #define HAVE_QUADMATH_H 1
@@ -238,6 +250,12 @@
 
 /* Define to 1 if you have the `rand_r' function. */
 #define HAVE_RAND_R 1
+
+/* Define to 1 if you have the `round' function. */
+#define HAVE_ROUND 1
+
+/* Define to 1 if you have the `roundf' function. */
+#define HAVE_ROUNDF 1
 
 /* Define to 1 if you have the `setjmp' function. */
 #define HAVE_SETJMP 1
@@ -290,6 +308,12 @@
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
 
+/* Define to 1 if you have the `strtoll' function. */
+#define HAVE_STRTOLL 1
+
+/* Define to 1 if you have the `strtoull' function. */
+#define HAVE_STRTOULL 1
+
 /* Define if struct text_info is defined */
 /* #undef HAVE_STRUCT_TEXT_INFO */
 
@@ -327,10 +351,10 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <szlib.h> header file. */
-/* #undef HAVE_SZLIB_H */
+#define HAVE_SZLIB_H 1
 
 /* Define if we have thread safe support */
-/* #undef HAVE_THREADSAFE */
+#define HAVE_THREADSAFE 1
 
 /* Define if timezone is a global variable */
 #define HAVE_TIMEZONE 1
@@ -381,7 +405,7 @@
 #define HAVE___INLINE__ 1
 
 /* Define if the high-level library headers should be included in hdf5.h */
-#define INCLUDE_HL 1
+/* #undef INCLUDE_HL */
 
 /* Define if your system can convert long double to (unsigned) long long
    values correctly. */
@@ -403,7 +427,7 @@
 #define LT_OBJDIR ".libs/"
 
 /* Define to enable internal memory allocation sanity checking. */
-/* #undef MEMORY_ALLOC_SANITY_CHECK */
+#define MEMORY_ALLOC_SANITY_CHECK 1
 
 /* Define if the metadata trace file code is to be compiled in */
 /* #undef METADATA_TRACE_FILE */
@@ -424,7 +448,7 @@
 #define PACKAGE_NAME "HDF5"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "HDF5 1.10.0-patch1"
+#define PACKAGE_STRING "HDF5 1.10.1-pre1"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "hdf5"
@@ -433,7 +457,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.10.0-patch1"
+#define PACKAGE_VERSION "1.10.1-pre1"
 
 /* Determine the maximum decimal precision in C */
 #define PAC_C_MAX_REAL_PRECISION 33
@@ -571,11 +595,11 @@
 #define STDC_HEADERS 1
 
 /* Define if strict file format checks are enabled */
-/* #undef STRICT_FORMAT_CHECKS */
+#define STRICT_FORMAT_CHECKS 1
 
 /* Define if your system supports pthread_attr_setscope(&attribute,
    PTHREAD_SCOPE_SYSTEM) call. */
-/* #undef SYSTEM_SCOPE_THREADS */
+#define SYSTEM_SCOPE_THREADS 1
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #define TIME_WITH_SYS_TIME 1
@@ -592,7 +616,7 @@
 /* #undef USING_MEMCHECKER */
 
 /* Version number of package */
-#define VERSION "1.10.0-patch1"
+#define VERSION "1.10.1-pre1"
 
 /* Data accuracy is prefered to speed during data conversions */
 #define WANT_DATA_ACCURACY 1

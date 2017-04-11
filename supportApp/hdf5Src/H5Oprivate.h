@@ -69,6 +69,7 @@ typedef struct H5O_t H5O_t;
 #define H5O_FIRST	(-2)		/* Operate on first message of type  */
 
 /* Flags needed when encoding messages */
+#define H5O_MSG_NO_FLAGS_SET	0x00u
 #define H5O_MSG_FLAG_CONSTANT	0x01u
 #define H5O_MSG_FLAG_SHARED	0x02u
 #define H5O_MSG_FLAG_DONTSHARE	0x04u
@@ -99,7 +100,7 @@ typedef struct H5O_t H5O_t;
 #define H5O_BOGUS_MSG_FLAGS_NAME        "bogus msg flags"       /* Flags for 'bogus' message */
 #define H5O_BOGUS_MSG_FLAGS_SIZE        sizeof(uint8_t)
 
-/* bogus ID can be either (a) H5O_BOGUS_VALID_ID 0x0009 or (b) H5O_BOGUS_INVALID_ID 0x0019 */
+/* bogus ID can be either (a) H5O_BOGUS_VALID_ID or (b) H5O_BOGUS_INVALID_ID */
 #define H5O_BOGUS_MSG_ID_NAME        "bogus msg id" 		/* ID for 'bogus' message */
 #define H5O_BOGUS_MSG_ID_SIZE        sizeof(unsigned)
 
@@ -203,10 +204,19 @@ typedef struct H5O_copy_t {
 #define H5O_DRVINFO_ID  0x0014          /* Driver info message.  */
 #define H5O_AINFO_ID    0x0015          /* Attribute info message.  */
 #define H5O_REFCOUNT_ID 0x0016          /* Reference count message.  */
-#define H5O_FSINFO_ID   0x0017          /* Free-space manager info message.  */
-#define H5O_UNKNOWN_ID  0x0018          /* Placeholder message ID for unknown message.  */
+#define H5O_FSINFO_ID   0x0017          /* File space info message.  */
+#define H5O_MDCI_MSG_ID 0x0018		/* Metadata Cache Image Message */
+#define H5O_UNKNOWN_ID  0x0019          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
-#define H5O_BOGUS_INVALID_ID	0x0019  /* "Bogus invalid" Message.  */
+/* 
+ * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
+ *      in H5O.c when creating a new message type.  Also bump the value of
+ *      H5O_BOGUS_INVALID_ID, below, to be one greater than the value of
+ *      H5O_UNKNOWN_ID.
+ *
+ * (this should never exist in a file)
+ */
+#define H5O_BOGUS_INVALID_ID	0x001A  /* "Bogus invalid" Message.  */
 
 /* Shared object message types.
  * Shared objects can be committed, in which case the shared message contains
@@ -349,7 +359,7 @@ typedef struct H5O_link_t {
 typedef struct H5O_efl_entry_t {
     size_t	name_offset;		/*offset of name within heap	     */
     char	*name;			/*malloc'd name			     */
-    off_t	offset;			/*offset of data within file	     */
+    HDoff_t	offset;			/*offset of data within file	     */
     hsize_t	size;			/*size allocated within file	     */
 } H5O_efl_entry_t;
 
@@ -775,16 +785,33 @@ typedef uint32_t H5O_refcount_t;        /* Contains # of links to object, if >1 
 typedef unsigned H5O_unknown_t;         /* Original message type ID */
 
 /*
- * Free space manager info Message.
+ * File space info Message.
  * Contains file space management info and
  * addresses of free space managers for file memory
  * (Data structure in memory)
  */
 typedef struct H5O_fsinfo_t {
-    H5F_file_space_type_t strategy;	/* File space strategy */
-    hsize_t		  threshold;	/* Free space section threshold */
-    haddr_t     	  fs_addr[H5FD_MEM_NTYPES-1]; /* Addresses of free space managers */
+    H5F_fspace_strategy_t   strategy;       /* File space strategy */
+    hbool_t persist;                        /* Persisting free-space or not */
+    hsize_t threshold;                      /* Free-space section threshold */
+    hsize_t page_size;                      /* For paged aggregation: file space page size */
+    size_t pgend_meta_thres;                /* For paged aggregation: page end metadata threshold */
+    haddr_t eoa_pre_fsm_fsalloc;            /* For paged aggregation: the eoa before free-space headers & sinfo */
+    haddr_t fs_addr[H5F_MEM_PAGE_NTYPES - 1];   /* 13 addresses of free-space managers */
+                                                /* For non-paged aggregation: only 6 addresses are used */
+    hbool_t mapped;                             /* Not stored */
+                                                /* Indicate the message is mapped from version 0 to version 1 */
 } H5O_fsinfo_t;
+
+/*
+ * Metadata Cache Image Message.
+ * Contains base address and length of the metadata cache image.
+ * (Data structure in memory)
+ */
+typedef struct H5O_mdci_t {
+    haddr_t	addr;			/* address of MDC image block */
+    hsize_t	size;			/* size of MDC image block    */
+} H5O_mdci_t;
 
 /* Typedef for "application" iteration operations */
 typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,
@@ -827,7 +854,7 @@ H5_DLL herr_t H5O_init(void);
 H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
     size_t initial_rc, hid_t ocpl_id, H5O_loc_t *loc/*out*/);
 H5_DLL herr_t H5O_open(H5O_loc_t *loc);
-H5_DLL herr_t H5O_close(H5O_loc_t *loc);
+H5_DLL herr_t H5O_close(H5O_loc_t *loc, hbool_t *file_closed/*out*/);
 H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id);
 H5_DLL H5O_t *H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id,
     unsigned prot_flags, hbool_t pin_all_chunks);
@@ -900,6 +927,7 @@ H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned type_id, const unsigned char *buf);
 H5_DLL herr_t H5O_msg_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned type_id, void *mesg);
+H5_DLL herr_t H5O_msg_get_flags(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id, uint8_t *flags);
 
 /* Object metadata flush/refresh routines */
 H5_DLL herr_t H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id, hid_t dxpl_id);

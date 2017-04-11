@@ -39,6 +39,7 @@
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5PBprivate.h"	/* Page Buffer				*/
 
 
 /****************/
@@ -96,15 +97,11 @@ herr_t
 H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     hid_t dxpl_id, void *buf/*out*/)
 {
-    H5F_io_info_t fio_info;             /* I/O info for operation */
+    H5F_io_info2_t fio_info;            /* I/O info for operation */
     H5FD_mem_t  map_type;               /* Mapped memory type */
-    hid_t       my_dxpl_id = dxpl_id;   /* transfer property to use for I/O */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-#ifdef QAK
-HDfprintf(stderr, "%s: read from addr = %a, size = %Zu\n", FUNC, addr, size);
-#endif /* QAK */
 
     HDassert(f);
     HDassert(f->shared);
@@ -118,20 +115,24 @@ HDfprintf(stderr, "%s: read from addr = %a, size = %Zu\n", FUNC, addr, size);
     /* Treat global heap as raw data */
     map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
 
-#ifdef H5_DEBUG_BUILD
-    /* GHEAP type is treated as RAW, so update the dxpl type property too */
-    if(H5FD_MEM_GHEAP == type)
-        my_dxpl_id = H5AC_rawdata_dxpl_id;
-#endif /* H5_DEBUG_BUILD */
-
-    /* Set up I/O info for operation */
+    /* Set up the I/O info object */
     fio_info.f = f;
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(my_dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    if(H5FD_MEM_DRAW == type) {
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end if */
+    else {
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end else */
 
-    /* Pass through metadata accumulator layer */
-    if(H5F__accum_read(&fio_info, map_type, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read through metadata accumulator failed")
+    /* Pass through page buffer layer */
+    if(H5PB_read(&fio_info, map_type, addr, size, buf) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read through page buffer failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -157,15 +158,11 @@ herr_t
 H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     hid_t dxpl_id, const void *buf)
 {
-    H5F_io_info_t fio_info;             /* I/O info for operation */
+    H5F_io_info2_t fio_info;            /* I/O info for operation */
     H5FD_mem_t  map_type;               /* Mapped memory type */
-    hid_t       my_dxpl_id = dxpl_id;   /* transfer property to use for I/O */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-#ifdef QAK
-HDfprintf(stderr, "%s: write to addr = %a, size = %Zu\n", FUNC, addr, size);
-#endif /* QAK */
 
     HDassert(f);
     HDassert(f->shared);
@@ -180,20 +177,24 @@ HDfprintf(stderr, "%s: write to addr = %a, size = %Zu\n", FUNC, addr, size);
     /* Treat global heap as raw data */
     map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
 
-#ifdef H5_DEBUG_BUILD
-    /* GHEAP type is treated as RAW, so update the dxpl type property too */
-    if(H5FD_MEM_GHEAP == type)
-        my_dxpl_id = H5AC_rawdata_dxpl_id;
-#endif /* H5_DEBUG_BUILD */
-
-    /* Set up I/O info for operation */
+    /* Set up the I/O info object */
     fio_info.f = f;
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(my_dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    if(H5FD_MEM_DRAW == type) {
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end if */
+    else {
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end else */
 
-    /* Pass through metadata accumulator layer */
-    if(H5F__accum_write(&fio_info, map_type, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write through metadata accumulator failed")
+    /* Pass through page buffer layer */
+    if(H5PB_write(&fio_info, map_type, addr, size, buf) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write through page buffer failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -216,7 +217,7 @@ done:
 herr_t
 H5F_flush_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
 {
-    H5F_io_info_t fio_info;             /* I/O info for operation */
+    H5F_io_info2_t fio_info;             /* I/O info for operation */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -227,10 +228,10 @@ H5F_flush_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
 
     /* Set up I/O info for operation */
     fio_info.f = f;
-
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+    if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-    
+    if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Flush and reset the accumulator */
     if(H5F__accum_reset(&fio_info, TRUE) < 0)
@@ -264,19 +265,9 @@ H5F_evict_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-//    /* Unpin the superblock, as this will be marked for eviction and it can't 
-//        be pinned. */
-//    if(H5AC_unpin_entry(f->shared->sblock) < 0)
-//        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
-//    f->shared->sblock = NULL;
-
     /* Evict the object's metadata */
-    if(H5AC_evict_tagged_metadata(f, tag, dxpl_id) < 0)
+    if(H5AC_evict_tagged_metadata(f, tag, TRUE, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "unable to evict tagged metadata")
-
-//    /* Re-read the superblock. */
-//    if(H5F__super_read(f, dxpl_id, FALSE) < 0)
-//	HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "unable to read superblock")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -298,8 +289,6 @@ done:
 herr_t
 H5F__evict_cache_entries(H5F_t *f, hid_t dxpl_id)
 {
-    unsigned status = 0;
-    int32_t    cur_num_entries;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -310,6 +299,11 @@ H5F__evict_cache_entries(H5F_t *f, hid_t dxpl_id)
     /* Evict all except pinned entries in the cache */
     if(H5AC_evict(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "unable to evict all except pinned entries")
+
+#ifndef NDEBUG
+{
+    unsigned status = 0;
+    uint32_t cur_num_entries;
 
     /* Retrieve status of the superblock */
     if(H5AC_get_entry_status(f, (haddr_t)0, &status) < 0)
@@ -323,9 +317,11 @@ H5F__evict_cache_entries(H5F_t *f, hid_t dxpl_id)
     if(H5AC_get_cache_size(f->shared->cache, NULL, NULL, NULL, &cur_num_entries) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_size() failed.")
 
-    /* Should be the only one left in the cache */
+    /* Should be the only one left in the cache (the superblock) */
     if(cur_num_entries != 1)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "number of cache entries is not correct")
+}
+#endif /* NDEBUG */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -342,7 +338,8 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; Sept 2013
+ * Programmer:	Vailin Choi
+ *		Sept 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -372,70 +369,4 @@ H5F_get_checksums(const uint8_t *buf, size_t buf_size, uint32_t *s_chksum/*out*/
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5F_get_chksums() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_read_check_meatadata
- *
- * Purpose:   	Attempts to read and validate a piece of meatadata that has
- *		checksum as follows:
- * 		  a) read the piece of metadata
- * 		  b) calculate checksum for the buffer of metadata
- * 		  c) decode the checksum stored in the buffer of metadata
- *		  d) compare the computed checksum with its stored checksum
- *
- *	       	The library will perform (a) to (d) above for "f->read_attempts"
- *		times or until the checksum comparison in (d) passes.
- *		This routine also records the # of retries via 
- *		H5F_track_metadata_read_retries()
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi; Sept 2013
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_read_check_metadata(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
-    unsigned actype, haddr_t addr, size_t read_size, size_t chk_size,
-    uint8_t *buf/*out*/)
-{
-    unsigned tries, max_tries;	/* The # of read attempts */
-    unsigned retries;		/* The # of retries */
-    uint32_t stored_chksum;  	/* Stored metadata checksum value */
-    uint32_t computed_chksum; 	/* Computed metadata checksum value */
-    herr_t ret_value = SUCCEED;	/* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Get the # of read attempts */
-    max_tries = tries = H5F_GET_READ_ATTEMPTS(f);
-
-    do {
-        /* Read header from disk */
-        if(H5F_block_read(f, type, addr, read_size, dxpl_id, buf) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read metadata")
-
-        /* Get stored and computed checksums */
-        H5F_get_checksums(buf, chk_size, &stored_chksum, &computed_chksum);
-
-        /* Verify checksum */
-        if(stored_chksum == computed_chksum)
-            break;
-    } while(--tries);
-
-    /* Check for too many tries */
-    if(tries == 0)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "incorrect metadatda checksum after all read attempts (%u) for %lu bytes:c_chksum=%u, s_chkum=%u", 
-	    max_tries, chk_size, computed_chksum, stored_chksum)
-
-    /* Calculate and track the # of retries */
-    retries = max_tries - tries;
-    if(retries)         /* Does not track 0 retry */
-        if(H5F_track_metadata_read_retries(f, actype, retries) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "cannot track read tries = %u ", retries)
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5F_read_check_metadata */
 

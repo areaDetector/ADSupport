@@ -351,6 +351,12 @@ H5FL_EXTERN(H5AC_aux_t);
  *		this verification.  The field is set to NULL when the 
  *		callback is not needed.
  *
+ * The following field supports the metadata cache image feature.
+ *
+ * p0_image_len: unsiged integer containing the length of the metadata cache
+ *		image constructed by MPI process 0.  This field should be 0
+ *		if the value is unknown, or if cache image is not enabled.
+ *
  ****************************************************************************/
 
 #ifdef H5_HAVE_PARALLEL
@@ -398,8 +404,11 @@ typedef struct H5AC_aux_t
 
     void	(* write_done)(void);
 
-    void	(* sync_point_done)(int num_writes, 
+    void	(* sync_point_done)(unsigned num_writes, 
                                     haddr_t * written_entries_tbl);
+
+    unsigned    p0_image_len;
+
 } H5AC_aux_t; /* struct H5AC_aux_t */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -421,7 +430,7 @@ H5_DLL herr_t H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr,
 H5_DLL herr_t H5AC__flush_entries(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC__run_sync_point(H5F_t *f, hid_t dxpl_id, int sync_point_op);
 H5_DLL herr_t H5AC__set_sync_point_done_callback(H5C_t *cache_ptr,
-    void (*sync_point_done)(int num_writes, haddr_t *written_entries_tbl));
+    void (*sync_point_done)(unsigned num_writes, haddr_t *written_entries_tbl));
 H5_DLL herr_t H5AC__set_write_done_callback(H5C_t * cache_ptr,
     void (* write_done)(void));
 #endif /* H5_HAVE_PARALLEL */
@@ -451,6 +460,10 @@ H5_DLL herr_t H5AC__write_mark_dirty_entry_log_msg(const H5AC_t *cache,
                                                    const H5AC_info_t *entry,
                                                    herr_t fxn_ret_value);
 H5_DLL herr_t H5AC__write_mark_clean_entry_log_msg(const H5AC_t *cache,
+    const H5AC_info_t *entry, herr_t fxn_ret_value);
+H5_DLL herr_t H5AC__write_mark_unserialized_entry_log_msg(const H5AC_t *cache,
+        const H5AC_info_t *entry, herr_t fxn_ret_value);
+H5_DLL herr_t H5AC__write_mark_serialized_entry_log_msg(const H5AC_t *cache,
     const H5AC_info_t *entry, herr_t fxn_ret_value);
 H5_DLL herr_t H5AC__write_move_entry_log_msg(const H5AC_t *cache,
                                              haddr_t old_addr,

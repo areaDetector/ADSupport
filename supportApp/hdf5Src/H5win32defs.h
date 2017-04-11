@@ -23,6 +23,11 @@
  *
  */
 
+/*
+ * _MSC_VER = 1900 VS2015
+ * _MSC_VER = 1800 VS2013
+ * _MSC_VER = 1700 VS2012
+ */
 #ifdef H5_HAVE_WIN32_API
 
 typedef struct _stati64     h5_stat_t;
@@ -42,6 +47,7 @@ typedef __int64             h5_stat_size_t;
 #define HDlseek(F,O,W)      _lseeki64(F,O,W)
 #define HDlstat(S,B)        _lstati64(S,B)
 #define HDmkdir(S,M)        _mkdir(S)
+#define HDnanosleep(N, O)   Wnanosleep(N, O)
 #define HDoff_t             __int64
 /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
  * transformations when performing I/O.
@@ -51,16 +57,24 @@ typedef __int64             h5_stat_size_t;
 #define HDrmdir(S)          _rmdir(S)
 #define HDsetvbuf(F,S,M,Z)  setvbuf(F,S,M,(Z>1?Z:2))
 #define HDsleep(S)          Sleep(S*1000)
-#define HDnanosleep(N, O)   Sleep((int)(1000. * ((N)->tv_sec + (N)->tv_nsec/1.e9)))
 #define HDstat(S,B)         _stati64(S,B)
 #define HDstrcasecmp(A,B)   _stricmp(A,B)
-#define HDstrtoull(S,R,N)   _strtoui64(S,R,N)
 #define HDstrdup(S)         _strdup(S)
 #define HDtzset()           _tzset()
 #define HDunlink(S)         _unlink(S)
 #define HDwrite(F,M,Z)      _write(F,M,Z)
 
 #ifdef H5_HAVE_VISUAL_STUDIO
+
+#if (_MSC_VER < 1800)
+  #ifndef H5_HAVE_STRTOLL
+    #define HDstrtoll(S,R,N)    _strtoi64(S,R,N)
+  #endif /* H5_HAVE_STRTOLL */
+  #ifndef H5_HAVE_STRTOULL
+    #define HDstrtoull(S,R,N)   _strtoui64(S,R,N)
+  #endif /* H5_HAVE_STRTOULL */
+#endif /* MSC_VER < 1800 */
+
 /*
  * The (void*) cast just avoids a compiler warning in H5_HAVE_VISUAL_STUDIO
  */
@@ -70,6 +84,25 @@ struct timezone {
     int tz_minuteswest;
     int tz_dsttime;
 };
+
+/* time.h before VS2015 does not include timespec */
+#if (_MSC_VER < 1900)
+struct timespec
+{
+    time_t tv_sec;  /* Seconds - >= 0 */
+    long   tv_nsec; /* Nanoseconds - [0, 999999999] */
+};
+#endif /* MSC_VER < 1900 */
+
+/* The round functions do not exist in VS2012 and earlier */
+#if (_MSC_VER <= 1700)
+#define HDllround(V)        Wllround(V)
+#define HDllroundf(V)       Wllroundf(V)
+#define HDlround(V)         Wlround(V)
+#define HDlroundf(V)        Wlroundf(V)
+#define HDround(V)          Wround(V)
+#define HDroundf(V)         Wroundf(V)
+#endif /* MSC_VER < 1700 */
 
 #endif /* H5_HAVE_VISUAL_STUDIO */
 
@@ -83,6 +116,19 @@ extern "C" {
     H5_DLL char* Wgetlogin(void);
     H5_DLL int c99_snprintf(char* str, size_t size, const char* format, ...);
     H5_DLL int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap);
+    H5_DLL int Wnanosleep(const struct timespec *req, struct timespec *rem);
+
+    /* Round functions only needed for VS2012 and earlier.
+     * They are always built to ensure they don't go stale and
+     * can be deleted (along with their #defines, above) when we
+     * drop VS2012 support.
+     */
+    H5_DLL long long Wllround(double arg);
+    H5_DLL long long Wllroundf(float arg);
+    H5_DLL long Wlround(double arg);
+    H5_DLL long Wlroundf(float arg);
+    H5_DLL double Wround(double arg);
+    H5_DLL float Wroundf(float arg);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

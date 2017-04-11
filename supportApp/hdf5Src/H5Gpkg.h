@@ -55,7 +55,7 @@
     + 2         /* Number of symbols */                                       \
                                                                               \
     /* Entries */                                                             \
-    + ((2 * H5F_SYM_LEAF_K(f)) * H5G_SIZEOF_ENTRY_FILE(f))                    \
+    + ((2 * H5F_SYM_LEAF_K(f)) * (unsigned)H5G_SIZEOF_ENTRY_FILE(f))                    \
     )
 
 
@@ -311,9 +311,6 @@ typedef struct H5G_copy_file_ud_t {
  * This is the class identifier to give to the B-tree functions.
  */
 H5_DLLVAR H5B_class_t H5B_SNODE[1];
-
-/* The cache subclass */
-H5_DLLVAR const H5AC_class_t H5AC_SNODE[1];
 
 /* The v2 B-tree class for indexing 'name' field on links */
 H5_DLLVAR const H5B2_class_t H5G_BT2_NAME[1];

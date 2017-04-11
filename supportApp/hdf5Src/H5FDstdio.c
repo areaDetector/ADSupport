@@ -24,6 +24,7 @@
  *          and is not intended for production use!
  */
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -123,20 +124,8 @@ typedef struct H5FD_stdio_t {
     #define file_offset_t   __int64
     #define file_ftruncate  _chsize_s   /* Supported in VS 2005 or newer */
     #define file_ftell      _ftelli64
-#else
-    #define file_fseek      fseeko64
-    #define file_offset_t   __int64
-    #define file_ftruncate  _chsize_s   /* Supported in VS 2005 or newer */
-    #define file_ftell      ftello64
 #endif /* H5_HAVE_MINGW */
 #endif /* H5_HAVE_WIN32_API */
-
-#ifdef H5_HAVE_VXWORKS
-  #define file_fseek      fseek
-  #define file_offset_t   off_t
-  #define file_ftruncate  vxWorks_ftruncate
-  #define file_ftell      ftell
-#endif
 
 /* If these functions weren't re-defined for Windows, give them
  * more platform-independent names.
@@ -611,13 +600,6 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
 
     /* Compute the address for the block to allocate */
     addr = file->eoa;
-
-    /* Check if we need to align this block */
-    if(size >= file->pub.threshold) {
-        /* Check for an already aligned block */
-        if((addr % file->pub.alignment) != 0)
-            addr = ((addr / file->pub.alignment) + 1) * file->pub.alignment;
-    } /* end if */
 
     file->eoa = addr + size;
 
@@ -1094,8 +1076,8 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id,
  * Function:    H5FD_stdio_lock
  *
  * Purpose:     Lock a file via flock
- *
  *              NOTE: This function is a no-op if flock() is not present.
+ *
  * Errors:
  *    IO    FCNTL    flock failed.
  *
@@ -1109,21 +1091,27 @@ static herr_t
 H5FD_stdio_lock(H5FD_t *_file, hbool_t rw)
 {
 #ifdef H5_HAVE_FLOCK
-    H5FD_stdio_t  *file = (H5FD_stdio_t*)_file;
-    int lock;                                   	/* The type of lock */
-    static const char *func = "H5FD_stdio_lock";  	/* Function Name for error reporting */
+    H5FD_stdio_t  *file = (H5FD_stdio_t*)_file;     /* VFD file struct                      */
+    int lock_flags;                                 /* file locking flags                   */
+    static const char *func = "H5FD_stdio_lock";  	/* Function Name for error reporting    */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
     assert(file);
 
-    /* Determine the type of lock */
-    lock = rw ? LOCK_EX : LOCK_SH;
+    /* Set exclusive or shared lock based on rw status */
+    lock_flags = rw ? LOCK_EX : LOCK_SH;
 
-    /* Place the lock with non-blocking */
-    if(flock(file->fd, lock | LOCK_NB) < 0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "flock failed", -1)
+    /* Place a non-blocking lock on the file */
+    if(flock(file->fd, lock_flags | LOCK_NB) < 0) {
+        if(ENOSYS == errno)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "file locking disabled on this file system (use HDF5_USE_FILE_LOCKING environment variable to override)", -1)
+        else
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "file lock failed", -1)
+    } /* end if */
+
+    /* Flush the stream */
     if(fflush(file->fp) < 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "fflush failed", -1)
 
@@ -1133,16 +1121,15 @@ H5FD_stdio_lock(H5FD_t *_file, hbool_t rw)
 } /* end H5FD_stdio_lock() */
 
 /*-------------------------------------------------------------------------
- * Function:  H5F_stdio_unlock
+ * Function:    H5F_stdio_unlock
  *
- * Purpose:  Unlock a file via flock
+ * Purpose:     Unlock a file via flock
+ *              NOTE: This function is a no-op if flock() is not present.
  *
- *
- *           NOTE: This function is a no-op if flock() is not present.
  * Errors:
  *    IO    FCNTL    flock failed.
  *
- * Return:  Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Vailin Choi; March 2015
  *
@@ -1152,18 +1139,25 @@ static herr_t
 H5FD_stdio_unlock(H5FD_t *_file)
 {
 #ifdef H5_HAVE_FLOCK
-    H5FD_stdio_t  *file = (H5FD_stdio_t*)_file;
-    static const char *func = "H5FD_stdio_unlock";  	/* Function Name for error reporting */
+    H5FD_stdio_t  *file = (H5FD_stdio_t*)_file;         /* VFD file struct                      */
+    static const char *func = "H5FD_stdio_unlock";  	/* Function Name for error reporting    */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
     assert(file);
 
+    /* Flush the stream */
     if(fflush(file->fp) < 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "fflush failed", -1)
-    if(flock(file->fd, LOCK_UN) < 0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "flock (unlock) failed", -1)
+
+    /* Place a non-blocking lock on the file */
+    if(flock(file->fd, LOCK_UN) < 0) {
+        if(ENOSYS == errno)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "file locking disabled on this file system (use HDF5_USE_FILE_LOCKING environment variable to override)", -1)
+        else
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "file unlock failed", -1)
+    } /* end if */
 
 #endif /* H5_HAVE_FLOCK */
 

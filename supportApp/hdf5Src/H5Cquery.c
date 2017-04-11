@@ -131,7 +131,7 @@ H5C_get_cache_size(H5C_t * cache_ptr,
                    size_t * max_size_ptr,
                    size_t * min_clean_size_ptr,
                    size_t * cur_size_ptr,
-                   int32_t * cur_num_entries_ptr)
+                   uint32_t * cur_num_entries_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
@@ -231,7 +231,8 @@ H5C_get_entry_status(const H5F_t *f,
 		     hbool_t * is_pinned_ptr,
 		     hbool_t * is_corked_ptr,
 		     hbool_t * is_flush_dep_parent_ptr,
-                     hbool_t * is_flush_dep_child_ptr)
+                     hbool_t * is_flush_dep_child_ptr,
+		     hbool_t * image_up_to_date_ptr)
 {
     H5C_t             * cache_ptr;
     H5C_cache_entry_t *	entry_ptr = NULL;
@@ -280,6 +281,8 @@ H5C_get_entry_status(const H5F_t *f,
             *is_flush_dep_parent_ptr = (entry_ptr->flush_dep_nchildren > 0);
         if(is_flush_dep_child_ptr != NULL)
             *is_flush_dep_child_ptr = (entry_ptr->flush_dep_nparents > 0);
+        if(image_up_to_date_ptr != NULL )
+            *image_up_to_date_ptr = entry_ptr->image_up_to_date;
     } /* end else */
 
 done:
@@ -441,7 +444,8 @@ H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring)
 
     /* Locate the entry at the address */
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
-    HDassert(entry_ptr);
+    if(entry_ptr == NULL)
+        HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't find entry in index")
 
     /* Return the ring value */
     *ring = entry_ptr->ring;
@@ -449,4 +453,34 @@ H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_get_entry_ring() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_get_mdc_image_info
+ *
+ * Purpose:	    To retrieve the address and size of the cache image in the file.
+ *              
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  Vailin Choi; March 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_get_mdc_image_info(H5C_t * cache_ptr, haddr_t *image_addr, hsize_t *image_len)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "bad cache_ptr on entry")
+    if(image_addr == NULL || image_len == NULL)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "bad image_addr or image_len on entry")
+
+    *image_addr = cache_ptr->image_addr;
+    *image_len = cache_ptr->image_len;
+    
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_get_mdc_image_info() */
 

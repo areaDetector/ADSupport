@@ -239,7 +239,6 @@ H5FA_open(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata))
 
     /* Local variables */
     H5FA_t *fa = NULL;          /* Pointer to new fixed array wrapper */
-    H5FA_hdr_t *hdr = NULL;     /* The fixed array header information */
 
     /*
      * Check arguments.
@@ -578,18 +577,18 @@ H5FA_close(H5FA_t *fa, hid_t dxpl_id))
             H5FA_hdr_t *hdr;            /* Another pointer to fixed array header */
 
 #ifndef NDEBUG
-    {
-        unsigned hdr_status = 0;         /* Header's status in the metadata cache */
+{
+    unsigned hdr_status = 0;         /* Header's status in the metadata cache */
 
-        /* Check the header's status in the metadata cache */
-        if(H5AC_get_entry_status(fa->f, fa_addr, &hdr_status) < 0)
-            H5E_THROW(H5E_CANTGET, "unable to check metadata cache status for fixed array header")
+    /* Check the header's status in the metadata cache */
+    if(H5AC_get_entry_status(fa->f, fa_addr, &hdr_status) < 0)
+        H5E_THROW(H5E_CANTGET, "unable to check metadata cache status for fixed array header")
 
-        /* Sanity checks on header */
-        HDassert(hdr_status & H5AC_ES__IN_CACHE);
-        HDassert(hdr_status & H5AC_ES__IS_PINNED);
-        HDassert(!(hdr_status & H5AC_ES__IS_PROTECTED));
-    }
+    /* Sanity checks on header */
+    HDassert(hdr_status & H5AC_ES__IN_CACHE);
+    HDassert(hdr_status & H5AC_ES__IS_PINNED);
+    HDassert(!(hdr_status & H5AC_ES__IS_PROTECTED));
+}
 #endif /* NDEBUG */
 
             /* Lock the array header into memory */

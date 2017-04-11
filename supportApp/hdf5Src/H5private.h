@@ -813,7 +813,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
     /* NOTE: flock(2) is not present on all POSIX systems.
      * If it is not present, we try a flock() equivalent based on
      * fcntl(2), then fall back to a function that always fails if
-     * it is not present at all.
+     * it is not present at all (Windows uses a separate Wflock()
+     * function).
      */
     #if defined(H5_HAVE_FLOCK)
         #define HDflock(F,L)    flock(F,L)
@@ -1145,7 +1146,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDpowf
     #define HDpowf(X,Y)   powf(X,Y)
 #endif /* HDpowf */
-/* printf() variable arguments */
+#ifndef HDprintf
+    #define HDprintf(...)   HDfprintf(stdout, __VA_ARGS__)
+#endif /* HDprintf */
 #ifndef HDputc
     #define HDputc(C,F)    putc(C,F)
 #endif /* HDputc*/
@@ -1383,7 +1386,13 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDstrtol
     #define HDstrtol(S,R,N)    strtol(S,R,N)
 #endif /* HDstrtol */
-H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
+#ifndef HDstrtoll
+    #ifdef H5_HAVE_STRTOLL
+        #define HDstrtoll(S,R,N)  strtoll(S,R,N)
+    #else
+        H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
+    #endif /* H5_HAVE_STRTOLL */
+#endif /* HDstrtoll */
 #ifndef HDstrtoul
     #define HDstrtoul(S,R,N)  strtoul(S,R,N)
 #endif /* HDstrtoul */
@@ -1970,7 +1979,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
                                                                               \
         if(!func_check) {                                                     \
             /* Check function naming status */                                \
-            HDassert(asrt);                                                   \
+            HDassert(asrt && "Function naming conventions are incorrect - check H5_IS_API|PUB|PRIV|PKG macros in H5private.h (this is usually due to an incorrect number of underscores)");                                                   \
                                                                               \
             /* Don't check again */                                           \
             func_check = TRUE;                                                \

@@ -32,10 +32,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5private.h"        /* Generic Functions            */
+#include "H5Eprivate.h"        /* Error handling              */
+#include "H5Fprivate.h"        /* File access                */
+#include "H5MMprivate.h"    /* Memory management            */
 
 
 /****************/
@@ -172,7 +172,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 s = rest;
             } /* end if */
             else if ('*'==*s) {
-                fwidth = va_arg (ap, int);
+                fwidth = va_arg(ap, int);
                 if(fwidth < 0) {
                     leftjust = 1;
                     fwidth = -fwidth;
@@ -269,23 +269,22 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%s", modifier);
             HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%c", conv);
 
-
             /* Conversion */
             switch (conv) {
                 case 'd':
                 case 'i':
                     if(!HDstrcmp(modifier, "h")) {
-                        short x = (short)va_arg (ap, int);
-                        n = fprintf (stream, format_templ, x);
+                        short x = (short)va_arg(ap, int);
+                        n = fprintf(stream, format_templ, x);
                     } else if(!*modifier) {
-                        int x = va_arg (ap, int);
-                        n = fprintf (stream, format_templ, x);
-                    } else if(!HDstrcmp (modifier, "l")) {
-                        long x = va_arg (ap, long);
-                        n = fprintf (stream, format_templ, x);
+                        int x = va_arg(ap, int);
+                        n = fprintf(stream, format_templ, x);
+                    } else if(!HDstrcmp(modifier, "l")) {
+                        long x = va_arg(ap, long);
+                        n = fprintf(stream, format_templ, x);
                     } else {
                         int64_t x = va_arg(ap, int64_t);
-                        n = fprintf (stream, format_templ, x);
+                        n = fprintf(stream, format_templ, x);
                     }
                     break;
 
@@ -294,13 +293,13 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 'x':
                 case 'X':
                     if(!HDstrcmp(modifier, "h")) {
-                        unsigned short x = (unsigned short)va_arg (ap, unsigned int);
+                        unsigned short x = (unsigned short)va_arg(ap, unsigned int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!*modifier) {
-                        unsigned int x = va_arg (ap, unsigned int); /*lint !e732 Loss of sign not really occuring */
+                        unsigned int x = va_arg(ap, unsigned int); /*lint !e732 Loss of sign not really occuring */
                         n = fprintf(stream, format_templ, x);
                     } else if(!HDstrcmp(modifier, "l")) {
-                        unsigned long x = va_arg (ap, unsigned long); /*lint !e732 Loss of sign not really occuring */
+                        unsigned long x = va_arg(ap, unsigned long); /*lint !e732 Loss of sign not really occuring */
                         n = fprintf(stream, format_templ, x);
                     } else {
                         uint64_t x = va_arg(ap, uint64_t); /*lint !e732 Loss of sign not really occuring */
@@ -336,7 +335,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                 case 'a':
                     {
-                        haddr_t x = va_arg (ap, haddr_t); /*lint !e732 Loss of sign not really occuring */
+                        haddr_t x = va_arg(ap, haddr_t); /*lint !e732 Loss of sign not really occuring */
 
                         if(H5F_addr_defined(x)) {
                             len = 0;
@@ -405,7 +404,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                         htri_t tri_var = va_arg(ap, htri_t);
 
                         if(tri_var > 0)
-                            fprintf (stream, "TRUE");
+                            fprintf(stream, "TRUE");
                         else if(!tri_var)
                             fprintf(stream, "FALSE");
                         else
@@ -475,6 +474,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
  *
  *-------------------------------------------------------------------------
  */
+#ifndef HDstrtoll
 int64_t
 HDstrtoll(const char *s, const char **rest, int base)
 {
@@ -550,7 +550,7 @@ HDstrtoll(const char *s, const char **rest, int base)
         *rest = s;
     return acc;
 } /* end HDstrtoll() */
-
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:  HDrand/HDsrand
@@ -605,7 +605,7 @@ void HDsrand(unsigned int seed)
 #ifdef H5_HAVE_FCNTL
 int
 Pflock(int fd, int operation) {
-    
+
     struct flock    flk;
 
     /* Set the lock type */
@@ -650,18 +650,18 @@ Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5_make_time
+ * Function:    H5_make_time
  *
- * Purpose:	Portability routine to abstract converting a 'tm' struct into
- *		a time_t value.
+ * Purpose:    Portability routine to abstract converting a 'tm' struct into
+ *        a time_t value.
  *
- * Note:	This is a little problematic because mktime() operates on
- *		local times.  We convert to local time and then figure out the
- *		adjustment based on the local time zone and daylight savings
- *		setting.
+ * Note:    This is a little problematic because mktime() operates on
+ *        local times.  We convert to local time and then figure out the
+ *        adjustment based on the local time zone and daylight savings
+ *        setting.
  *
- * Return:	Success:  The value of timezone
- *		Failure:  -1
+ * Return:    Success:  The value of timezone
+ *        Failure:  -1
  *
  * Programmer:  Quincey Koziol
  *              November 18, 2015
@@ -801,31 +801,6 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
  *
  *-------------------------------------------------------------------------
  */
-/* mingw does not have getenv_s or _putenv_s to work around */
-#ifdef __MINGW32__
-
-int
-Wsetenv(const char *name, const char *value, int overwrite)
-{
-    char buffer[256];
-    char *envName;
-
-    /* If we're not overwriting, check if the environment variable exists.
-     * If it does (i.e.: the required buffer size to store the variable's
-     * value is non-zero), then return an error code.
-     */
-    if(!overwrite) {
-        envName = getenv(name);
-        if (envName)
-            return -1;
-    } /* end if */
-
-    snprintf(buffer, sizeof(buffer)-1, "%s=%s", name, value);
-    return putenv(buffer);
-} /* end Wsetenv() */
-
-#else
-
 int
 Wsetenv(const char *name, const char *value, int overwrite)
 {
@@ -844,8 +819,6 @@ Wsetenv(const char *name, const char *value, int overwrite)
 
     return (int)_putenv_s(name, value);
 } /* end Wsetenv() */
-
-#endif /* __MINGW32__ */
 
 #ifdef H5_HAVE_WINSOCK2_H
 #pragma comment(lib, "advapi32.lib")
@@ -879,13 +852,6 @@ int c99_snprintf(char* str, size_t size, const char* format, ...)
     return count;
 }
 
-#ifdef __MINGW32__
-/* mingw does not have _vsnprintf_s or vcsprintf */
-int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
-{
-    return vsnprintf(str, size, format, ap);
-}
-#else
 int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
 {
     int count = -1;
@@ -897,7 +863,6 @@ int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
 
     return count;
 }
-#endif /* __MING32__ */
 
 
 /*-------------------------------------------------------------------------
@@ -946,6 +911,76 @@ Wflock(int fd, int operation) {
 #endif /* 0 */
     return 0;
 } /* end Wflock() */
+
+
+ /*--------------------------------------------------------------------------
+  * Function:    Wnanosleep
+  *
+  * Purpose:     Sleep for a given # of nanoseconds (Windows version)
+  *
+  * Return:      SUCCEED/FAIL
+  *
+  * Programmer:  Dana Robinson
+  *              Fall 2016
+  *--------------------------------------------------------------------------
+  */
+int
+Wnanosleep(const struct timespec *req, struct timespec *rem)
+{
+    /* XXX: Currently just a placeholder */
+    return 0;
+
+} /* end Wnanosleep() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
+ *
+ * Purpose:     Wrapper function for round functions for use with VS2012
+ *              and earlier.
+ *
+ * Return:      The rounded value that was passed in.
+ *
+ * Programmer:  Dana Robinson
+ *              December 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+long long
+Wllround(double arg)
+{
+    return (long long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
+}
+
+long long
+Wllroundf(float arg)
+{
+    return (long long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
+}
+
+long
+Wlround(double arg)
+{
+    return (long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
+}
+
+long
+Wlroundf(float arg)
+{
+    return (long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
+}
+
+double
+Wround(double arg)
+{
+    return arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5);
+}
+
+float
+Wroundf(float arg)
+{
+    return arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F);
+}
 
 #endif /* H5_HAVE_WIN32_API */
 
@@ -1104,7 +1139,7 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
         if(NULL == (*full_name = (char *)H5MM_strdup(path2)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-    } /* end if */ 
+    } /* end if */
     else if(H5_CHECK_ABS_PATH(path2)) {
 
         /* On windows path2 is a path absolute name */
@@ -1204,51 +1239,3 @@ H5_get_time(void)
 } /* end H5_get_time() */
 
 
-#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER < 1800)  /* pre- VS 2013 */
-
-  double round(double x)
-  {
-    return x >= 0.0 ? floor(x + 0.5) : ceil(x - 0.5);
-  }
-
-  float roundf(float x)
-  {
-    return x >= 0.0f ? floorf(x + 0.5f) : ceilf(x - 0.5f);
-  }
-
-  long double roundl(long double x)
-  {
-    return x >= 0.0 ? floorl(x + 0.5) : ceill(x - 0.5);
-  }
-
-  long int lround(double x)
-  {
-    return round(x);
-  }
-
-  long int lroundf(float x)
-  {
-    return roundf(x);
-  }
-
-  long int lroundl(long double x)
-  {
-    return roundl(x);
-  }
-
-  long long int llround(double x)
-  {
-    return round(x);
-  }
-
-  long long int llroundf(float x)
-  {
-    return roundf(x);
-  }
-
-  long long int llroundl(long double x)
-  {
-    return roundl(x);
-  }
-
-#endif

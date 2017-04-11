@@ -439,7 +439,6 @@ H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
     ret_value = hdr->addr;
 
 CATCH
-
     if(!H5F_addr_defined(ret_value))
         if(hdr) {
             /* Remove from cache, if inserted */

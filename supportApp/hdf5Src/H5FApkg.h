@@ -137,7 +137,6 @@ typedef struct H5FA_hdr_t {
     haddr_t addr;                       /* Address of header in file                                    */
     size_t size;                        /* Size of header in file                                       */
     H5F_t *f;                           /* Pointer to file for fixed array                              */
-    hbool_t swmr_write;                 /* Flag indicating the file is opened with SWMR-write access    */
     size_t file_rc;                     /* Reference count of files using array header                  */
     hbool_t pending_delete;             /* Array is pending deletion                                    */
     size_t sizeof_addr;                 /* Size of file addresses                                       */
@@ -146,7 +145,8 @@ typedef struct H5FA_hdr_t {
     /* Client information (not stored) */
     void *cb_ctx;                       /* Callback context */
 
-    /* Flush dependency information (not stored) */
+    /* SWMR / Flush dependency information (not stored) */
+    hbool_t swmr_write;                 /* Flag indicating the file is opened with SWMR-write access    */
     H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all array entries */
     void *parent;		        /* Pointer to 'top' proxy flush dependency
                                          * parent, if it exists, otherwise NULL.
@@ -180,7 +180,7 @@ typedef struct H5FA_dblock_t {
     /* Internal array information (not stored) */
     H5FA_hdr_t    *hdr;            /* Shared array header info                              */
 
-    /* Flush dependency information (not stored) */
+    /* SWMR / Flush dependency information (not stored) */
     H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all array entries */
 
     /* Computed/cached values (not stored) */
@@ -206,7 +206,7 @@ typedef struct H5FA_dbk_page_t {
     /* Internal array information (not stored) */
     H5FA_hdr_t    *hdr;         /* Shared array header info                     */
 
-    /* Flush dependency information (not stored) */
+    /* SWMR / Flush dependency information (not stored) */
     H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all array entries */
 
     /* Computed/cached values (not stored) */
@@ -248,15 +248,6 @@ typedef struct H5FA_dblk_page_cache_ud_t {
 /*****************************/
 /* Package Private Variables */
 /*****************************/
-
-/* H5FA header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FARRAY_HDR[1];
-
-/* H5FA data block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FARRAY_DBLOCK[1];
-
-/* H5FA data block page inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1];
 
 /* Internal fixed array testing class */
 H5_DLLVAR const H5FA_class_t H5FA_CLS_TEST[1];

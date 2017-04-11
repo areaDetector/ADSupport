@@ -31,7 +31,7 @@
 #define H5O_NMESGS	8 		/*initial number of messages	     */
 #define H5O_NCHUNKS	2		/*initial number of chunks	     */
 #define H5O_MIN_SIZE	22		/* Min. obj header data size (must be big enough for a message prefix and a continuation message) */
-#define H5O_MSG_TYPES   26              /* # of types of messages            */
+#define H5O_MSG_TYPES   27              /* # of types of messages            */
 #define H5O_MAX_CRT_ORDER_IDX 65535     /* Max. creation order index value   */
 
 /* Versions of object header structure */
@@ -47,17 +47,6 @@
 /* The latest version of the format.  Look through the 'flush'
  *      and 'size' callback for places to change when updating this. */
 #define H5O_VERSION_LATEST	H5O_VERSION_2
-
-/* This is the initial size of the dynamically allocated list of object 
- * header continuation chunk flush dependency parents maintained by the 
- * object header proxy.  
- *
- * The current value of 1 presumes that the typical number of entries 
- * on this list is almost always either zero or 1.  Increase this value 
- * if appropriate.
- */
-#define H5O_FD_PAR_LIST_BASE	1
-
 
 /*
  * Align messages on 8-byte boundaries because we would like to copy the
@@ -228,6 +217,12 @@
 #define H5O_SHARE_IS_SHARABLE   0x01
 #define H5O_SHARE_IN_OHDR       0x02
 
+/* Set the object header size to speculatively read in */
+/* (needs to be more than the object header prefix size to work at all and
+ *      should be larger than the largest object type's default object header
+ *      size to save the extra I/O operations) */
+#define H5O_SPEC_READ_SIZE 512
+
 
 /* The "message class" type */
 struct H5O_msg_class_t {
@@ -305,9 +300,6 @@ struct H5O_t {
 
     /* Chunk management information (not stored) */
     size_t      rc;                     /* Reference count of [continuation] chunks using this structure */
-    size_t      chunk0_size;            /* Size of serialized first chunk    */
-    hbool_t     mesgs_modified;         /* Whether any messages were modified when the object header was deserialized */
-    hbool_t     prefix_modified;        /* Whether prefix was modified when the object header was deserialized */
 
     /* Object information (stored) */
     hbool_t     has_refcount_msg;       /* Whether the object has a ref. count message */
@@ -379,7 +371,6 @@ typedef struct H5O_common_cache_ud_t {
     hid_t dxpl_id;                      /* DXPL for operation */
     unsigned file_intent;               /* Read/write intent for file */
     unsigned merged_null_msgs;          /* Number of null messages merged together */
-    hbool_t mesgs_modified;             /* Whether any messages were modified when the object header was deserialized */
     H5O_cont_msgs_t *cont_msg_info;     /* Pointer to continuation messages to work on */
     haddr_t addr;                       /* Address of the prefix or chunk */
 } H5O_common_cache_ud_t;
@@ -388,9 +379,8 @@ typedef struct H5O_common_cache_ud_t {
 typedef struct H5O_cache_ud_t {
     hbool_t made_attempt;               /* Whether the deserialize routine was already attempted */
     unsigned v1_pfx_nmesgs;             /* Number of messages from v1 prefix header */
-    uint8_t     version;                /* Version number obtained in get_load_size callback.
-					 * It will be used later in verify_chksum callback
-					 */ 
+    size_t chunk0_size;                 /* Size of serialized first chunk    */
+    H5O_t *oh;                          /* Partially deserialized object header, for later use */
     H5O_common_cache_ud_t common;       /* Common object header cache callback info */
 } H5O_cache_ud_t;
 
@@ -416,9 +406,7 @@ typedef struct H5O_chunk_proxy_t {
      * (if cont_chunkno == 0) or the chunk proxy indicated by the 
      * cont_chunkno field (if cont_chunkno > 0).
      */
-    void * fd_parent_ptr;               /* pointer to flush dependency parent
-                                         * it it exists.  NULL otherwise.
-                                         */
+    void *parent;                       /* Pointer to flush dependency parent */
 } H5O_chunk_proxy_t;
 
 /* Callback information for loading object header chunk from disk */
@@ -430,11 +418,6 @@ typedef struct H5O_chk_cache_ud_t {
     H5O_common_cache_ud_t common;       /* Common object header cache callback info */
 } H5O_chk_cache_ud_t;
 
-/* H5O object header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_OHDR[1];
-
-/* H5O object header chunk inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_OHDR_CHK[1];
 
 /* Header message ID to class mapping */
 H5_DLLVAR const H5O_msg_class_t *const H5O_msg_class_g[H5O_MSG_TYPES];
@@ -555,7 +538,10 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_REFCOUNT[1];
 /* Free-space Manager Info message. (0x0017) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_FSINFO[1];
 
-/* Placeholder for unknown message. (0x0018) */
+/* Metadata Cache Image message. (0x0018) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_MDCI[1];
+
+/* Placeholder for unknown message. (0x0019) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_UNKNOWN[1];
 
 

@@ -499,7 +499,7 @@ H5D__farray_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get layout info")
 
     /* close the object header */
-    if(H5O_close(&obj_loc) < 0)
+    if(H5O_close(&obj_loc, NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header")
 
     /* Create user data */
@@ -518,7 +518,7 @@ done:
 
         /* Close object header */
         if(obj_opened) {
-            if(H5O_close(&obj_loc) < 0)
+            if(H5O_close(&obj_loc, NULL) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header")
         } /* end if */
     } /* end if */
@@ -1298,11 +1298,13 @@ H5D__farray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
         if(H5FA_get(fa, idx_info->dxpl_id, idx, &elmt) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info")
 
-        /* Remove raw data chunk from file */
+        /* Remove raw data chunk from file if not doing SWMR writes */
         HDassert(H5F_addr_defined(elmt.addr));
-        H5_CHECK_OVERFLOW(elmt.nbytes, /*From: */uint32_t, /*To: */hsize_t);
-        if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, elmt.addr, (hsize_t)elmt.nbytes) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
+        if(!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)) {
+            H5_CHECK_OVERFLOW(elmt.nbytes, /*From: */uint32_t, /*To: */hsize_t);
+            if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, elmt.addr, (hsize_t)elmt.nbytes) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
+        } /* end if */
 
         /* Reset the info about the chunk for the index */
         elmt.addr = HADDR_UNDEF;
@@ -1318,11 +1320,13 @@ H5D__farray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
         if(H5FA_get(fa, idx_info->dxpl_id, idx, &addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
 
-        /* Remove raw data chunk from file */
+        /* Remove raw data chunk from file if not doing SWMR writes */
         HDassert(H5F_addr_defined(addr));
-        H5_CHECK_OVERFLOW(idx_info->layout->size, /*From: */uint32_t, /*To: */hsize_t);
-        if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, addr, (hsize_t)idx_info->layout->size) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
+        if(!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)) {
+            H5_CHECK_OVERFLOW(idx_info->layout->size, /*From: */uint32_t, /*To: */hsize_t);
+            if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, addr, (hsize_t)idx_info->layout->size) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
+        } /* end if */
 
         /* Reset the address of the chunk for the index */
         addr = HADDR_UNDEF;

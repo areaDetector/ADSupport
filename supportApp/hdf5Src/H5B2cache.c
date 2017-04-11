@@ -65,40 +65,31 @@
 /********************/
 
 /* Metadata cache callbacks */
-static herr_t H5B2__cache_hdr_get_load_size(const void *image_ptr, void *udata, 
-    size_t *image_len, size_t *actual_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5B2__cache_hdr_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5B2__cache_hdr_verify_chksum(const void *image_ptr, size_t len, void *udata);
 static void *H5B2__cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5B2__cache_hdr_image_len(const void *thing, size_t *image_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5B2__cache_hdr_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_hdr_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
 static herr_t H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5B2__cache_hdr_free_icr(void *thing);
 
-static herr_t H5B2__cache_int_get_load_size(const void *image_ptr, void *udata, 
-    size_t *image_len, size_t *actual_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5B2__cache_int_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5B2__cache_int_verify_chksum(const void *image_ptr, size_t len, void *udata);
 static void *H5B2__cache_int_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5B2__cache_int_image_len(const void *thing, size_t *image_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5B2__cache_int_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_int_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
 static herr_t H5B2__cache_int_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5B2__cache_int_free_icr(void *thing);
 
-static herr_t H5B2__cache_leaf_get_load_size(const void * mage_ptr, void *udata, 
-    size_t *image_len, size_t *actual_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5B2__cache_leaf_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5B2__cache_leaf_verify_chksum(const void *image_ptr, size_t len, void *udata);
 static void *H5B2__cache_leaf_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5B2__cache_leaf_image_len(const void *thing, size_t *image_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5B2__cache_leaf_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_leaf_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
 static herr_t H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *thing);
@@ -114,15 +105,15 @@ const H5AC_class_t H5AC_BT2_HDR[1] = {{
     "v2 B-tree header",                 /* Metadata client name (for debugging) */
     H5FD_MEM_BTREE,                     /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5B2__cache_hdr_get_load_size,      /* 'get_load_size' callback */
-    H5B2__cache_hdr_verify_chksum,
+    H5B2__cache_hdr_get_initial_load_size, /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
+    H5B2__cache_hdr_verify_chksum,      /* 'verify_chksum' callback */
     H5B2__cache_hdr_deserialize,        /* 'deserialize' callback */
     H5B2__cache_hdr_image_len,          /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5B2__cache_hdr_serialize,          /* 'serialize' callback */
     H5B2__cache_hdr_notify, 		/* 'notify' callback */
     H5B2__cache_hdr_free_icr,           /* 'free_icr' callback */
-    NULL,				/* 'clear' callback */
     NULL,				/* 'fsf_size' callback */
 }};
 
@@ -132,7 +123,8 @@ const H5AC_class_t H5AC_BT2_INT[1] = {{
     "v2 B-tree internal node",          /* Metadata client name (for debugging) */
     H5FD_MEM_BTREE,                     /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5B2__cache_int_get_load_size,      /* 'get_load_size' callback */
+    H5B2__cache_int_get_initial_load_size, /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
     H5B2__cache_int_verify_chksum,	/* 'verify_chksum' callback */
     H5B2__cache_int_deserialize,        /* 'deserialize' callback */
     H5B2__cache_int_image_len,          /* 'image_len' callback */
@@ -140,7 +132,6 @@ const H5AC_class_t H5AC_BT2_INT[1] = {{
     H5B2__cache_int_serialize,          /* 'serialize' callback */
     H5B2__cache_int_notify,		/* 'notify' callback */
     H5B2__cache_int_free_icr,           /* 'free_icr' callback */
-    NULL,				/* 'clear' callback */
     NULL,				/* 'fsf_size' callback */
 }};
 
@@ -150,7 +141,8 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
     "v2 B-tree leaf node",              /* Metadata client name (for debugging) */
     H5FD_MEM_BTREE,                     /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5B2__cache_leaf_get_load_size,     /* 'get_load_size' callback */
+    H5B2__cache_leaf_get_initial_load_size, /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
     H5B2__cache_leaf_verify_chksum,	/* 'verify_chksum' callback */
     H5B2__cache_leaf_deserialize,       /* 'deserialize' callback */
     H5B2__cache_leaf_image_len,         /* 'image_len' callback */
@@ -158,7 +150,6 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
     H5B2__cache_leaf_serialize,         /* 'serialize' callback */
     H5B2__cache_leaf_notify,		/* 'notify' callback */
     H5B2__cache_leaf_free_icr,          /* 'free_icr' callback */
-    NULL,				/* 'clear' callback */
     NULL,				/* 'fsf_size' callback */
 }};
 
@@ -175,7 +166,7 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5B2__cache_hdr_get_load_size
+ * Function:    H5B2__cache_hdr_get_initial_load_size
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -188,10 +179,8 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_hdr_get_load_size(const void *_image, void *_udata, size_t *image_len, size_t *actual_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5B2__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
 {
-    const uint8_t *image = (const uint8_t *)_image;       		    /* Pointer into raw data buffer */
     H5B2_hdr_cache_ud_t *udata = (H5B2_hdr_cache_ud_t *)_udata; /* User data for callback */
 
     FUNC_ENTER_STATIC_NOERR
@@ -201,16 +190,11 @@ H5B2__cache_hdr_get_load_size(const void *_image, void *_udata, size_t *image_le
     HDassert(udata->f);
     HDassert(image_len);
 
-    if(image == NULL) {
-	/* Set the image length size */
-	*image_len = H5B2_HEADER_SIZE_FILE(udata->f);
-    } else {
-	HDassert(actual_len);
-	HDassert(*actual_len == *image_len);
-    }
+    /* Set the image length size */
+    *image_len = H5B2_HEADER_SIZE_FILE(udata->f);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5B2__cache_hdr_get_load_size() */
+} /* end H5B2__cache_hdr_get_initial_load_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -363,8 +347,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_hdr_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5B2__cache_hdr_image_len(const void *_thing, size_t *image_len)
 {
     const H5B2_hdr_t *hdr = (const H5B2_hdr_t *)_thing;      /* Pointer to the B-tree header */
 
@@ -448,27 +431,6 @@ H5B2__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     /* Sanity check */
     HDassert((size_t)(image - (uint8_t *)_image) == len);
 
-    /* Clear shadowed node lists, as the header has been flushed and all
-     * nodes must be shadowed again (if doing SWMR writes).  Note that this
-     * algorithm does one extra iteration at the end, as the last node's
-     * shadowed_next pointer points to itself. */
-    while(hdr->shadowed_internal) {
-	H5B2_internal_t *next = hdr->shadowed_internal->shadowed_next;
-
-	HDassert(!hdr->shadowed_internal->cache_info.is_dirty);
-	hdr->shadowed_internal->shadowed_next = NULL;
-	hdr->shadowed_internal->shadowed_prev = NULL;
-	hdr->shadowed_internal = next;
-    } /* end while */
-    while(hdr->shadowed_leaf) {
-	H5B2_leaf_t *next = hdr->shadowed_leaf->shadowed_next;
-
-	HDassert(!hdr->shadowed_leaf->cache_info.is_dirty);
-	hdr->shadowed_leaf->shadowed_next = NULL;
-	hdr->shadowed_leaf->shadowed_prev = NULL;
-	hdr->shadowed_leaf = next;
-    } /* end while */
-
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2__cache_hdr_serialize() */
 
@@ -504,11 +466,21 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
         switch(action) {
             case H5AC_NOTIFY_ACTION_AFTER_INSERT:
 	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+		/* do nothing */
+                break;
+
 	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+                /* Increment the shadow epoch, forcing new modifications to
+                 * internal and leaf nodes to create new shadow copies */
+                hdr->shadow_epoch++;
+                break;
+
             case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
             case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
             case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
             case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
+            case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
 		/* do nothing */
                 break;
 
@@ -517,11 +489,21 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
                  * the flush dependency before the header is evicted.
                  */
                 if(hdr->parent) {
-		    /* Destroy flush dependency */
-		    if(H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent, (void *)hdr) < 0)
-                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                    /* Sanity check */
+                    HDassert(hdr->top_proxy);
+
+		    /* Destroy flush dependency on object header proxy */
+		    if(H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent, (void *)hdr->top_proxy) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between v2 B-tree and proxy")
                     hdr->parent = NULL;
 		} /* end if */
+
+                /* Detach from 'top' proxy for extensible array */
+                if(hdr->top_proxy) {
+                    if(H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between header and v2 B-tree 'top' proxy")
+                    /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
+                } /* end if */
 		break;
 
             default:
@@ -574,7 +556,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5B2__cache_int_get_load_size
+ * Function:    H5B2__cache_int_get_initial_load_size
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -587,10 +569,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_int_get_load_size(const void *_image, void *_udata, size_t *image_len, size_t *actual_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5B2__cache_int_get_initial_load_size(void *_udata, size_t *image_len)
 {
-    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     H5B2_internal_cache_ud_t *udata = (H5B2_internal_cache_ud_t *)_udata; /* User data for callback */
 
     FUNC_ENTER_STATIC_NOERR
@@ -600,17 +580,13 @@ H5B2__cache_int_get_load_size(const void *_image, void *_udata, size_t *image_le
     HDassert(udata->hdr);
     HDassert(image_len);
 
-    if(image == NULL) {
-	/* Set the image length size */
-	*image_len = udata->hdr->node_size;
-    } else {
-	HDassert(actual_len);
-	HDassert(*actual_len == *image_len);
-    }
+    /* Set the image length size */
+    *image_len = udata->hdr->node_size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5B2__cache_int_get_load_size() */
+} /* end H5B2__cache_int_get_initial_load_size() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5B2__cache_int_verify_chksum
  *
@@ -687,9 +663,8 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     HDassert(udata);
 
     /* Allocate new internal node and reset cache info */
-    if(NULL == (internal = H5FL_MALLOC(H5B2_internal_t)))
+    if(NULL == (internal = H5FL_CALLOC(H5B2_internal_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&internal->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Increment ref. count on B-tree header */
     if(H5B2__hdr_incr(udata->hdr) < 0)
@@ -698,8 +673,7 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     /* Share B-tree information */
     internal->hdr = udata->hdr;
     internal->parent = udata->parent;
-    internal->shadowed_next = NULL;
-    internal->shadowed_prev = NULL;
+    internal->shadow_epoch = udata->hdr->shadow_epoch;
 
     /* Magic number */
     if(HDmemcmp(image, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC))
@@ -787,8 +761,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_int_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5B2__cache_int_image_len(const void *_thing, size_t *image_len)
 {
     const H5B2_internal_t *internal = (const H5B2_internal_t *)_thing;      /* Pointer to the B-tree internal node */
 
@@ -917,10 +890,10 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
      * Check arguments.
      */
     HDassert(internal);
+    HDassert(internal->hdr);
 
     /* Check if the file was opened with SWMR-write access */
     if(internal->hdr->swmr_write) {
-        HDassert(internal->parent);
         switch(action) {
             case H5AC_NOTIFY_ACTION_AFTER_INSERT:
 	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
@@ -934,6 +907,8 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
             case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
             case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
             case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
+            case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
 		/* do nothing */
 		break;
 
@@ -941,6 +916,13 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
 		/* Destroy flush dependency on parent */
 		if(H5B2__destroy_flush_depend((H5AC_info_t *)internal->parent, (H5AC_info_t *)internal) < 0)
 		    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+
+                /* Detach from 'top' proxy for v2 B-tree */
+                if(internal->top_proxy) {
+                    if(H5AC_proxy_entry_remove_child(internal->top_proxy, internal) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between internal node and v2 B-tree 'top' proxy")
+                    internal->top_proxy = NULL;
+                } /* end if */
                 break;
 
             default:
@@ -951,6 +933,8 @@ H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
 #endif /* NDEBUG */
         } /* end switch */
     } /* end if */
+    else
+        HDassert(NULL == internal->top_proxy);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -981,31 +965,6 @@ H5B2__cache_int_free_icr(void *_thing)
 
     /* Check arguments */
     HDassert(internal);
-    HDassert(internal->hdr);
-
-    /* Unlink from shadowed list */
-    if(internal->shadowed_next) {
-        if(internal->shadowed_next != internal) {
-            internal->shadowed_next->shadowed_prev = internal->shadowed_prev;
-
-            if(internal->shadowed_prev)
-                internal->shadowed_prev->shadowed_next = internal->shadowed_next;
-            else {
-                HDassert(internal->hdr->shadowed_internal = internal);
-
-                internal->hdr->shadowed_internal = internal->shadowed_next;
-            } /* end else */
-        } /* end if */
-        else {
-            if(internal->shadowed_prev)
-                internal->shadowed_prev->shadowed_next = internal->shadowed_prev;
-            else {
-                HDassert(internal->hdr->shadowed_internal = internal);
-
-                internal->hdr->shadowed_internal = NULL;
-            } /* end else */
-        } /* end else */
-    } /* end if */
 
     /* Release v2 B-tree internal node */
     if(H5B2__internal_free(internal) < 0)
@@ -1017,7 +976,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5B2__cache_leaf_get_load_size
+ * Function:    H5B2__cache_leaf_get_initial_load_size
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -1030,10 +989,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_leaf_get_load_size(const void *_image, void *_udata, size_t *image_len, size_t *actual_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5B2__cache_leaf_get_initial_load_size(void *_udata, size_t *image_len)
 {
-    const uint8_t *image = (const uint8_t *)_image;       		      /* Pointer into raw data buffer */
     H5B2_leaf_cache_ud_t *udata = (H5B2_leaf_cache_ud_t *)_udata; /* User data for callback */
 
     FUNC_ENTER_STATIC_NOERR
@@ -1043,17 +1000,13 @@ H5B2__cache_leaf_get_load_size(const void *_image, void *_udata, size_t *image_l
     HDassert(udata->hdr);
     HDassert(image_len);
 
-    if(image == NULL) {
-	/* Set the image length size */
-	*image_len = udata->hdr->node_size;
-    } else {
-	HDassert(actual_len);
-	HDassert(*actual_len == *image_len);
-    }
+    /* Set the image length size */
+    *image_len = udata->hdr->node_size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5B2__cache_leaf_get_load_size() */
+} /* end H5B2__cache_leaf_get_initial_load_size() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5B2__cache_leaf_verify_chksum
  *
@@ -1129,9 +1082,8 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     HDassert(udata);
 
     /* Allocate new leaf node and reset cache info */
-    if(NULL == (leaf = H5FL_MALLOC(H5B2_leaf_t)))
+    if(NULL == (leaf = H5FL_CALLOC(H5B2_leaf_t)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed")
-    HDmemset(&leaf->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Increment ref. count on B-tree header */
     if(H5B2__hdr_incr(udata->hdr) < 0)
@@ -1140,8 +1092,7 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     /* Share B-tree header information */
     leaf->hdr = udata->hdr;
     leaf->parent = udata->parent;
-    leaf->shadowed_next = NULL;
-    leaf->shadowed_prev = NULL;
+    leaf->shadow_epoch = udata->hdr->shadow_epoch;
 
     /* Magic number */
     if(HDmemcmp(image, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC))
@@ -1212,8 +1163,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_leaf_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5B2__cache_leaf_image_len(const void *_thing, size_t *image_len)
 {
     const H5B2_leaf_t *leaf = (const H5B2_leaf_t *)_thing;      /* Pointer to the B-tree leaf node  */
 
@@ -1245,7 +1195,7 @@ H5B2__cache_leaf_image_len(const void *_thing, size_t *image_len,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_leaf_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,
+H5B2__cache_leaf_serialize(const H5F_t H5_ATTR_UNUSED *f, void *_image, size_t H5_ATTR_UNUSED len,
     void *_thing)
 {
     H5B2_leaf_t *leaf = (H5B2_leaf_t *)_thing;      /* Pointer to the B-tree leaf node  */
@@ -1328,10 +1278,10 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
      * Check arguments.
      */
     HDassert(leaf);
+    HDassert(leaf->hdr);
 
     /* Check if the file was opened with SWMR-write access */
     if(leaf->hdr->swmr_write) {
-        HDassert(leaf->parent);
         switch(action) {
             case H5AC_NOTIFY_ACTION_AFTER_INSERT:
 	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
@@ -1345,6 +1295,8 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
             case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
             case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
             case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
+            case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
                 /* do nothing */
                 break;
 
@@ -1352,6 +1304,13 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
 		/* Destroy flush dependency on parent */
                 if(H5B2__destroy_flush_depend((H5AC_info_t *)leaf->parent, (H5AC_info_t *)leaf) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+
+                /* Detach from 'top' proxy for v2 B-tree */
+                if(leaf->top_proxy) {
+                    if(H5AC_proxy_entry_remove_child(leaf->top_proxy, leaf) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between leaf node and v2 B-tree 'top' proxy")
+                    leaf->top_proxy = NULL;
+                } /* end if */
                 break;
 
             default:
@@ -1362,6 +1321,8 @@ H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
 #endif /* NDEBUG */
         } /* end switch */
     } /* end if */
+    else
+        HDassert(NULL == leaf->top_proxy);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1392,31 +1353,6 @@ H5B2__cache_leaf_free_icr(void *_thing)
 
     /* Check arguments */
     HDassert(leaf);
-    HDassert(leaf->hdr);
-
-    /* Unlink from shadowed list */
-    if(leaf->shadowed_next) {
-        if(leaf->shadowed_next != leaf) {
-            leaf->shadowed_next->shadowed_prev = leaf->shadowed_prev;
-
-            if(leaf->shadowed_prev)
-                leaf->shadowed_prev->shadowed_next = leaf->shadowed_next;
-            else {
-                HDassert(leaf->hdr->shadowed_leaf = leaf);
-
-                leaf->hdr->shadowed_leaf = leaf->shadowed_next;
-            } /* end else */
-        } /* end if */
-        else {
-            if(leaf->shadowed_prev)
-                leaf->shadowed_prev->shadowed_next = leaf->shadowed_prev;
-            else {
-                HDassert(leaf->hdr->shadowed_leaf = leaf);
-
-                leaf->hdr->shadowed_leaf = NULL;
-            } /* end else */
-        } /* end else */
-    } /* end if */
 
     /* Destroy v2 B-tree leaf node */
     if(H5B2__leaf_free(leaf) < 0)

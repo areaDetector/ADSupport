@@ -154,10 +154,6 @@ H5_DLL herr_t H5B2_size(H5B2_t *bt2, hid_t dxpl_id,
 H5_DLL herr_t H5B2_close(H5B2_t *bt2, hid_t dxpl_id);
 H5_DLL herr_t H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     void *ctx_udata, H5B2_remove_t op, void *op_data);
-H5_DLL htri_t H5B2_support(H5B2_t *bt2, hid_t dxpl_id, void *udata,
-    H5AC_info_t *child);
-H5_DLL herr_t H5B2_unsupport(H5B2_t *bt2, hid_t dxpl_id, void *udata,
-    H5AC_info_t *child);
 H5_DLL herr_t H5B2_depend(H5B2_t *bt2, hid_t dxpl_id, H5AC_proxy_entry_t *parent);
 H5_DLL herr_t H5B2_patch_file(H5B2_t *fa, H5F_t *f);
 

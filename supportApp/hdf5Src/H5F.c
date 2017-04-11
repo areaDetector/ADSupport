@@ -406,7 +406,7 @@ H5Fis_hdf5(const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* call the private is_HDF5 function */
-    if((ret_value = H5F_is_hdf5(name, H5AC_ind_read_dxpl_id)) < 0)
+    if((ret_value = H5F__is_hdf5(name, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable open file")
 
 done:
@@ -445,6 +445,8 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
+    hbool_t      ci_load = FALSE;       /* whether MDC ci load requested */
+    hbool_t      ci_write = FALSE;      /* whether MDC CI write requested */
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
     hid_t        dxpl_id = H5AC_ind_read_dxpl_id; /*dxpl used by library        */
     hid_t	 ret_value;	        /*return value			*/
@@ -490,6 +492,12 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if(NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
+   /* Check to see if both SWMR and cache image are requested.  Fail if so */
+   if(H5C_cache_image_status(new_file, &ci_load, &ci_write) < 0)
+       HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MDC cache image status")
+   if((ci_load || ci_write) && (flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE)))
+       HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and cache image")
+
     /* Get an atom for the file */
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
@@ -498,9 +506,8 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     new_file->file_id = ret_value;
 
 done:
-    if(ret_value < 0 && new_file)
-        if(H5F_close(new_file) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
+    if(ret_value < 0 && new_file && H5F_try_close(new_file, NULL) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
@@ -528,7 +535,7 @@ done:
  * Modifications:
  *	  	Robb Matzke, 1997-07-18
  *		File struct creation and destruction is through H5F_new() and
- *		H5F_dest(). Reading the root symbol table entry is done with
+ *		H5F__dest(). Reading the root symbol table entry is done with
  *		H5G_decode().
  *
  *  		Robb Matzke, 1997-09-23
@@ -549,6 +556,8 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
+    hbool_t      ci_load = FALSE;       /* whether MDC ci load requested */
+    hbool_t      ci_write = FALSE;      /* whether MDC CI write requested */
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
     hid_t        dxpl_id = H5AC_ind_read_dxpl_id; /*dxpl used by library        */
     hid_t	 ret_value;	        /*return value			*/
@@ -578,6 +587,12 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
 
+    /* Check to see if both SWMR and cache image are requested.  Fail if so */
+    if(H5C_cache_image_status(new_file, &ci_load, &ci_write) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MDC cache image status")
+    if((ci_load || ci_write) && (flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE)))
+        HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and cache image")
+
     /* Get an atom for the file */
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
@@ -586,7 +601,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     new_file->file_id = ret_value;
 
 done:
-    if(ret_value < 0 && new_file && H5F_try_close(new_file) < 0)
+    if(ret_value < 0 && new_file && H5F_try_close(new_file, NULL) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
     FUNC_LEAVE_API(ret_value)
@@ -698,12 +713,12 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
         /* Flush other files, depending on scope */
         if(H5F_SCOPE_GLOBAL == scope) {
             /* Call the flush routine for mounted file hierarchies */
-            if(H5F_flush_mounts(f, H5AC_ind_read_dxpl_id) < 0)
+            if(H5F_flush_mounts(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
         } /* end if */
         else {
             /* Call the flush routine, for this file */
-            if(H5F_flush(f, H5AC_ind_read_dxpl_id, FALSE) < 0)
+            if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
         } /* end else */
     } /* end if */
@@ -758,7 +773,7 @@ H5Fclose(hid_t file_id)
         if((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
         if(nref == 1)
-            if(H5F_flush(f, H5AC_ind_read_dxpl_id, FALSE) < 0)
+            if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
@@ -823,7 +838,7 @@ H5Freopen(hid_t file_id)
 
 done:
     if(ret_value < 0 && new_file)
-        if(H5F_dest(new_file, H5AC_ind_read_dxpl_id, FALSE) < 0)
+        if(H5F__dest(new_file, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
     FUNC_LEAVE_API(ret_value)
@@ -1027,7 +1042,7 @@ H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* call private get_file_image function */
-    if((ret_value = H5F_get_file_image(file, buf_ptr, buf_len, H5AC_ind_read_dxpl_id)) < 0)
+    if((ret_value = H5F_get_file_image(file, buf_ptr, buf_len, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file image")
 
 done:
@@ -1177,7 +1192,7 @@ H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
     size_t *cur_size_ptr, int *cur_num_entries_ptr)
 {
     H5F_t      *file;                   /* File object for file ID */
-    int32_t    cur_num_entries;
+    uint32_t   cur_num_entries;
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1593,6 +1608,8 @@ done:
 herr_t
 H5Fstart_swmr_write(hid_t file_id)
 {
+    hbool_t ci_load = FALSE;    /* whether MDC ci load requested */
+    hbool_t ci_write = FALSE;   /* whether MDC CI write requested */
     H5F_t *file = NULL;         /* File info */
     size_t grp_dset_count=0; 	/* # of open objects: groups & datasets */
     size_t nt_attr_count=0; 	/* # of opened named datatypes  + opened attributes */
@@ -1602,7 +1619,7 @@ H5Fstart_swmr_write(hid_t file_id)
     H5G_name_t *obj_paths=NULL;	/* Group hierarchy path */
     size_t u;               	/* Local index variable */
     hbool_t setup = FALSE;	/* Boolean flag to indicate whether SWMR setting is enabled */
-    H5F_io_info_t fio_info;    	/* I/O info for operation */
+    H5F_io_info2_t fio_info;    /* I/O info for operation */
     herr_t ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1626,8 +1643,14 @@ H5Fstart_swmr_write(hid_t file_id)
 
     HDassert(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS);
 
+    /* Check to see if cache image is enabled.  Fail if so */
+    if(H5C_cache_image_status(file, &ci_load, &ci_write) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MDC cache image status")
+    if(ci_load || ci_write )
+        HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and MDC cache image")
+
     /* Flush data buffers */
-    if(H5F_flush(file, H5AC_ind_read_dxpl_id, FALSE) < 0)
+    if(H5F__flush(file, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
 
     /* Get the # of opened named datatypes and attributes */
@@ -1681,7 +1704,9 @@ H5Fstart_swmr_write(hid_t file_id)
 
     /* Set up I/O info for operation */
     fio_info.f = file;
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+    if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Flush and reset the accumulator */
@@ -1868,7 +1893,48 @@ H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Fstop_mdc_logging() */
+} /* H5Fget_mdc_logging_status() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:   H5Fset_latest_format
+ *
+ * Purpose:    Enable switching the "latest format" flag while a file is open.
+ *
+ * Return:     Non-negative on success/Negative on failure
+ *
+ * Programmer: Quincey Koziol
+ *             Monday, September 21, 2015
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
+{
+    H5F_t *f;                           /* File */
+    unsigned latest_flags;              /* Latest format flags for file */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", file_id, latest_format);
+
+    /* Check args */
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "not a file ID")
+
+    /* Check if the value is changing */
+    latest_flags = H5F_USE_LATEST_FLAGS(f, H5F_LATEST_ALL_FLAGS);
+    if(latest_format != (H5F_LATEST_ALL_FLAGS == latest_flags)) {
+        /* Call the flush routine, for this file */
+        if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
+
+        /* Toggle the 'latest format' flag */
+        H5F_SET_LATEST_FLAGS(f, latest_format ? H5F_LATEST_ALL_FLAGS : 0);
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fset_latest_format() */
 
 
 /*-------------------------------------------------------------------------
@@ -1909,7 +1975,9 @@ H5Fformat_convert(hid_t fid)
 
         /* Check for persistent freespace manager, which needs to be downgraded */
         if(!(f->shared->fs_strategy == H5F_FILE_SPACE_STRATEGY_DEF &&
-                f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF)) {
+             f->shared->fs_persist == H5F_FREE_SPACE_PERSIST_DEF &&
+             f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF &&
+             f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF)) {
             /* Check to remove free-space manager info message from superblock extension */
             if(H5F_addr_defined(f->shared->sblock->ext_addr))
                 if(H5F_super_ext_remove_msg(f, H5AC_ind_read_dxpl_id, H5O_FSINFO_ID) < 0)
@@ -1921,7 +1989,9 @@ H5Fformat_convert(hid_t fid)
 
             /* Set non-persistent freespace manager */
             f->shared->fs_strategy = H5F_FILE_SPACE_STRATEGY_DEF;
+            f->shared->fs_persist = H5F_FREE_SPACE_PERSIST_DEF;
             f->shared->fs_threshold = H5F_FREE_SPACE_THRESHOLD_DEF;
+            f->shared->fs_page_size = H5F_FILE_SPACE_PAGE_SIZE_DEF;
 
             /* Indicate that the superblock should be marked dirty */
             mark_dirty = TRUE;
@@ -1939,4 +2009,120 @@ H5Fformat_convert(hid_t fid)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fformat_convert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Freset_page_buffering_stats
+ *
+ * Purpose:     Resets statistics for the page buffer layer.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Freset_page_buffering_stats(hid_t file_id)
+{
+    H5F_t   *file;                      /* File to reset stats on */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", file_id);
+
+    /* Check args */
+    if(NULL == (file = (H5F_t *)H5I_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    if(NULL == file->shared->page_buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "page buffering not enabled on file")
+
+    /* Reset the statistics */
+    if(H5PB_reset_stats(file->shared->page_buf) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't reset stats for page buffering")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* H5Freset_page_buffering_stats() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_page_buffering_stats
+ *
+ * Purpose:     Retrieves statistics for the page buffer layer.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], unsigned hits[2],
+    unsigned misses[2], unsigned evictions[2], unsigned bypasses[2])
+{
+    H5F_t      *file;                   /* File object for file ID */
+    herr_t     ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "i*Iu*Iu*Iu*Iu*Iu", file_id, accesses, hits, misses, evictions,
+             bypasses);
+
+    /* Check args */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    if(NULL == file->shared->page_buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "page buffering not enabled on file")
+    if(NULL == accesses || NULL == hits || NULL == misses || NULL == evictions || NULL == bypasses)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL input parameters for stats")
+
+    /* Get the statistics */
+    if(H5PB_get_stats(file->shared->page_buf, accesses, hits, misses, evictions, bypasses) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve stats for page buffering")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fget_page_buffering_stats() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_mdc_image_info
+ *
+ * Purpose:     Retrieves the image_addr and image_len for the cache image in the file.
+ *              image_addr:  --base address of the on disk metadata cache image
+ *                           --HADDR_UNDEF if no cache image
+ *              image_len:   --size of the on disk metadata cache image
+ *                           --zero if no cache image
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi; March 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t *image_len)
+{
+    H5F_t      *file;                   /* File object for file ID */
+    herr_t     ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*a*h", file_id, image_addr, image_len);
+
+    /* Check args */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    if(NULL == image_addr || NULL == image_len)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL image addr or image len")
+
+    /* Go get the address and size of the cache image */
+    if(H5AC_get_mdc_image_info(file->shared->cache, image_addr, image_len) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't retrieve cache image info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fget_mdc_image_info() */
 

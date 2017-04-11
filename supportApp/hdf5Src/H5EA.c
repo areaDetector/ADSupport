@@ -254,7 +254,6 @@ H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
 
     /* Local variables */
     H5EA_t *ea = NULL;          /* Pointer to new extensible array wrapper */
-    H5EA_hdr_t *hdr = NULL;     /* The extensible array header information */
 
     /*
      * Check arguments.
@@ -881,18 +880,18 @@ H5EA_close(H5EA_t *ea, hid_t dxpl_id))
             H5EA_hdr_t *hdr;            /* Another pointer to extensible array header */
 
 #ifndef NDEBUG
-    {
-        unsigned hdr_status = 0;         /* Header's status in the metadata cache */
+{
+    unsigned hdr_status = 0;         /* Header's status in the metadata cache */
 
-        /* Check the header's status in the metadata cache */
-        if(H5AC_get_entry_status(ea->f, ea_addr, &hdr_status) < 0)
-            H5E_THROW(H5E_CANTGET, "unable to check metadata cache status for extensible array header")
+    /* Check the header's status in the metadata cache */
+    if(H5AC_get_entry_status(ea->f, ea_addr, &hdr_status) < 0)
+        H5E_THROW(H5E_CANTGET, "unable to check metadata cache status for extensible array header")
 
-        /* Sanity checks on header */
-        HDassert(hdr_status & H5AC_ES__IN_CACHE);
-        HDassert(hdr_status & H5AC_ES__IS_PINNED);
-        HDassert(!(hdr_status & H5AC_ES__IS_PROTECTED));
-    }
+    /* Sanity checks on header */
+    HDassert(hdr_status & H5AC_ES__IN_CACHE);
+    HDassert(hdr_status & H5AC_ES__IS_PINNED);
+    HDassert(!(hdr_status & H5AC_ES__IS_PROTECTED));
+}
 #endif /* NDEBUG */
 
             /* Lock the array header into memory */

@@ -745,9 +745,8 @@ H5O__alloc_find_best_nonnull(const H5F_t *f, const H5O_t *oh, size_t *size,
     size_t      cont_size;              /* Continuation message size */
     size_t      multi_size;             /* Size of all the messages in the last chunk */
     unsigned    u;                      /* Local index variable */
-    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(f);
@@ -865,8 +864,7 @@ H5O__alloc_find_best_nonnull(const H5F_t *f, const H5O_t *oh, size_t *size,
     else
         *size += (size_t)H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[found_msg->msgno].raw_size;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5O__alloc_find_best_nonnull() */
 
 
@@ -898,7 +896,7 @@ H5O__alloc_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size,
     size_t      idx;                    /* Message number */
     uint8_t     *p = NULL;              /* Pointer into new chunk image */
     H5O_cont_t  *cont = NULL;           /*native continuation message   */
-    size_t      chunkno;                /* Chunk allocated */
+    unsigned    chunkno;                /* Chunk allocated */
     haddr_t	new_chunk_addr;         /* Address of new chunk in file */
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -942,7 +940,8 @@ H5O__alloc_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size,
         oh->chunk = x;
     } /* end if */
 
-    chunkno = (unsigned)oh->nchunks++;
+    H5_CHECKED_ASSIGN(chunkno, unsigned, oh->nchunks, size_t);
+    oh->nchunks++;
     oh->chunk[chunkno].addr = new_chunk_addr;
     oh->chunk[chunkno].size = size;
     oh->chunk[chunkno].gap = 0;
@@ -1221,10 +1220,9 @@ static herr_t
 H5O__alloc_find_best_null(const H5O_t *oh, size_t size, size_t *mesg_idx)
 {
     size_t idx;                 /* Index of message which fits allocation */
-    int found_null;             /* Best fit null message         */
-    herr_t ret_value = SUCCEED; /* Return value */
+    ssize_t found_null;         /* Best fit null message         */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(oh);
@@ -1239,11 +1237,11 @@ H5O__alloc_find_best_null(const H5O_t *oh, size_t size, size_t *mesg_idx)
             if(oh->mesg[idx].raw_size == size) {
                 /* Keep first exact fit */
                 if(found_null < 0)
-                    found_null = idx;
+                    found_null = (ssize_t)idx;
                 else
                     /* If we've got more than one exact fit, choose the one in the earliest chunk */
                     if(oh->mesg[idx].chunkno < oh->mesg[found_null].chunkno) {
-                        found_null = idx;
+                        found_null = (ssize_t)idx;
 
                         /* If we found an exact fit in object header chunk #0, we can get out */
                         /* (Could extend this to look for earliest message in
@@ -1257,29 +1255,26 @@ H5O__alloc_find_best_null(const H5O_t *oh, size_t size, size_t *mesg_idx)
             else if(oh->mesg[idx].raw_size > size) {
                 /* Keep first one found */
                 if(found_null < 0)
-                    found_null = idx;
+                    found_null = (ssize_t)idx;
                 else
                     /* Check for better fit */
                     if(oh->mesg[idx].raw_size < oh->mesg[found_null].raw_size)
-                        found_null = idx;
+                        found_null = (ssize_t)idx;
                     else {
                         /* If they are the same size, choose the one in the earliest chunk */
                         if(oh->mesg[idx].raw_size ==  oh->mesg[found_null].raw_size) {
                             if(oh->mesg[idx].chunkno < oh->mesg[found_null].chunkno)
-                                found_null = idx;
+                                found_null = (ssize_t)idx;
                         } /* end if */
                     } /* end else */
             } /* end else-if */
-            /* Ignore too-small null messages */
-            else 
-                ;
+            /* else: Ignore too-small null messages */
         } /* end if */
     } /* end for */
     if(found_null >= 0)
-        *mesg_idx = found_null;
+        *mesg_idx = (size_t)found_null;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5O__alloc_find_best_null() */
 
 
@@ -1745,9 +1740,8 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                         /* If the message being moved is a continuation
                          * message and we are doing SWMR writes, we must
                          * update the flush dependencies */
-                        if((H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
-                                && (H5O_CONT_ID == curr_msg->type->id)) {
-                            void *null_chk_mdc_obj = NULL; /* The metadata cache object for the null_msg chunk */
+                        if(oh->swmr_write && (H5O_CONT_ID == curr_msg->type->id)) {
+                            void *null_chk_mdc_obj;     /* The metadata cache object for the null_msg chunk */
 
                             /* Point to the metadata cache object for the
                              * null message chunk, oh if in chunk 0 or the
@@ -1768,14 +1762,14 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                             /* Remove flush dependency on old continuation
                              * message chunk */
                             HDassert(cont_targ_chk_proxy);
-                            HDassert(cont_targ_chk_proxy->fd_parent_ptr);
+                            HDassert(cont_targ_chk_proxy->parent);
                             HDassert(curr_chk_proxy);
-                            HDassert((void *)curr_chk_proxy == cont_targ_chk_proxy->fd_parent_ptr);
+                            HDassert((void *)curr_chk_proxy == cont_targ_chk_proxy->parent);
 
                             if(H5AC_destroy_flush_dependency(curr_chk_proxy, cont_targ_chk_proxy) < 0)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
 
-                            cont_targ_chk_proxy->fd_parent_ptr = NULL;
+                            cont_targ_chk_proxy->parent = NULL;
 
                             /* Create flush dependency on new continuation
                              * message chunk */
@@ -1788,7 +1782,7 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                             HDassert((((H5C_cache_entry_t *)null_chk_mdc_obj)->type->id == H5AC_OHDR_ID) ||
                                      (((H5C_cache_entry_t *)null_chk_mdc_obj)->type->id == H5AC_OHDR_CHK_ID));
 
-                            cont_targ_chk_proxy->fd_parent_ptr = null_chk_mdc_obj;
+                            cont_targ_chk_proxy->parent = null_chk_mdc_obj;
 
                             /* Unprotect continuation message target chunk
                              */
@@ -2029,6 +2023,7 @@ H5O_merge_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                         /* Second message has been merged, delete it */
                         if(merged_msg) {
                             H5O_chunk_proxy_t *curr_chk_proxy;        /* Chunk that message is in */
+                            htri_t result;
 
                             /* Release any information/memory for second message */
                             H5O_msg_free_mesg(curr_msg2);
@@ -2055,6 +2050,13 @@ H5O_merge_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                             /* Decrement # of messages */
                             /* (Don't bother reducing size of message array for now -QAK) */
                             oh->nmesgs--;
+
+                            /* The merge null message might span the entire chunk: scan for empty chunk to remove */
+                            if((result = H5O_remove_empty_chunks(f, dxpl_id, oh)) < 0)
+                                HGOTO_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't remove empty chunk")
+                            else if(result > 0)
+                                /* Get out of loop */
+                                break;
 
                             /* If the merged message is too large, shrink the chunk */
                             if(curr_msg->raw_size >= H5O_MESG_MAX_SIZE)

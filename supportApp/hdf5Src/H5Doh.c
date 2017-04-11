@@ -156,10 +156,6 @@ H5O__dset_free_copy_file_udata(void *_udata)
     if(udata->common.src_pline)
         H5O_msg_free(H5O_PLINE_ID, udata->common.src_pline);
 
-    /* Release copy of dataset's layout, if it was set */
-    if(udata->src_layout)
-        H5O_msg_free(H5O_LAYOUT_ID, udata->src_layout);
-
     /* Release space for 'copy file' user data */
     udata = H5FL_FREE(H5D_copy_file_ud_t, udata);
 

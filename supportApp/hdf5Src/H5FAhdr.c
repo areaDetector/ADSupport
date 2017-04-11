@@ -120,6 +120,7 @@ H5FA__hdr_alloc(H5F_t *f))
     ret_value = hdr;
 
 CATCH
+
     if(!ret_value)
         if(hdr && H5FA__hdr_dest(hdr) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy fixed array header")
