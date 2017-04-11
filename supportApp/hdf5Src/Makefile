@@ -26,6 +26,8 @@ ifeq ($(WITH_HDF5),YES)
     INC += H5ACpublic.h
     INC += H5api_adpt.h
     INC += H5Apublic.h
+    INC += H5B2public.h
+    INC += H5Bpublic.h
     INC += H5Cpublic.h
     INC += H5Dpublic.h
     INC += H5Epubgen.h
@@ -41,8 +43,12 @@ ifeq ($(WITH_HDF5),YES)
     INC += H5FDsec2.h
     INC += H5FDstdio.h
     INC += H5FDwindows.h
+    INC += H5FSpublic.h
     INC += H5Fpublic.h
     INC += H5Gpublic.h
+    INC += H5HFpublic.h
+    INC += H5HGpublic.h
+    INC += H5HLpublic.h
     INC += H5Ipublic.h
     INC += H5Lpublic.h
     INC += H5MMpublic.h
