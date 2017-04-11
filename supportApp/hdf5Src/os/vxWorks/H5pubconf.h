@@ -30,7 +30,7 @@ typedef uint64_t      uint_least64_t;
 typedef int64_t       int_fast64_t  ;
 typedef uint64_t      uint_fast64_t;
  /* This is needed by H5PL.c */
-#define RTLD_NOW 0x00002
+#define RTLD_LAZY 0x00001
 
 /* Define if building universal (internal helper macro) */
 /* #undef H5_AC_APPLE_UNIVERSAL_BUILD */
