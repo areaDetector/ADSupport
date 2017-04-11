@@ -8,7 +8,7 @@
 /* #undef H5_CXX_HAVE_OFFSETOF */
 
 /* Define if this is a debug build. */
-/* #undef H5_DEBUG_BUILD */
+#define H5_DEBUG_BUILD 1
 
 /* Define the default plugins path to compile */
 #define H5_DEFAULT_PLUGINDIR "/usr/local/hdf5/lib/plugin"
@@ -200,8 +200,20 @@
 /* Define to 1 if you have the `z' library (-lz). */
 #define H5_HAVE_LIBZ 1
 
+/* Define to 1 if you have the `llround' function. */
+#define H5_HAVE_LLROUND 1
+
+/* Define to 1 if you have the `llroundf' function. */
+#define H5_HAVE_LLROUNDF 1
+
 /* Define to 1 if you have the `longjmp' function. */
 #define H5_HAVE_LONGJMP 1
+
+/* Define to 1 if you have the `lround' function. */
+#define H5_HAVE_LROUND 1
+
+/* Define to 1 if you have the `lroundf' function. */
+#define H5_HAVE_LROUNDF 1
 
 /* Define to 1 if you have the `lstat' function. */
 #define H5_HAVE_LSTAT 1
@@ -238,6 +250,12 @@
 
 /* Define to 1 if you have the `rand_r' function. */
 #define H5_HAVE_RAND_R 1
+
+/* Define to 1 if you have the `round' function. */
+#define H5_HAVE_ROUND 1
+
+/* Define to 1 if you have the `roundf' function. */
+#define H5_HAVE_ROUNDF 1
 
 /* Define to 1 if you have the `setjmp' function. */
 #define H5_HAVE_SETJMP 1
@@ -289,6 +307,12 @@
 
 /* Define to 1 if you have the <string.h> header file. */
 #define H5_HAVE_STRING_H 1
+
+/* Define to 1 if you have the `strtoll' function. */
+#define H5_HAVE_STRTOLL 1
+
+/* Define to 1 if you have the `strtoull' function. */
+#define H5_HAVE_STRTOULL 1
 
 /* Define if struct text_info is defined */
 /* #undef H5_HAVE_STRUCT_TEXT_INFO */
@@ -403,7 +427,7 @@
 #define H5_LT_OBJDIR ".libs/"
 
 /* Define to enable internal memory allocation sanity checking. */
-/* #undef H5_MEMORY_ALLOC_SANITY_CHECK */
+#define H5_MEMORY_ALLOC_SANITY_CHECK 1
 
 /* Define if the metadata trace file code is to be compiled in */
 /* #undef H5_METADATA_TRACE_FILE */
@@ -424,7 +448,7 @@
 #define H5_PACKAGE_NAME "HDF5"
 
 /* Define to the full name and version of this package. */
-#define H5_PACKAGE_STRING "HDF5 1.10.0-patch1"
+#define H5_PACKAGE_STRING "HDF5 1.10.1-pre1"
 
 /* Define to the one symbol short name of this package. */
 #define H5_PACKAGE_TARNAME "hdf5"
@@ -433,7 +457,7 @@
 #define H5_PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define H5_PACKAGE_VERSION "1.10.0-patch1"
+#define H5_PACKAGE_VERSION "1.10.1-pre1"
 
 /* Determine the maximum decimal precision in C */
 #define H5_PAC_C_MAX_REAL_PRECISION 33
@@ -571,7 +595,7 @@
 #define H5_STDC_HEADERS 1
 
 /* Define if strict file format checks are enabled */
-/* #undef H5_STRICT_FORMAT_CHECKS */
+#define H5_STRICT_FORMAT_CHECKS 1
 
 /* Define if your system supports pthread_attr_setscope(&attribute,
    PTHREAD_SCOPE_SYSTEM) call. */
@@ -592,7 +616,7 @@
 /* #undef H5_USING_MEMCHECKER */
 
 /* Version number of package */
-#define H5_VERSION "1.10.0-patch1"
+#define H5_VERSION "1.10.1-pre1"
 
 /* Data accuracy is prefered to speed during data conversions */
 #define H5_WANT_DATA_ACCURACY 1
