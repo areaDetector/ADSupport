@@ -88,12 +88,16 @@ ifeq ($(WITH_HDF5),YES)
     LIB_SRCS += H5B2dbg.c
     LIB_SRCS += H5B2hdr.c
     LIB_SRCS += H5B2int.c
+    LIB_SRCS += H5B2internal.c
+    LIB_SRCS += H5B2leaf.c
     LIB_SRCS += H5B2stat.c
     LIB_SRCS += H5B2test.c
     LIB_SRCS += H5C.c
     LIB_SRCS += H5Cdbg.c
     LIB_SRCS += H5Cepoch.c
+    LIB_SRCS += H5Cimage.c
     LIB_SRCS += H5Clog.c
+    LIB_SRCS += H5Cprefetched.c
     LIB_SRCS += H5Cquery.c
     LIB_SRCS += H5Ctag.c
     LIB_SRCS += H5Ctest.c
@@ -141,11 +145,11 @@ ifeq ($(WITH_HDF5),YES)
     LIB_SRCS += H5Fdeprec.c
     LIB_SRCS += H5Fefc.c
     LIB_SRCS += H5Ffake.c
-    LIB_SRCS += H5Fint.c
     LIB_SRCS += H5Fio.c
     LIB_SRCS += H5Fmount.c
     LIB_SRCS += H5Fquery.c
     LIB_SRCS += H5Fsfile.c
+    LIB_SRCS += H5Fspace.c
     LIB_SRCS += H5Fsuper.c
     LIB_SRCS += H5Fsuper_cache.c
     LIB_SRCS += H5Ftest.c
@@ -242,6 +246,7 @@ ifeq ($(WITH_HDF5),YES)
     LIB_SRCS += H5Obogus.c
     LIB_SRCS += H5Obtreek.c
     LIB_SRCS += H5Ocache.c
+    LIB_SRCS += H5Ocache_image.c
     LIB_SRCS += H5Ochunk.c
     LIB_SRCS += H5Ocont.c
     LIB_SRCS += H5Ocopy.c
@@ -261,7 +266,6 @@ ifeq ($(WITH_HDF5),YES)
     LIB_SRCS += H5Oname.c
     LIB_SRCS += H5Onull.c
     LIB_SRCS += H5Opline.c
-#    LIB_SRCS += H5Oproxy.c
     LIB_SRCS += H5Orefcount.c
     LIB_SRCS += H5Osdspace.c
     LIB_SRCS += H5Oshared.c
@@ -287,6 +291,7 @@ ifeq ($(WITH_HDF5),YES)
     LIB_SRCS += H5Pocpypl.c
     LIB_SRCS += H5Pstrcpl.c
     LIB_SRCS += H5Ptest.c
+    LIB_SRCS += H5PB.c
     LIB_SRCS += H5PL.c
     LIB_SRCS += H5R.c
     LIB_SRCS += H5Rdeprec.c
