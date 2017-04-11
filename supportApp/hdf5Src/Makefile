@@ -151,6 +151,7 @@ ifeq ($(WITH_HDF5),YES)
     LIB_SRCS += H5Fdeprec.c
     LIB_SRCS += H5Fefc.c
     LIB_SRCS += H5Ffake.c
+    LIB_SRCS += H5Fint.c
     LIB_SRCS += H5Fio.c
     LIB_SRCS += H5Fmount.c
     LIB_SRCS += H5Fquery.c
@@ -214,7 +215,6 @@ ifeq ($(WITH_HDF5),YES)
     LIB_SRCS += H5HFhdr.c
     LIB_SRCS += H5HFhuge.c
     LIB_SRCS += H5HFiblock.c
-    LIB_SRCS += H5HFint.c
     LIB_SRCS += H5HFiter.c
     LIB_SRCS += H5HFman.c
     LIB_SRCS += H5HFsection.c
