@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -53,6 +51,7 @@ typedef struct H5FD_class_mpi_t {
     int  (*get_rank)(const H5FD_t *file);     /* Get the MPI rank of a process */
     int  (*get_size)(const H5FD_t *file);     /* Get the MPI size of a communicator */
     MPI_Comm (*get_comm)(const H5FD_t *file); /* Get the communicator for a file */
+    herr_t (*get_mpi_info)(H5FD_t *file, void** mpi_info); /* get MPI_Info for a file */
 } H5FD_class_mpi_t;
 #endif
 
@@ -202,6 +201,7 @@ H5_DLL herr_t H5FD_get_mpio_atomicity(H5FD_t *file, hbool_t *flag);
 H5_DLL int H5FD_mpi_get_rank(const H5FD_t *file);
 H5_DLL int H5FD_mpi_get_size(const H5FD_t *file);
 H5_DLL MPI_Comm H5FD_mpi_get_comm(const H5FD_t *_file);
+H5_DLL herr_t H5FD_get_mpi_info(H5FD_t *file, void** file_info);
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* !_H5FDprivate_H */

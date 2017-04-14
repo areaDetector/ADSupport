@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  Robb Matzke <matzke@llnl.gov>
@@ -124,20 +122,8 @@ typedef struct H5FD_stdio_t {
     #define file_offset_t   __int64
     #define file_ftruncate  _chsize_s   /* Supported in VS 2005 or newer */
     #define file_ftell      _ftelli64
-#else
-    #define file_fseek      fseeko64
-    #define file_offset_t   __int64
-    #define file_ftruncate  _chsize_s   /* Supported in VS 2005 or newer */
-    #define file_ftell      ftello64
 #endif /* H5_HAVE_MINGW */
 #endif /* H5_HAVE_WIN32_API */
-
-#ifdef H5_HAVE_VXWORKS
-  #define file_fseek      fseek
-  #define file_offset_t   off_t
-  #define file_ftruncate  vxWorks_ftruncate
-  #define file_ftell      ftell
-#endif
 
 /* If these functions weren't re-defined for Windows, give them
  * more platform-independent names.

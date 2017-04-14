@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
@@ -801,31 +799,6 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
  *
  *-------------------------------------------------------------------------
  */
-/* mingw does not have getenv_s or _putenv_s to work around */
-#ifdef __MINGW32__
-
-int
-Wsetenv(const char *name, const char *value, int overwrite)
-{
-    char buffer[256];
-    char *envName;
-
-    /* If we're not overwriting, check if the environment variable exists.
-     * If it does (i.e.: the required buffer size to store the variable's
-     * value is non-zero), then return an error code.
-     */
-    if(!overwrite) {
-        envName = getenv(name);
-        if (envName)
-            return -1;
-    } /* end if */
-
-    snprintf(buffer, sizeof(buffer)-1, "%s=%s", name, value);
-    return putenv(buffer);
-} /* end Wsetenv() */
-
-#else
-
 int
 Wsetenv(const char *name, const char *value, int overwrite)
 {
@@ -844,8 +817,6 @@ Wsetenv(const char *name, const char *value, int overwrite)
 
     return (int)_putenv_s(name, value);
 } /* end Wsetenv() */
-
-#endif /* __MINGW32__ */
 
 #ifdef H5_HAVE_WINSOCK2_H
 #pragma comment(lib, "advapi32.lib")
@@ -879,13 +850,6 @@ int c99_snprintf(char* str, size_t size, const char* format, ...)
     return count;
 }
 
-#ifdef __MINGW32__
-/* mingw does not have _vsnprintf_s or vcsprintf */
-int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
-{
-    return vsnprintf(str, size, format, ap);
-}
-#else
 int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
 {
     int count = -1;
@@ -897,7 +861,6 @@ int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
 
     return count;
 }
-#endif /* __MING32__ */
 
 
 /*-------------------------------------------------------------------------

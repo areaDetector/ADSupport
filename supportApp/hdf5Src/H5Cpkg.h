@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -686,6 +684,13 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
     (cache_ptr)->images_created++;                          \
 }
 
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)  \
+{                                                          \
+    /* make sure image len is still good */                \
+    HDassert((cache_ptr)->image_len > 0);                  \
+    (cache_ptr)->images_read++;                            \
+}
+
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr)  \
 {                                                          \
     /* make sure image len is still good */                \
@@ -931,6 +936,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 #define H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_INDEX_SCAN_RESTART(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr)
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_PREFETCH(cache_ptr, dirty)
 #define H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr)
@@ -4549,6 +4555,18 @@ typedef struct H5C_tag_info_t {
  *		Further, since cache images are only created at file 
  *		close, this field should only be set at that time.
  *
+ * images_read: Integer field containing the number of cache images 
+ *              read from file.  Note that reading an image is different
+ *              from loading it -- reading the image means just that,
+ *              while loading the image refers to decoding it and loading
+ *              it into the metadata cache.
+ *
+ *              In the serial case, image_read should always equal 
+ *              images_loaded.  However, in the parallel case, the 
+ *              image should only be read by process 0.  All other 
+ *              processes should receive the cache image via a broadcast
+ *              from process 0.
+ *
  * images_loaded:  Integer field containing the number of cache images
  *		loaded since the last time statistics were reset.
  *
@@ -4864,6 +4882,7 @@ struct H5C_t {
 
     /* Fields for tracking cache image operations */
     int32_t			images_created;
+    int32_t			images_read;
     int32_t			images_loaded;
     hsize_t			last_image_size;
 

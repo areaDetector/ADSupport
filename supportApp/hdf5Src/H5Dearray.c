@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer: 	Quincey Koziol <koziol@hdfgroup.org>
@@ -1137,7 +1135,7 @@ H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
         H5VM_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
-        idx = H5VM_chunk_index(ndims, swizzled_coords, idx_info->layout->u.earray.swizzled_dim, idx_info->layout->u.earray.swizzled_down_chunks);
+        idx = H5VM_chunk_index(ndims, swizzled_coords, idx_info->layout->u.earray.swizzled_dim, idx_info->layout->u.earray.swizzled_max_down_chunks);
     } /* end if */
     else {
         /* Calculate the index of this chunk */
@@ -1202,7 +1200,8 @@ H5D__earray_idx_resize(H5O_layout_chunk_t *layout)
 
     /* "Swizzle" constant dimensions for this dataset */
     if(layout->u.earray.unlim_dim > 0) {
-        hsize_t swizzled_chunks[H5O_LAYOUT_NDIMS];    /* Swizzled form of # of chunks in each dimension */
+        hsize_t swizzled_chunks[H5O_LAYOUT_NDIMS];      /* Swizzled form of # of chunks in each dimension */
+        hsize_t swizzled_max_chunks[H5O_LAYOUT_NDIMS];  /* Swizzled form of max # of chunks in each dimension */
 
         /* Get the swizzled chunk dimensions */
         HDmemcpy(layout->u.earray.swizzled_dim, layout->dim, (layout->ndims - 1) * sizeof(layout->dim[0]));
@@ -1214,6 +1213,14 @@ H5D__earray_idx_resize(H5O_layout_chunk_t *layout)
 
         /* Get the swizzled "down" sizes for each dimension */
         if(H5VM_array_down((layout->ndims - 1), swizzled_chunks, layout->u.earray.swizzled_down_chunks) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute swizzled 'down' chunk size value")
+
+        /* Get the swizzled max number of chunks in each dimension */
+        HDmemcpy(swizzled_max_chunks, layout->max_chunks, (layout->ndims - 1) * sizeof(swizzled_max_chunks[0]));
+        H5VM_swizzle_coords(hsize_t, swizzled_max_chunks, layout->u.earray.unlim_dim);
+
+        /* Get the swizzled max "down" sizes for each dimension */
+        if(H5VM_array_down((layout->ndims - 1), swizzled_max_chunks, layout->u.earray.swizzled_max_down_chunks) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute swizzled 'down' chunk size value")
     } /* end if */
 
@@ -1414,7 +1421,7 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
         H5VM_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
-        idx = H5VM_chunk_index(ndims, swizzled_coords, idx_info->layout->u.earray.swizzled_dim, idx_info->layout->u.earray.swizzled_down_chunks);
+        idx = H5VM_chunk_index(ndims, swizzled_coords, idx_info->layout->u.earray.swizzled_dim, idx_info->layout->u.earray.swizzled_max_down_chunks);
     } /* end if */
     else {
         /* Calculate the index of this chunk */

@@ -8,7 +8,7 @@
 /* #undef CXX_HAVE_OFFSETOF */
 
 /* Define if this is a debug build. */
-#define DEBUG_BUILD 1
+/* #undef DEBUG_BUILD */
 
 /* Define the default plugins path to compile */
 #define DEFAULT_PLUGINDIR "/usr/local/hdf5/lib/plugin"
@@ -119,7 +119,7 @@
 #define HAVE_FILTER_DEFLATE 1
 
 /* Define if support for szip filter is enabled */
-#define HAVE_FILTER_SZIP 1
+/* #undef HAVE_FILTER_SZIP */
 
 /* Determine if __float128 is available */
 #define HAVE_FLOAT128 1
@@ -192,7 +192,7 @@
 #define HAVE_LIBPTHREAD 1
 
 /* Define to 1 if you have the `sz' library (-lsz). */
-#define HAVE_LIBSZ 1
+/* #undef HAVE_LIBSZ */
 
 /* Define to 1 if you have the `ws2_32' library (-lws2_32). */
 /* #undef HAVE_LIBWS2_32 */
@@ -427,7 +427,7 @@
 #define LT_OBJDIR ".libs/"
 
 /* Define to enable internal memory allocation sanity checking. */
-#define MEMORY_ALLOC_SANITY_CHECK 1
+/* #undef MEMORY_ALLOC_SANITY_CHECK */
 
 /* Define if the metadata trace file code is to be compiled in */
 /* #undef METADATA_TRACE_FILE */
@@ -448,7 +448,7 @@
 #define PACKAGE_NAME "HDF5"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "HDF5 1.10.1-pre1"
+#define PACKAGE_STRING "HDF5 1.10.1-pre2"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "hdf5"
@@ -457,7 +457,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.10.1-pre1"
+#define PACKAGE_VERSION "1.10.1-pre2"
 
 /* Determine the maximum decimal precision in C */
 #define PAC_C_MAX_REAL_PRECISION 33
@@ -595,7 +595,7 @@
 #define STDC_HEADERS 1
 
 /* Define if strict file format checks are enabled */
-#define STRICT_FORMAT_CHECKS 1
+/* #undef STRICT_FORMAT_CHECKS */
 
 /* Define if your system supports pthread_attr_setscope(&attribute,
    PTHREAD_SCOPE_SYSTEM) call. */
@@ -616,7 +616,7 @@
 /* #undef USING_MEMCHECKER */
 
 /* Version number of package */
-#define VERSION "1.10.1-pre1"
+#define VERSION "1.10.1-pre2"
 
 /* Data accuracy is prefered to speed during data conversions */
 #define WANT_DATA_ACCURACY 1

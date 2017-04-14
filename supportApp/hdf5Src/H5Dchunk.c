@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer: 	Quincey Koziol <koziol@hdfgroup.org>
@@ -6060,9 +6058,9 @@ H5D__chunk_stats(const H5D_t *dset, hbool_t headers)
 #endif
 
     if (headers) {
-        if (rdcc->nhits>0 || rdcc->nmisses>0) {
-            miss_rate = 100.0 * rdcc->nmisses /
-                    (rdcc->nhits + rdcc->nmisses);
+        if (rdcc->stats.nhits>0 || rdcc->stats.nmisses>0) {
+            miss_rate = 100.0 * rdcc->stats.nmisses /
+                    (rdcc->stats.nhits + rdcc->stats.nmisses);
         } else {
             miss_rate = 0.0;
         }
@@ -6073,8 +6071,8 @@ H5D__chunk_stats(const H5D_t *dset, hbool_t headers)
         }
 
         fprintf(H5DEBUG(AC), "   %-18s %8u %8u %7s %8d+%-9ld\n",
-            "raw data chunks", rdcc->nhits, rdcc->nmisses, ascii,
-            rdcc->ninits, (long)(rdcc->nflushes)-(long)(rdcc->ninits));
+            "raw data chunks", rdcc->stats.nhits, rdcc->stats.nmisses, ascii,
+            rdcc->stats.ninits, (long)(rdcc->stats.nflushes)-(long)(rdcc->stats.ninits));
     }
 
 done:

@@ -9,15 +9,13 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- * Created:		Apr 10, 2017
+ * Created:		Apr 13, 2017
  *			Epics <epics@corvette.cars.aps.anl.gov>
  *
  * Purpose:		This machine-generated source code contains
@@ -37,21 +35,21 @@ char H5libhdf5_settings[]=
 	"\n"
 	"General Information:\n"
 	"-------------------\n"
-	"                   HDF5 Version: 1.10.1-pre1\n"
-	"                  Configured on: Mon Apr 10 18:36:44 CDT 2017\n"
+	"                   HDF5 Version: 1.10.1-pre2\n"
+	"                  Configured on: Thu Apr 13 19:23:48 CDT 2017\n"
 	"                  Configured by: epics@corvette.cars.aps.anl.gov\n"
 	"                    Host system: x86_64-unknown-linux-gnu\n"
 	"              Uname information: Linux corvette.cars.aps.anl.gov 3.10.0-514.2.2.el7.x86_64 #1 SMP Tue Dec 6 23:06:41 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux\n"
 	"                       Byte sex: little-endian\n"
-	"             Installation point: /home/epics/areaDetector_libs/hdf5-1.10.1-pre1/hdf5\n"
+	"             Installation point: /home/epics/areaDetector_libs/hdf5-1.10.1-pre2/hdf5\n"
 	"\n"
 	"Compiling Options:\n"
 	"------------------\n"
-	"                     Build Mode: debug\n"
-	"              Debugging Symbols: yes\n"
-	"                        Asserts: yes\n"
+	"                     Build Mode: production\n"
+	"              Debugging Symbols: no\n"
+	"                        Asserts: no\n"
 	"                      Profiling: no\n"
-	"             Optimization Level: debug\n"
+	"             Optimization Level: high\n"
 	"\n"
 	"Linking Options:\n"
 	"----------------\n"
@@ -59,8 +57,8 @@ char H5libhdf5_settings[]=
 	"  Statically Linked Executables: \n"
 	"                        LDFLAGS: \n"
 	"                     H5_LDFLAGS: \n"
-	"                     AM_LDFLAGS:  -L/usr/local64/lib\n"
-	"                Extra libraries: -lpthread -lsz -lz -ldl -lm \n"
+	"                     AM_LDFLAGS: \n"
+	"                Extra libraries: -lpthread -lz -ldl -lm \n"
 	"                       Archiver: ar\n"
 	"                         Ranlib: ranlib\n"
 	"\n"
@@ -69,10 +67,10 @@ char H5libhdf5_settings[]=
 	"                              C: yes\n"
 	"                     C Compiler: /bin/gcc ( gcc (GCC) 4.8.5 20150623 )\n"
 	"                       CPPFLAGS: \n"
-	"                    H5_CPPFLAGS: -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L   -UNDEBUG -DH5AC_DEBUG -DH5B2_DEBUG -DH5D_DEBUG -DH5F_DEBUG -DH5HL_DEBUG -DH5I_DEBUG -DH5O_DEBUG -DH5S_DEBUG -DH5ST_DEBUG -DH5T_DEBUG -DH5Z_DEBUG -DH5_DEBUG_API\n"
-	"                    AM_CPPFLAGS:  -I/usr/local64/include\n"
+	"                    H5_CPPFLAGS: -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L   -DNDEBUG -UH5_DEBUG_API\n"
+	"                    AM_CPPFLAGS:  -I/usr/local32/include\n"
 	"                        C Flags: \n"
-	"                     H5 C Flags: -std=c99 -pedantic -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Wfloat-equal -Wmissing-format-attribute -Wpacked -Wdisabled-optimization -Wformat=2 -Wunreachable-code -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros -Wunsafe-loop-optimizations -Wc++-compat -Wlogical-op -Wlarger-than=2048 -Wvla -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat -Wstrict-overflow=5 -Wjump-misses-init -Wdouble-promotion -Wtrampolines -Wstack-usage=8192 -Wvector-operation-performance  -g -Wno-inline -Wno-aggregate-return -Wno-missing-noreturn -Wno-suggest-attribute=const -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn -Wno-suggest-attribute=format \n"
+	"                     H5 C Flags: -std=c99 -pedantic -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Wfloat-equal -Wmissing-format-attribute -Wpacked -Wdisabled-optimization -Wformat=2 -Wunreachable-code -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros -Wunsafe-loop-optimizations -Wc++-compat -Wlogical-op -Wlarger-than=2048 -Wvla -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat -Wstrict-overflow=5 -Wjump-misses-init -Wdouble-promotion -Wtrampolines -Wstack-usage=8192 -Wvector-operation-performance  -s -Wno-inline -Wno-aggregate-return -Wno-missing-noreturn -Wno-suggest-attribute=const -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn -Wno-suggest-attribute=format -O3\n"
 	"                     AM C Flags: \n"
 	"               Shared C Library: yes\n"
 	"               Static C Library: yes\n"
@@ -92,17 +90,17 @@ char H5libhdf5_settings[]=
 	"                   Threadsafety: yes\n"
 	"            Default API mapping: v110\n"
 	" With deprecated public symbols: yes\n"
-	"         I/O filters (external): deflate(zlib),szip(encoder)\n"
+	"         I/O filters (external): deflate(zlib)\n"
 	"                            MPE: no\n"
 	"                     Direct VFD: no\n"
 	"                        dmalloc: no\n"
-	" Packages w/ extra debug output: AC,B2,D,F,HL,I,O,S,ST,T,Z\n"
-	"                    API tracing: yes\n"
+	" Packages w/ extra debug output: none\n"
+	"                    API tracing: no\n"
 	"           Using memory checker: no\n"
-	"Memory allocation sanity checks: yes\n"
+	"Memory allocation sanity checks: no\n"
 	"            Metadata trace file: no\n"
 	"         Function stack tracing: no\n"
-	"      Strict file format checks: yes\n"
+	"      Strict file format checks: no\n"
 	"   Optimization instrumentation: no\n"
 ;
 

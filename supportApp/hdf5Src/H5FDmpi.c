@@ -5,12 +5,10 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -145,6 +143,45 @@ H5FD_mpi_get_comm(const H5FD_t *file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpi_get_comm() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_get_mpi_info
+ *
+ * Purpose:	Retrieves the file's mpi info
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	John Mainzer
+ *              4/4/17
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_get_mpi_info(H5FD_t *file, void** mpi_info)
+{
+    const H5FD_class_mpi_t *cls;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+    cls = (const H5FD_class_mpi_t *)(file->cls);
+    HDassert(cls);
+    HDassert(cls->get_mpi_info);    /* All MPI drivers must implement this */
+
+    /* Dispatch to driver */
+    if ((ret_value=(cls->get_mpi_info)(file, mpi_info)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, \
+                    "driver get_mpi_info request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_get_mpi_info() */
 
 
 /*-------------------------------------------------------------------------
