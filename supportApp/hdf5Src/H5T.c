@@ -925,6 +925,8 @@ H5T__init_package(void)
      *------------------------------------------------------------
      */
 
+#ifndef H5_HAVE_VXWORKS
+/* These functions are not working on vxWorks, need to figure out why */
     /* Little-endian 32-bit UNIX time_t */
     H5T_INIT_TYPE(TIME, H5T_UNIX_D32LE_g, COPY, std_u32le, NOSET, -)
 
@@ -936,7 +938,7 @@ H5T__init_package(void)
 
     /* Big-endian 64-bit UNIX time_t */
     H5T_INIT_TYPE(TIME, H5T_UNIX_D64BE_g, COPY, std_u64be, NOSET, -)
-
+#endif
 
     /* Indicate that the types that are created from here down are allocated
      * H5FL_ALLOC(), not copied with H5T_copy()
