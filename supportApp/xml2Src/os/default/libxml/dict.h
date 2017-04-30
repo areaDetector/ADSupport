@@ -17,6 +17,10 @@
 #define __XML_EXTERNC
 #endif
 
+#if _WRS_VXWORKS_MAJOR < 6
+#define _XML_EXTERNC
+#endif
+
 /*
  * The dictionary.
  */
