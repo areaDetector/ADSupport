@@ -192,8 +192,14 @@
 
 #else
 
+  /* vxWorks 5 */
+  #include <epicsStdio.h>
+
   /* Whether __va_copy() is available */
   #define HAVE___VA_COPY 1
+  
+  #define snprintf epicsSnprintf
+  #define vsnprintf epicsVsnprintf
 
 #endif
 
