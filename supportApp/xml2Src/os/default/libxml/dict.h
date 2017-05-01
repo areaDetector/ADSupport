@@ -17,15 +17,13 @@
 #define __XML_EXTERNC
 #endif
 
-#if _WRS_VXWORKS_MAJOR < 6
-#define _XML_EXTERNC
-#endif
-
 /*
  * The dictionary.
  */
-__XML_EXTERNC typedef struct _xmlDict xmlDict;
-__XML_EXTERNC typedef xmlDict *xmlDictPtr;
+__XML_EXTERNC {
+  typedef struct _xmlDict xmlDict;
+  typedef xmlDict *xmlDictPtr;
+}
 
 #include <limits.h>
 #include <libxml/xmlversion.h>
