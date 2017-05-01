@@ -15,7 +15,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- * Created:		Apr 13, 2017
+ * Created:		May  1, 2017
  *			Epics <epics@corvette.cars.aps.anl.gov>
  *
  * Purpose:		This machine-generated source code contains
@@ -35,13 +35,13 @@ char H5libhdf5_settings[]=
 	"\n"
 	"General Information:\n"
 	"-------------------\n"
-	"                   HDF5 Version: 1.10.1-pre2\n"
-	"                  Configured on: Thu Apr 13 19:23:48 CDT 2017\n"
+	"                   HDF5 Version: 1.10.1\n"
+	"                  Configured on: Mon May  1 12:14:51 CDT 2017\n"
 	"                  Configured by: epics@corvette.cars.aps.anl.gov\n"
 	"                    Host system: x86_64-unknown-linux-gnu\n"
 	"              Uname information: Linux corvette.cars.aps.anl.gov 3.10.0-514.2.2.el7.x86_64 #1 SMP Tue Dec 6 23:06:41 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux\n"
 	"                       Byte sex: little-endian\n"
-	"             Installation point: /home/epics/areaDetector_libs/hdf5-1.10.1-pre2/hdf5\n"
+	"             Installation point: /home/epics/areaDetector_libs/hdf5-1.10.1/hdf5\n"
 	"\n"
 	"Compiling Options:\n"
 	"------------------\n"
@@ -57,8 +57,8 @@ char H5libhdf5_settings[]=
 	"  Statically Linked Executables: \n"
 	"                        LDFLAGS: \n"
 	"                     H5_LDFLAGS: \n"
-	"                     AM_LDFLAGS: \n"
-	"                Extra libraries: -lpthread -lz -ldl -lm \n"
+	"                     AM_LDFLAGS:  -L/usr/local64/lib\n"
+	"                Extra libraries: -lpthread -lsz -lz -ldl -lm \n"
 	"                       Archiver: ar\n"
 	"                         Ranlib: ranlib\n"
 	"\n"
@@ -68,7 +68,7 @@ char H5libhdf5_settings[]=
 	"                     C Compiler: /bin/gcc ( gcc (GCC) 4.8.5 20150623 )\n"
 	"                       CPPFLAGS: \n"
 	"                    H5_CPPFLAGS: -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L   -DNDEBUG -UH5_DEBUG_API\n"
-	"                    AM_CPPFLAGS:  -I/usr/local32/include\n"
+	"                    AM_CPPFLAGS:  -I/usr/local64/include\n"
 	"                        C Flags: \n"
 	"                     H5 C Flags: -std=c99 -pedantic -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Wfloat-equal -Wmissing-format-attribute -Wpacked -Wdisabled-optimization -Wformat=2 -Wunreachable-code -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros -Wunsafe-loop-optimizations -Wc++-compat -Wlogical-op -Wlarger-than=2048 -Wvla -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat -Wstrict-overflow=5 -Wjump-misses-init -Wdouble-promotion -Wtrampolines -Wstack-usage=8192 -Wvector-operation-performance  -s -Wno-inline -Wno-aggregate-return -Wno-missing-noreturn -Wno-suggest-attribute=const -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn -Wno-suggest-attribute=format -O3\n"
 	"                     AM C Flags: \n"
@@ -90,7 +90,7 @@ char H5libhdf5_settings[]=
 	"                   Threadsafety: yes\n"
 	"            Default API mapping: v110\n"
 	" With deprecated public symbols: yes\n"
-	"         I/O filters (external): deflate(zlib)\n"
+	"         I/O filters (external): deflate(zlib),szip(encoder)\n"
 	"                            MPE: no\n"
 	"                     Direct VFD: no\n"
 	"                        dmalloc: no\n"
