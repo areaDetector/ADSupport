@@ -190,6 +190,11 @@
   /* Define to 1 if you have the <stdint.h> header file. */
   #define HAVE_STDINT_H 1
 
+#else
+
+  /* Whether __va_copy() is available */
+  #define HAVE___VA_COPY 1
+
 #endif
 
 /* Define to 1 if you have the `sprintf' function. */
@@ -279,9 +284,6 @@
 
 /* Define to 1 if you have the `_stat' function. */
 /* #undef HAVE__STAT */
-
-/* Whether __va_copy() is available */
-/* #undef HAVE___VA_COPY */
 
 /* Define as const if the declaration of iconv() needs const. */
 #define ICONV_CONST 
