@@ -1,4 +1,4 @@
-HDF5 version 1.10.0-patch1 released on 2016-05-23
+HDF5 version 1.10.1 released on 2017-04-27
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
