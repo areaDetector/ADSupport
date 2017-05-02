@@ -1,4 +1,4 @@
-This directory contains the HDF5 code (1.10.1-pre1).  
+This directory contains the HDF5 code (1.10.1).  
 It has been slightly modified to build under the EPICS build system.
 
 The following source files were modified.
@@ -35,18 +35,24 @@ H5system.c
   New versions of Wsetenv and c99_vsnprintf were added for mingw.  
   mingw does not have some of the run-time functions that Visual Studio has.
 
+  H5system.patch was generated to apply this change on each HDF5 release.
+
 H5FDstdio.c
   New definitions of file_fseek and file_ftell for mingw.
   mingw does not have some of the run-time functions that Visual Studio has.
 
   New definitions of file_fseek, file_ftell and file_ftruncate for vxWorks.
   ftruncate may be a problem since vxWorks lacks ftruncate except on DOS file system.
+
+  H5FDstdio.patch was generated to apply this change on each HDF5 release.
  
 H5T.c
   Temporarily commented out 4 macro expansions stating with H5T_INIT_TYPE(TIME, ...) on vxWorks
   These are generating compiler errors on vxWorks. 
   It is hard code to follow, but I'm sure I can fix it.  
   May need to contact HDF5 group for help.
+
+  H5T.patch was generated to apply this change on each HDF5 release.
   
 H5vxWorks.c, H5vxWorks.h
   These are new files.  They provide dummy implementations of:
@@ -58,24 +64,6 @@ H5vxWorks.c, H5vxWorks.h
   ftruncate (named vxWorks_ftruncate) to avoid conflict with vxWorks definition which is only
     implemented on DOS file system.
   flock (named vxWorks_flock).
-
-
-When building the 1.10-swmr-fixes release I also needed to do the following:
-
-Makefile
-  Commented out -D NDEBUG.  Compiling fails in H5C.c if NDEBUG is set.
-
-H5win32defs.h:
-  Added definition of HDnanosleep
-
-H5FDlog.c
-  Added brackets to fix Visual Studio compiler error.
-  
-H5system.c
-  Added definition of round() functions for Visual Studio pre-2013.
-  
-os/WIN32/H5pubconf.h
-  Added definition of timespec structure.
 
 
 These are the flags that were used by CMake with my comments:
