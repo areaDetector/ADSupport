@@ -13,6 +13,15 @@ files respectively, in the configure/ directory of the appropriate release of th
 Release Notes
 =============
 
+R1-2 (May XXX, 2017)
+========================
+* Updated HDF5 to 1.10.1 which was officially released on May 1, 2017.  
+  This release fixes the SWMR problems and adds some new performance features.
+* Updated Nexus to release 4.4.3.  This fixes some problems on 64-bit systems.
+* Modified XML2 so it will build on vxWorks 5.5.  ADCore previously contained and used TinyXml,
+  but now requires libxml2, so it needs to build on all platforms.
+
+
 R1-1 (February 19, 2017)
 ========================
 * Fixed a problem with XML2 on vxWorks.  xml2Src/os/vxWorks/config.h was previously defining HAVE_ZLIB_H.
