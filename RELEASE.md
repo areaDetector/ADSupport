@@ -13,7 +13,7 @@ files respectively, in the configure/ directory of the appropriate release of th
 Release Notes
 =============
 
-R1-2 (May XXX, 2017)
+R1-2 (May 5, 2017)
 ========================
 * Updated HDF5 to 1.10.1 which was officially released on May 1, 2017.  
   This release fixes the SWMR problems and adds some new performance features.
