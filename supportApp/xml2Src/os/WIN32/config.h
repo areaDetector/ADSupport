@@ -114,6 +114,9 @@ static int isnan (double d) {
 #endif
 #endif
 
+/* Support for IPv6 */
+#define SUPPORT_IP6 /**/
+
 /* Some third-party libraries far from our control assume the following
    is defined, which it is not if we don't include windows.h. */
 #if !defined(FALSE)
