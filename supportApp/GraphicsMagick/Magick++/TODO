@@ -1,0 +1,83 @@
+
+Items large and small which remain to be worked on.
+--------------------------------------------------------------------
+
+* See if ImageMagick's progress monitor can be supported.
+
+* Add support for LevelImage().
+
+* Extend ColorRGB constructor so that it it supports setting alpha.
+
+* Add a pixelIndex method to Image class (similar to pixelColor) which
+  associates a colormap index (index used by colorMap) with an x,y
+  pixel position for cache view 0 (default view).
+
+* Add a pixelIndex method to Pixels class which
+  associates a colormap index (index used by colorMap) with an x,y
+  pixel position for the selected view.
+
+* Provide a way for the user to tailor how errors of various types are
+  reported.
+
+* Set scene number to 1 (or 0?) in STL unlinkImages.
+
+* Add read/write methods to support user-supplied BLOBs which are
+  supplied in raw form rather than via a Blob object.
+
+* Use verbose flag on image to enable run-time tracing.
+
+* Add microtimer support for image processing operations so that the
+  processing time for the last operation is immediately available.
+
+* Add support for OrderedDitherImage().
+
+* Look into adding/removing profiles via the ProfileImage function.
+  Need method for adding a profile via ProfileType and void* as well
+  as a method for removing a profile via ProfileType.  The ProfileType
+  "UndefinedProfile" would remove all profiles.
+  Need to reconcile memory allocators between profiles and Blob.
+
+* Extend Image constructor to allow specifying DirectClass or
+  PsuedoClass representation when creating a solid-color canvas.
+
+* Add Image constructor that takes only a Geometry argument in order
+  to support constructing an image with size, but without content.
+
+* Fix floodFillTexture() so that it preserves the current texture.
+
+* Fix documentation for drawing rounded rectangle.  Parameters
+  represent corners, not center.
+
+* Manage Options instance seperate from Image instance.  Possibly take
+  this to the extreme by managing each contained structure
+  independently.
+
+* Support options stack similar to graphic-context.
+
+* Add support for new drawing primitives:
+  - clip-path %s  (%s is the name of the clip path
+  - pop clip-path
+  - push clip-path-%s  (%s is the name of the clip path)
+  - viewbox (e.g. "viewbox 0 0 640 480")
+
+* Support manipulating IPTC profiles directly.
+
+Items which will require the aid of volunteers.  Volunteers?
+--------------------------------------------------------------------
+
+* Port to CodeWarrior Professional 6.0 under NT
+
+* Port to Borland C++ Builder 4.0 (http://www.borland.com/)
+
+* Port to EDG C++ (multi-platform) compiler (http://www.edg.com/)
+
+* Port to HP-UX C++ compiler (aCC)
+
+* Port to AIX C Set++ compiler
+
+* Port to DEC C++ compiler
+
+* Port to Cray C++ compiler
+
+* Port to VMS
+
