@@ -11,6 +11,7 @@ ifeq ($(WITH_HDF5),YES)
     LIBRARY_IOC = hdf5
     PROD_IOC    = H5detect
 
+    USR_CFLAGS += -D NDEBUG
     ifeq ($(SHARED_LIBRARIES), YES)
       USR_CFLAGS_WIN32 += -D H5_BUILT_AS_DYNAMIC_LIB 
       USR_CFLAGS_WIN32 += -D hdf5_shared_EXPORTS
