@@ -1225,10 +1225,8 @@ xmlNanoHTTPConnectHost(const char *host, int port)
 
 void*
 xmlNanoHTTPOpen(const char *URL, char **contentType) {
-	void* ret;
     if (contentType != NULL) *contentType = NULL;
-	ret = xmlNanoHTTPMethod(URL, NULL, NULL, contentType, NULL, 0);
-    return(ret);
+    return(xmlNanoHTTPMethod(URL, NULL, NULL, contentType, NULL, 0));
 }
 
 /**
@@ -1604,9 +1602,8 @@ retry:
 void*
 xmlNanoHTTPMethod(const char *URL, const char *method, const char *input,
                   char **contentType, const char *headers, int ilen) {
-	void* ret = xmlNanoHTTPMethodRedir(URL, method, input, contentType,
-		                  NULL, headers, ilen);
-    return(ret);
+    return(xmlNanoHTTPMethodRedir(URL, method, input, contentType,
+		                  NULL, headers, ilen));
 }
 
 /**
