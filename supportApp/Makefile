@@ -11,6 +11,7 @@ DIRS += tiffSrc
 tiffSrc_DEPEND_DIRS += zlibSrc
 
 DIRS += xml2Src
+xml2Src_DEPEND_DIRS += zlibSrc
 
 DIRS += szipSrc
 
