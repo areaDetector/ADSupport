@@ -88,7 +88,7 @@
 // prefixed with "Gm" to ensure that there are no conflicts at the
 // library level. Symbol renaming is done using the C preprocessor so
 // there is still risk of conflict at the source level.
-#undef PREFIX_MAGICK_SYMBOLS
+//#undef PREFIX_MAGICK_SYMBOLS
 
 
 /////////////
