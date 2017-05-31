@@ -20,6 +20,10 @@ else
   USR_CXXFLAGS_WIN32 += -D_LIB
 endif
 
+ifeq ($(GRAPHICSMAGICK_PREFIX_SYMBOLS),YES)
+  USR_CXXFLAGS += -DPREFIX_MAGICK_SYMBOLS
+endif
+
 USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick
 USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/lcms/include
 USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/Magick++/lib
