@@ -29,6 +29,9 @@ endif
 
 USR_CFLAGS += -D_MAGICKLIB_
 USR_CFLAGS += -DHAVE_VSNPRINTF
+ifeq ($(GRAPHICSMAGICK_PREFIX_SYMBOLS),YES)
+  USR_CFLAGS += -DPREFIX_MAGICK_SYMBOLS
+endif
 
 # Here overriding the default header file install location.
 # This allows Magick++ headers files (at $(INSTALL_LOCATION)/include/Magick++) to
@@ -98,6 +101,7 @@ INC += resource.h
 INC += shear.h
 INC += signature.h
 INC += statistics.h
+INC += symbols.h
 INC += texture.h
 INC += timer.h
 INC += transform.h

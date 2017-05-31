@@ -22,6 +22,10 @@ endif
 
 USR_CFLAGS += -DHAVE_VSNPRINTF
 
+ifeq ($(GRAPHICSMAGICK_PREFIX_SYMBOLS),YES)
+  USR_CFLAGS += -DPREFIX_MAGICK_SYMBOLS
+endif
+
 USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick
 USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/jbig/libjbig
 USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/jp2/src/libjasper/include
