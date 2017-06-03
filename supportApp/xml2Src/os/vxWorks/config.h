@@ -16,7 +16,7 @@
 #define HAVE_ARPA_INET_H 1
 
 /* Define to 1 if you have the <arpa/nameser.h> header file. */
-#define HAVE_ARPA_NAMESER_H 1
+/* #define HAVE_ARPA_NAMESER_H 1 */
 
 /* Whether struct sockaddr::__ss_family exists */
 /* #undef HAVE_BROKEN_SS_FAMILY */
@@ -251,7 +251,7 @@
 /* #undef HAVE_SYS_NDIR_H */
 
 /* Define to 1 if you have the <sys/select.h> header file. */
-#define HAVE_SYS_SELECT_H 1
+/* #define HAVE_SYS_SELECT_H 1 */
 
 /* Define to 1 if you have the <sys/socket.h> header file. */
 #define HAVE_SYS_SOCKET_H 1
