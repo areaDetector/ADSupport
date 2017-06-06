@@ -13,6 +13,7 @@ has a different version from the one required by areaDetector.
 
 This module contains the following libraries:
 
+- [GraphicsMagick] (http://www.graphicsmagick.org/)
 - [HDF5]   (https://support.hdfgroup.org/HDF5/)
 - [JPEG]   (http://www.ijg.org/)
 - [netCDF] (http://www.unidata.ucar.edu/software/netcdf/)  
