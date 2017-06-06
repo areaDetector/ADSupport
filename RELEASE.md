@@ -13,6 +13,17 @@ files respectively, in the configure/ directory of the appropriate release of th
 Release Notes
 =============
 
+
+R1-3 (June XXX, 2017)
+========================
+* Added support for GraphicsMagick.  It is based on GraphicsMagick version 1.3.25.
+  This support is used by NDFileMagick in ADCore and by the ADURL driver.
+  This has been tested on Windows and Linux.  It is disabled for vxWorks.  
+  Thanks to Peter Heesterman for doing this. 
+* Modified xml2Src to enable building nanoftp.c and nanohttp.c which are used for transferring files
+  in GraphicsMagick. 
+
+
 R1-2 (May 5, 2017)
 ========================
 * Updated HDF5 to 1.10.1 which was officially released on May 1, 2017.  
