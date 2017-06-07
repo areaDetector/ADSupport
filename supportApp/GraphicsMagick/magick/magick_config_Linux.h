@@ -535,7 +535,7 @@
 /* #undef PTHREAD_CREATE_JOINABLE */
 
 /* Number of bits in a pixel Quantum (8/16/32) */
-#define QuantumDepth 8
+#define QuantumDepth 32
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #define RETSIGTYPE void
