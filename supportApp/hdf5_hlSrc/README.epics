@@ -1,0 +1,10 @@
+This directory contains the HDF5 high-level interface code (1.10.1).
+The files were copied from the hl directory in the HDF5 source tree.
+It has been slightly modified to build under the EPICS build system.
+
+
+Makefile  
+  This is completely new.
+  
+No source files were modified.
+
