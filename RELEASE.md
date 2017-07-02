@@ -21,7 +21,8 @@ R1-3 (July 3, 2017)
   This has been tested on Windows and Linux.  It is disabled for vxWorks.  
   Thanks to Peter Heesterman for doing this. 
 * Modified xml2Src to enable building nanoftp.c and nanohttp.c which are used for transferring files
-  in GraphicsMagick. 
+  in GraphicsMagick.
+* Added support for the HDF5 hl (high-level) library.  This is in a new hdf5_hlSrc directory.  
 
 
 R1-2 (May 5, 2017)
