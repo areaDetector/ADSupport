@@ -18,6 +18,9 @@ DIRS += szipSrc
 DIRS += hdf5Src
 hdf5Src_DEPEND_DIRS += szipSrc zlibSrc
 
+DIRS += hdf5_hlSrc
+hdf5_hlSrc_DEPEND_DIRS += hdf5Src
+
 DIRS += nexusSrc
 nexusSrc_DEPEND_DIRS += hdf5Src
 
