@@ -14,7 +14,7 @@ Release Notes
 =============
 
 
-R1-3 (June XXX, 2017)
+R1-3 (July 3, 2017)
 ========================
 * Added support for GraphicsMagick.  It is based on GraphicsMagick version 1.3.25.
   This support is used by NDFileMagick in ADCore and by the ADURL driver.
