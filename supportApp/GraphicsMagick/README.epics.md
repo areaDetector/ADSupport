@@ -1,4 +1,4 @@
-This directory contains the GraphicsMagick code (1.3.25).  
+This directory contains the GraphicsMagick code (1.3.25).
 It has been modified to build under the EPICS build system.
 
 This work was done by Peter Heesterman.  The documentation in this file is based on a Word document he
@@ -17,7 +17,7 @@ produced describing what he did.  The following are the important issues and cha
   - The Magick library depends on configuration files:
     - delegates.mgk
     - modules.mgk
-    - log.mgk.
+    - log.mgk
   
   By hard-coded default, Magick logs nothing, not even errors or the fact that it couldn’t find it’s configuration files. 
   including the log.mgk configuration, nor where it might have looked to find these file(s).
@@ -49,6 +49,6 @@ produced describing what he did.  The following are the important issues and cha
   - This means that static.c, static.h and (Un)RegisterStaticModules() are now inappropriately named.
   - This issue should be raised with the GraphicsMagick project team.
 
-As time permits this file should be updated to describe exactly what files were changed.
+As time permits this file should be updated to describe exactly what files in the GraphicsMagick distriubtion were changed.
 We should also generate .patch files is done in hdf5Src and nexusSrc,
 which can be applied when a new version of GraphicsMagick is downloaded to this directory.
