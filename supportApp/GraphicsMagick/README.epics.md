@@ -18,6 +18,7 @@ produced describing what he did.  The following are the important issues and cha
     - delegates.mgk
     - modules.mgk
     - log.mgk.
+  
   By hard-coded default, Magick logs nothing, not even errors or the fact that it couldn’t find it’s configuration files. 
   including the log.mgk configuration, nor where it might have looked to find these file(s).
   This makes it difficult to debug what is going wrong.
@@ -26,6 +27,7 @@ produced describing what he did.  The following are the important issues and cha
   - The GraphicsMagick architecture includes 2 entirely separate build configurations:
     - Static 
     - Dynamic
+  
   Processing code in the low-level ‘coders’ library is heavily dependent on code in the ‘magick’ library.
   This appears to be a dependency inversion. 
   In a static build, the file ‘magick/static.c’ invokes functions like ‘RegisterURLImage()’ and ‘UnregisterURLImage()’
