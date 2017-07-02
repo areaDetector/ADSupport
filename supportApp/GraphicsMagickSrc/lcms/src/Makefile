@@ -24,7 +24,7 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       USR_CFLAGS_WIN32 += -D_LIB
     endif
     
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/lcms/include
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/lcms/include
     
     LIB_SRCS += cmsalpha.c
     LIB_SRCS += cmscam02.c

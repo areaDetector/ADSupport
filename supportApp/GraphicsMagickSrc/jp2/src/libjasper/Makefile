@@ -31,9 +31,9 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       USR_CFLAGS_WIN32 += -D_LIB
     endif
     
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc
     
-    LIBJASPER = $(TOP)/supportApp/GraphicsMagick/jp2/src/libjasper
+    LIBJASPER = $(TOP)/supportApp/GraphicsMagickSrc/jp2/src/libjasper
     
     USR_INCLUDES += -I$(LIBJASPER)/include
     

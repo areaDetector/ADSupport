@@ -28,8 +28,8 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       USR_CFLAGS_WIN32 += -D_LIB
     endif
     
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/lcms/inc
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/lcms/inc
     
     LIB_SRCS += analyze.c
     

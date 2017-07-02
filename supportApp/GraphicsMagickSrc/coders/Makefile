@@ -29,14 +29,14 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       USR_CFLAGS += -DPREFIX_MAGICK_SYMBOLS
     endif
     
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/jbig/libjbig
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/jp2/src/libjasper/include
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/bzlib
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/png
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/webp/src
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/ttf/include
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/wmf/include
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/jbig/libjbig
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/jp2/src/libjasper/include
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/bzlib
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/png
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/webp/src
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/ttf/include
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/wmf/include
     
     INC += static.h
     

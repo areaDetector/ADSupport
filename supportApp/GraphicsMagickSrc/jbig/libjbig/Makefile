@@ -22,7 +22,7 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       USR_CFLAGS_WIN32 += -D_LIB
     endif
     
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc
     
     #INC += jbig.h
     LIB_SRCS += jbig.c

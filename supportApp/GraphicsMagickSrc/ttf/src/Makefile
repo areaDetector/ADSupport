@@ -28,7 +28,7 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       USR_CFLAGS += -D_LIB
     endif
     
-    TTF = $(TOP)/supportApp/GraphicsMagick/ttf
+    TTF = $(TOP)/supportApp/GraphicsMagickSrc/ttf
     
     USR_INCLUDES += -I$(TTF)/include
     
@@ -56,7 +56,7 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
     include $(SRC)/cff/Makefile
     
     # LIB_RCS = ttf.rc
-    # D:\downloads\GraphicsMagick\GraphicsMagick-1.3.25\VisualMagick\ttf\ttf.rc
+    # D:\downloads\GraphicsMagickSrc\GraphicsMagickSrc-1.3.25\VisualMagick\ttf\ttf.rc
 
   endif # ($(GRAPHICSMAGICK_EXTERNAL),NO)
 endif # ($(WITH_GRAPHICSMAGICK),YES)

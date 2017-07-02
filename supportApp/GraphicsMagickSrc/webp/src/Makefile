@@ -24,9 +24,9 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       USR_CFLAGS_WIN32 += -D_LIB
     endif
     
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc
     
-    WEBP = $(TOP)/supportApp/GraphicsMagick/webp
+    WEBP = $(TOP)/supportApp/GraphicsMagickSrc/webp
     WEBPSRC = $(WEBP)/src
     
     include $(WEBPSRC)/dec/Makefile

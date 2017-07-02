@@ -27,9 +27,9 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       USR_CXXFLAGS += -DPREFIX_MAGICK_SYMBOLS
     endif
     
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/lcms/include
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/Magick++/lib
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/lcms/include
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/Magick++/lib
     
     INC += Magick++.h
     INC += Magick++/Include.h

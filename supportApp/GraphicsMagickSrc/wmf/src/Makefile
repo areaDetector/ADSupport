@@ -24,10 +24,10 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       USR_CFLAGS_WIN32 += -D_LIB
     endif
     
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/wmf
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/wmf/include
-    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagick/ttf/include
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/wmf
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/wmf/include
+    USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/ttf/include
     
     LIB_SRCS += api.c
     LIB_SRCS += bbuf.c
