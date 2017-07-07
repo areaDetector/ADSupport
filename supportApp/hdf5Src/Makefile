@@ -390,6 +390,24 @@ ifeq ($(WITH_HDF5),YES)
       LIB_LIBS += zlib
     endif
 
+    ifeq ($(WITH_BLOSC),YES)
+      USR_CFLAGS += -DH5_HAVE_FILTER_BLOSC
+      LIB_SRCS += blosc_filter.c
+      ifeq ($(BLOSC_EXTERNAL),YES)
+        ifdef BLOSC_INCLUDE
+          USR_INCLUDES += $(BLOSC_INCLUDE)
+        endif
+        ifdef BLOSC_LIB
+          blosc_DIR = $(BLOSC_LIB)
+          LIB_LIBS += blosc
+        else
+          LIB_SYS_LIBS += blosc
+        endif
+      else
+        LIB_LIBS += blosc
+      endif
+    endif
+
     LIB_SYS_LIBS_WIN32 += ws2_32
 
     H5detect_SRCS += H5detect.c
