@@ -63,9 +63,6 @@ ifeq ($(WITH_BLOSC),YES)
       LIB_SRCS += shuffle-avx2.c 
       LIB_SRCS += bitshuffle-avx2.c
     endif
-    # Use the internal pthread library for win32 systems
-    SRC_DIRS_WIN32 += $(LIBBLOSC)/blosc/win32
-    LIB_SRCS_WIN32 += pthread.c
 
     USR_CFLAGS += -DHAVE_ZLIB
     ifeq ($(ZLIB_EXTERNAL),YES)
