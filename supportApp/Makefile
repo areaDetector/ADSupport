@@ -19,7 +19,7 @@ xml2Src_DEPEND_DIRS += zlibSrc
 DIRS += szipSrc
 
 DIRS += hdf5Src
-hdf5Src_DEPEND_DIRS += szipSrc zlibSrc
+hdf5Src_DEPEND_DIRS += szipSrc zlibSrc bloscSrc
 
 DIRS += hdf5_hlSrc
 hdf5_hlSrc_DEPEND_DIRS += hdf5Src
