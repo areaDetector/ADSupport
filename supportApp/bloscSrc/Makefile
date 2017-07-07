@@ -15,6 +15,8 @@ ifeq ($(WITH_BLOSC),YES)
       USR_CFLAGS_WIN32 += -D BLOSC_SHARED_LIBRARY
     endif
 
+    USR_INCLUDES_vxWorks += -I$(TOP)/supportApp/bloscSrc/os/vxWorks
+
     # ZSTANDARD
     USR_CFLAGS += -DHAVE_ZSTD
     SRC_DIRS += $(LIBBLOSC)/internal-complibs/zstd-1.3.0/
