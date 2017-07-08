@@ -61,6 +61,7 @@ ifeq ($(WITH_TIFF),YES)
     tiff_SRCS += tif_write.c
     tiff_SRCS += tif_zip.c
     tiff_SRCS_Linux += tif_unix.c
+    tiff_SRCS_Darwin += tif_unix.c
     tiff_SRCS_WIN32 += tif_win32.c
     tiff_SRCS_vxWorks += tif_vxWorks.c
 
