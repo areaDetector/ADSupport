@@ -14,7 +14,7 @@ extern "C" {
 /* Filter ID registered with the HDF Group */
 #define FILTER_BLOSC 32001
 
-H5Z_class_t BLOSC_FILTER[1];
+extern H5Z_class_t BLOSC_FILTER[1];
 
 /* Registers the filter with the HDF5 library. */
 #if defined(_MSC_VER)
