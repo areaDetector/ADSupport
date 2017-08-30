@@ -24,7 +24,7 @@ ifeq ($(XML2_EXTERNAL),NO)
 
   # Need _REENTRANT flag on Linux for threads to build correctly
   USR_CFLAGS_Linux += -D_REENTRANT
-
+  
   INC_WIN32 += win32config.h
   INC_WIN32 += wsockcompat.h
   INC_Darwin += config.h
@@ -94,11 +94,8 @@ ifeq ($(XML2_EXTERNAL),NO)
   LIB_SRCS += HTMLtree.c
   LIB_SRCS += legacy.c
   LIB_SRCS += list.c
-  # nanoftp and nanohttp won't build on vxWorks.  They are only needed for GraphicsMagick
-  ifneq (vxWorks, $(OS_CLASS))
-    LIB_SRCS += nanoftp.c
-    LIB_SRCS += nanohttp.c
-  endif
+  LIB_SRCS += nanoftp.c
+  LIB_SRCS += nanohttp.c
   LIB_SRCS += parser.c
   LIB_SRCS += parserInternals.c
   LIB_SRCS += pattern.c
