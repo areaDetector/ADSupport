@@ -13,6 +13,16 @@ files respectively, in the configure/ directory of the appropriate release of th
 Release Notes
 =============
 
+R1-4 (September XXX, 2017)
+========================
+* Added support for Blosc filter library.  This is used by NDFileHDF5.  Thanks to Xiaoqiang Wang for this.
+* Fixed problem with xml2Src on vxWorks.  It was previously not compiling nanohttp.c and nanoftp.c.
+  This led to undefined symbols when booting vxWorks, because xmlIO.c references these functions.
+  The correct fix is not to define LIBXML_HTTP_ENABLED and LIBXML_FTP_ENABLED on vxWorks. 
+  This change was made to xml2Src/os/default/libxml/xmlversion.h, and the Makefile was changed to 
+  compile nanohttp.c and nanoftp.c on all architectures.
+
+
 
 R1-3 (July 3, 2017)
 ========================
