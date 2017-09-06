@@ -4,6 +4,7 @@
  */
 
 #include <H5vxWorks.h>
+#include <H5private.h>
 
 void *dlopen(const char *filename, int flag)
 {
@@ -37,4 +38,55 @@ int vxWorks_ftruncate(int fd, off_t length)
 int vxWorks_flock(int fd, int operation)
 {
   return 0;
+}
+
+int
+nanosleep(const struct timespec *req, struct timespec *rem)
+{
+    /* XXX: Currently just a placeholder */
+    return 0;
+
+} /* end nanosleep() */
+
+
+long long
+llround(double arg)
+{
+    return (long long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
+}
+
+long long
+llroundf(float arg)
+{
+    return (long long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
+}
+
+long
+lround(double arg)
+{
+    return (long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
+}
+
+long
+lroundf(float arg)
+{
+    return (long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
+}
+
+double
+round(double arg)
+{
+    return arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5);
+}
+
+float
+roundf(float arg)
+{
+    return arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F);
+}
+
+float
+powf(float x, float y)
+{
+    return (float)pow(x, y);
 }
