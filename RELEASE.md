@@ -16,6 +16,12 @@ Release Notes
 R1-4 (September XXX, 2017)
 ========================
 * Added support for Blosc filter library.  This is used by NDFileHDF5.  Thanks to Xiaoqiang Wang for this.
+* Fixed a bug in GraphicsMagickSrc.  We had changed Magick++/lib/Image.cpp to call UnregisterStaticModules in
+  a cleanup destructor.  The problem was that this destructor is always called, even if GraphicsMagick has not
+  ever been initialized.  That will happen if an application is built with GraphicsMagick but NDFileMagick is
+  not loaded in the startup script.  The symptom was an assertion failure when exiting the IOC.  This occurred
+  on both Linux and Windows.  Fixed the problem by ensuring that UnregisterStaticModules is not called if
+  GraphicsMagick has not been initialized.
 * Fixed Darwin support in tiffSrc.
 * Fixed several problems on vxWorks.  
   * xml2Src was previously not compiling nanohttp.c and nanoftp.c.
