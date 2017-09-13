@@ -22,6 +22,8 @@ R1-4 (September XXX, 2017)
   not loaded in the startup script.  The symptom was an assertion failure when exiting the IOC.  This occurred
   on both Linux and Windows.  Fixed the problem by ensuring that UnregisterStaticModules is not called if
   GraphicsMagick has not been initialized.
+* Fixes to Makefiles in GraphicsMagickSrc to allow it to be built with external libraries 
+  for jpeg, tiff, xml2, and zlib.
 * Fixed Darwin support in tiffSrc.
 * Fixed several problems on vxWorks.  
   * xml2Src was previously not compiling nanohttp.c and nanoftp.c.
