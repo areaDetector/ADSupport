@@ -47,7 +47,22 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
     
     LIB_RCS  += png.rc
     
-    LIB_LIBS += bzlib zlib
+    LIB_LIBS += bzlib
+
+    ifeq ($(ZLIB_EXTERNAL),NO)
+      LIB_LIBS += zlib
+    else
+      ifdef ZLIB_INCLUDE
+        USR_INCLUDES += -I$(ZLIB_INCLUDE)
+      endif
+      ifdef ZLIB_LIB
+        z_DIR        = $(ZLIB_LIB)
+        LIB_LIBS     += z
+      else
+        LIB_SYS_LIBS += z
+      endif
+    endif
+
 
   endif # ($(GRAPHICSMAGICK_EXTERNAL),NO)
 endif # ($(WITH_GRAPHICSMAGICK),YES)

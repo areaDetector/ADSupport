@@ -145,11 +145,42 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
     LIB_SRCS += yuv.c
     LIB_SRCS += static.c
     
-    LIB_LIBS += bzlib jbig jp2 Magick png ttf webp wmf jpeg zlib tiff
+    LIB_LIBS += bzlib jbig jp2 Magick png ttf webp wmf
+
+    ifeq ($(TIFF_EXTERNAL), NO)
+      LIB_LIBS += tiff
+    else
+      ifdef TIFF_INCLUDE
+        USR_INCLUDES += -I$(TIFF_INCLUDE)
+      endif
+      ifdef TIFF_LIB
+        jpeg_DIR     = $(TIFF_LIB)
+        LIB_LIBS     += tiff
+      else
+        LIB_SYS_LIBS += tiff
+      endif
+    endif
+
+    ifeq ($(JPEG_EXTERNAL), NO)
+      LIB_LIBS += jpeg
+    else
+      ifdef JPEG_INCLUDE
+        USR_INCLUDES += -I$(JPEG_INCLUDE)
+      endif
+      ifdef JPEG_LIB
+        jpeg_DIR     = $(JPEG_LIB)
+        LIB_LIBS     += jpeg
+      else
+        LIB_SYS_LIBS += jpeg
+      endif
+    endif
+
     ifeq ($(XML2_EXTERNAL), NO)
       LIB_LIBS += xml2
     else
-      USR_INCLUDES += -I$(XML2_INCLUDE)
+      ifdef XML2_INCLUDE
+        USR_INCLUDES += -I$(XML2_INCLUDE)
+      endif
       ifdef XML2_LIB
         xml2_DIR     = $(XML2_LIB)
         LIB_LIBS     += xml2
@@ -158,6 +189,20 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       endif
     endif
     
+    ifeq ($(ZLIB_EXTERNAL),NO)
+      LIB_LIBS += zlib
+    else
+      ifdef ZLIB_INCLUDE
+        USR_INCLUDES += -I$(ZLIB_INCLUDE)
+      endif
+      ifdef ZLIB_LIB
+        z_DIR        = $(ZLIB_LIB)
+        LIB_LIBS     += z
+      else
+        LIB_SYS_LIBS += z
+      endif
+    endif
+
     LIB_SYS_LIBS_WIN32 += User32 Gdi32 OleAut32
 
   endif # ($(GRAPHICSMAGICK_EXTERNAL),NO)

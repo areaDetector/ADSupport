@@ -192,7 +192,21 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
     LIB_SRCS += widget.c
     LIB_SRCS += xwindow.c
     
-    LIB_LIBS += bzlib lcms ttf zlib
+    LIB_LIBS += bzlib lcms ttf
+
+    ifeq ($(ZLIB_EXTERNAL),NO)
+      LIB_LIBS += zlib
+    else
+      ifdef ZLIB_INCLUDE
+        USR_INCLUDES += -I$(ZLIB_INCLUDE)
+      endif
+      ifdef ZLIB_LIB
+        z_DIR        = $(ZLIB_LIB)
+        LIB_LIBS     += z
+      else
+        LIB_SYS_LIBS += z
+      endif
+    endif
     
     LIB_SYS_LIBS_WIN32 += Advapi32 User32 Gdi32
     LIB_SYS_LIBS_Linux += Xext
