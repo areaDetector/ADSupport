@@ -13,7 +13,7 @@ files respectively, in the configure/ directory of the appropriate release of th
 Release Notes
 =============
 
-R1-4 (September XXX, 2017)
+R1-4 (January 27, 2018)
 ========================
 * Added support for Blosc filter library.  This is used by NDFileHDF5.  Thanks to Xiaoqiang Wang for this.
 * Fixed a bug in GraphicsMagickSrc.  We had changed Magick++/lib/Image.cpp to call UnregisterStaticModules in
@@ -37,6 +37,8 @@ R1-4 (September XXX, 2017)
     Added definitions of nanosleep(), llround(), llroundf(), lround(), lroundf(), round(), and roundf()
     to hdf5Src/H5vxWorks.c.  These were taken almost directly from the WIN32 functions in H5system.c.
     Added powf() which just calls pow().
+* Fixed .gitignore file.  It was previously ignoring all include/ directories, but those in GraphicsMagick
+  should not be ignored.
 
 
 R1-3 (July 3, 2017)
