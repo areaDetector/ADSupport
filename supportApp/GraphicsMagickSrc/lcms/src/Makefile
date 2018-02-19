@@ -1,6 +1,9 @@
 TOP = ../../../..
 include $(TOP)/configure/CONFIG
 
+# Sources here use a non-UTF-8 encoding
+PERL = perl -C0
+
 ifeq ($(WITH_GRAPHICSMAGICK),YES)
   ifeq ($(GRAPHICSMAGICK_EXTERNAL),NO)
 
