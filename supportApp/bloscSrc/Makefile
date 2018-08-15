@@ -69,7 +69,7 @@ ifeq ($(WITH_BLOSC),YES)
     USR_CFLAGS += -DHAVE_ZLIB
     ifeq ($(ZLIB_EXTERNAL),YES)
       ifdef ZLIB_INCLUDE
-        USR_INCLUDES += -I$(ZLIB_INCLUDE)
+        USR_INCLUDES += $(addprefix -I, $(ZLIB_INCLUDE))
       endif
       ifdef ZLIB_LIB
         z_DIR        = $(ZLIB_LIB)

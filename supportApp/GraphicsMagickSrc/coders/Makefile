@@ -151,7 +151,7 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       LIB_LIBS += tiff
     else
       ifdef TIFF_INCLUDE
-        USR_INCLUDES += -I$(TIFF_INCLUDE)
+        USR_INCLUDES += $(addprefix -I, $(TIFF_INCLUDE))
       endif
       ifdef TIFF_LIB
         jpeg_DIR     = $(TIFF_LIB)
@@ -165,7 +165,7 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       LIB_LIBS += jpeg
     else
       ifdef JPEG_INCLUDE
-        USR_INCLUDES += -I$(JPEG_INCLUDE)
+        USR_INCLUDES += $(addprefix -I, $(JPEG_INCLUDE))
       endif
       ifdef JPEG_LIB
         jpeg_DIR     = $(JPEG_LIB)
@@ -179,7 +179,7 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       LIB_LIBS += xml2
     else
       ifdef XML2_INCLUDE
-        USR_INCLUDES += -I$(XML2_INCLUDE)
+        USR_INCLUDES += $(addprefix -I, $(XML2_INCLUDE))
       endif
       ifdef XML2_LIB
         xml2_DIR     = $(XML2_LIB)
@@ -193,7 +193,7 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       LIB_LIBS += zlib
     else
       ifdef ZLIB_INCLUDE
-        USR_INCLUDES += -I$(ZLIB_INCLUDE)
+        USR_INCLUDES += $(addprefix -I, $(ZLIB_INCLUDE))
       endif
       ifdef ZLIB_LIB
         z_DIR        = $(ZLIB_LIB)

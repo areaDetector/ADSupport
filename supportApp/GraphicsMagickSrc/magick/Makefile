@@ -198,7 +198,7 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       LIB_LIBS += zlib
     else
       ifdef ZLIB_INCLUDE
-        USR_INCLUDES += -I$(ZLIB_INCLUDE)
+        USR_INCLUDES += $(addprefix -I, $(ZLIB_INCLUDE))
       endif
       ifdef ZLIB_LIB
         z_DIR        = $(ZLIB_LIB)

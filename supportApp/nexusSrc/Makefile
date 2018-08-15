@@ -44,7 +44,7 @@ ifeq ($(WITH_NEXUS),YES)
 
     ifeq ($(HDF5_EXTERNAL),YES)
       ifdef HDF5_INCLUDE
-        USR_INCLUDES += -I$(HDF5_INCLUDE)
+        USR_INCLUDES += $(addprefix -I, $(HDF5_INCLUDE))
       endif
       ifdef HDF5_LIB
         hdf5_DIR             = $(HDF5_LIB)
@@ -59,7 +59,7 @@ ifeq ($(WITH_NEXUS),YES)
 
     ifeq ($(SZIP_EXTERNAL),YES)
       ifdef SZIP_INCLUDE
-        USR_INCLUDES += -I$(SZIP_INCLUDE)
+        USR_INCLUDES += $(addprefix -I, $(SZIP_INCLUDE))
       endif
       ifdef SZIP_LIB
         sz_DIR             = $(SZIP_LIB)
@@ -73,7 +73,7 @@ ifeq ($(WITH_NEXUS),YES)
 
     ifeq ($(ZLIB_EXTERNAL),YES)
       ifdef ZLIB_INCLUDE
-        USR_INCLUDES += -I$(ZLIB_INCLUDE)
+        USR_INCLUDES += $(addprefix -I, $(ZLIB_INCLUDE))
       endif
       ifdef ZLIB_LIB
         z_DIR             = $(ZLIB_LIB)
