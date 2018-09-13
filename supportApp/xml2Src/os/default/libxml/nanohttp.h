@@ -18,6 +18,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef enum {
+	Idle, FoundStart, Complete, Error
+} xmlNanoFrameStates;
+
 XMLPUBFUN void XMLCALL
 	xmlNanoHTTPInit		(void);
 XMLPUBFUN void XMLCALL
@@ -66,6 +71,10 @@ XMLPUBFUN int XMLCALL
 	xmlNanoHTTPRead		(void *ctx,
 				 void *dest,
 				 int len);
+XMLPUBFUN xmlNanoFrameStates XMLCALL
+	xmlNanoHTTPFrameState	(void *ctx);
+XMLPUBFUN int XMLCALL
+	xmlNanoHTTPStreaming	(void *ctx);
 #ifdef LIBXML_OUTPUT_ENABLED
 XMLPUBFUN int XMLCALL
 	xmlNanoHTTPSave		(void *ctxt,
