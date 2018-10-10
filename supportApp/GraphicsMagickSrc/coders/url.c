@@ -126,7 +126,7 @@ static Image *ReadURLImage(const ImageInfo *image_info,ExceptionInfo *exception)
     *clone_info;
 
   void
-    *context;
+    *context = NULL;
 
   ConfirmAccessMode
     access_mode=UndefinedConfirmAccessMode;
@@ -180,14 +180,29 @@ static Image *ReadURLImage(const ImageInfo *image_info,ExceptionInfo *exception)
             bytes;
 
           type=(char *) NULL;
-          context=xmlNanoHTTPOpen(filename,&type);
+		  if (!image_info->file)
+			context=xmlNanoHTTPOpen(filename,&type);
+		  else
+		  {
+			context=image_info->file;
+			clone_info->file = NULL;
+		  }
           if (context != (void *) NULL)
             {
               while ((bytes=xmlNanoHTTPRead(context,buffer,MaxBufferExtent)) > 0)
+			  {
                 (void) fwrite(buffer,bytes,1,file);
-              xmlNanoHTTPClose(context);
-              xmlFree(type);
-              xmlNanoHTTPCleanup();
+				if ((xmlNanoHTTPFrameState(context) == Complete) || (xmlNanoHTTPFrameState(context) == Error))
+					break;
+			  }
+			  if (type)
+				xmlFree(type);
+			  if (!xmlNanoHTTPStreaming(context))
+			  {
+				xmlNanoHTTPClose(context);
+				xmlNanoHTTPCleanup();
+				context = NULL;
+			  }
             }
         }
       else if (LocaleCompare(clone_info->magick,"ftp") == 0)
@@ -211,7 +226,10 @@ static Image *ReadURLImage(const ImageInfo *image_info,ExceptionInfo *exception)
       else
         {
           *clone_info->magick='\0';
-          image=ReadImage(clone_info,exception);
+		  if (xmlNanoHTTPFrameState(context) != Error)
+			image=ReadImage(clone_info,exception);
+		  if ((context) && (image))
+			image->client_data = context;
         }
       (void) LiberateTemporaryFile(clone_info->filename);
     }
