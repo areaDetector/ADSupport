@@ -4,55 +4,62 @@
 #ifndef NCBYTES_H
 #define NCBYTES_H 1
 
+#include "ncexternl.h"
+
 typedef struct NCbytes {
   int nonextendible; /* 1 => fail if an attempt is made to extend this buffer*/
-  unsigned int alloc;
-  unsigned int length;
+  unsigned long alloc;
+  unsigned long length;
   char* content;
 } NCbytes;
 
 #if defined(_CPLUSPLUS_) || defined(__CPLUSPLUS__) || defined(__CPLUSPLUS)
-#define EXTERNC extern "C"
-#else
-#define EXTERNC extern
+extern "C" {
 #endif
 
-EXTERNC NCbytes* ncbytesnew(void);
-EXTERNC void ncbytesfree(NCbytes*);
-EXTERNC int ncbytessetalloc(NCbytes*,unsigned int);
-EXTERNC int ncbytessetlength(NCbytes*,unsigned int);
-EXTERNC int ncbytesfill(NCbytes*, char fill);
+EXTERNL NCbytes* ncbytesnew(void);
+EXTERNL void ncbytesfree(NCbytes*);
+EXTERNL int ncbytessetalloc(NCbytes*,unsigned long);
+EXTERNL int ncbytessetlength(NCbytes*,unsigned long);
+EXTERNL int ncbytesfill(NCbytes*, char fill);
 
 /* Produce a duplicate of the contents*/
-EXTERNC char* ncbytesdup(NCbytes*);
+EXTERNL char* ncbytesdup(NCbytes*);
 /* Extract the contents and leave buffer empty */
-EXTERNC char* ncbytesextract(NCbytes*);
+EXTERNL char* ncbytesextract(NCbytes*);
 
 /* Return the ith byte; -1 if no such index */
-EXTERNC int ncbytesget(NCbytes*,unsigned int);
+EXTERNL int ncbytesget(NCbytes*,unsigned long);
 /* Set the ith byte */
-EXTERNC int ncbytesset(NCbytes*,unsigned int,char);
+EXTERNL int ncbytesset(NCbytes*,unsigned long,char);
 
 /* Append one byte */
-EXTERNC int ncbytesappend(NCbytes*,char); /* Add at Tail */
+EXTERNL int ncbytesappend(NCbytes*,char); /* Add at Tail */
 /* Append n bytes */
-EXTERNC int ncbytesappendn(NCbytes*,void*,unsigned int); /* Add at Tail */
+EXTERNL int ncbytesappendn(NCbytes*,const void*,unsigned long); /* Add at Tail */
 
 /* Null terminate the byte string without extending its length (for debugging) */
-EXTERNC int ncbytesnull(NCbytes*);
+EXTERNL int ncbytesnull(NCbytes*);
+
+/* Remove char at position i */
+EXTERNL int ncbytesremove(NCbytes*,unsigned long);
 
 /* Concatenate a null-terminated string to the end of the buffer */
-EXTERNC int ncbytescat(NCbytes*,char*);
+EXTERNL int ncbytescat(NCbytes*,const char*);
 
 /* Set the contents of the buffer; mark the buffer as non-extendible */
-EXTERNC int ncbytessetcontents(NCbytes*, char*, unsigned int);
+EXTERNL int ncbytessetcontents(NCbytes*, char*, unsigned long);
 
 /* Following are always "in-lined"*/
-#define ncbyteslength(bb) ((bb)?(bb)->length:0U)
-#define ncbytesalloc(bb) ((bb)?(bb)->alloc:0U)
-#define ncbytescontents(bb) ((bb && bb->content)?(bb)->content:(char*)"")
+#define ncbyteslength(bb) ((bb)!=NULL?(bb)->length:0)
+#define ncbytesalloc(bb) ((bb)!=NULL?(bb)->alloc:0)
+#define ncbytescontents(bb) (((bb)!=NULL && (bb)->content!=NULL)?(bb)->content:(char*)"")
 #define ncbytesextend(bb,len) ncbytessetalloc((bb),(len)+(bb->alloc))
-#define ncbytesclear(bb) ((bb)?(bb)->length=0:0U)
-#define ncbytesavail(bb,n) ((bb)?((bb)->alloc - (bb)->length) >= (n):0U)
+#define ncbytesclear(bb) ((bb)!=NULL?(bb)->length=0:0)
+#define ncbytesavail(bb,n) ((bb)!=NULL?((bb)->alloc - (bb)->length) >= (n):0)
+
+#if defined(_CPLUSPLUS_) || defined(__CPLUSPLUS__) || defined(__CPLUSPLUS)
+}
+#endif
 
 #endif /*NCBYTES_H*/
