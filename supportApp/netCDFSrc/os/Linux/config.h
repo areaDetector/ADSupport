@@ -31,7 +31,7 @@
 #define DEFAULT_CHUNK_SIZE 4194304
 
 /* if true, enable CDF5 Support */
-#define ENABLE_CDF5 1
+/* #define ENABLE_CDF5 1 */
 
 /* if true, build DAP Client */
 /* #undef ENABLE_DAP */
@@ -349,7 +349,11 @@
 #define SIZEOF_INT 4
 
 /* The size of `long', as computed by sizeof. */
-#define SIZEOF_LONG 8
+#ifdef __LP64__
+  #define SIZEOF_LONG 8
+#else
+  #define SIZEOF_LONG 4
+#endif
 
 /* The size of `long long', as computed by sizeof. */
 #define SIZEOF_LONG_LONG 8
@@ -361,10 +365,18 @@
 #define SIZEOF_SHORT 2
 
 /* The size of `size_t', as computed by sizeof. */
-#define SIZEOF_SIZE_T 8
+#ifdef __LP64__
+  #define SIZEOF_SIZE_T 8
+#else
+  #define SIZEOF_SIZE_T 4
+#endif
 
 /* The size of `ssize_t', as computed by sizeof. */
-#define SIZEOF_SSIZE_T 8
+#ifdef __LP64__
+  #define SIZEOF_SSIZE_T 8
+#else
+  #define SIZEOF_SSIZE_T 4
+#endif
 
 /* The size of `uchar', as computed by sizeof. */
 /* #undef SIZEOF_UCHAR */
@@ -388,7 +400,11 @@
 #define SIZEOF_USHORT 2
 
 /* The size of `void*', as computed by sizeof. */
-#define SIZEOF_VOIDP 8
+#ifdef __LP64__
+  #define SIZEOF_VOIDP 8
+#else
+  #define SIZEOF_VOIDP 4
+#endif
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
@@ -405,7 +421,7 @@
 #define TEMP_LARGE "."
 
 /* if true, enable CDF5 Support */
-#define USE_CDF5 1
+/* #define USE_CDF5 1 */
 
 /* if true, build DAP Client */
 /* #undef USE_DAP */
@@ -483,7 +499,11 @@
 #endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */
+#ifdef __LP64__
 /* #undef _FILE_OFFSET_BITS */
+#else
+  #define _FILE_OFFSET_BITS 64
+#endif
 
 /* Define for large files, on AIX-style hosts. */
 /* #undef _LARGE_FILES */
