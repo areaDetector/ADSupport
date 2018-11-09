@@ -98,10 +98,10 @@
 #define HAVE_GETOPT_H 1
 
 /* Define to 1 if you have the `getpagesize' function. */
-#define HAVE_GETPAGESIZE 1
+/* #define HAVE_GETPAGESIZE 1 */
 
 /* Define to 1 if you have the `getrlimit' function. */
-#define HAVE_GETRLIMIT 1
+/* #define HAVE_GETRLIMIT 1 */
 
 /* Define to 1 if you have the `gettimeofday' function. */
 #define HAVE_GETTIMEOFDAY 1
@@ -176,10 +176,10 @@
 /* #undef HAVE_MFHDF_H */
 
 /* Define to 1 if you have the `mkstemp' function. */
-#define HAVE_MKSTEMP 1
+/* #define HAVE_MKSTEMP 1 */
 
 /* Define to 1 if you have the `mktemp' function. */
-#define HAVE_MKTEMP 1
+/* #define HAVE_MKTEMP 1 */
 
 /* Define to 1 if you have the `MPI_Comm_f2c' function. */
 /* #undef HAVE_MPI_COMM_F2C */
@@ -188,7 +188,7 @@
 #define HAVE_MREMAP 1
 
 /* Define to 1 if you have the `random' function. */
-#define HAVE_RANDOM 1
+/* #define HAVE_RANDOM 1 */
 
 /* Define to 1 if the system has the type `schar'. */
 /* #undef HAVE_SCHAR */
