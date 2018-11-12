@@ -78,6 +78,7 @@
 
 #include <stdlib.h>
 #include "ncexternl.h"
+#include "config.h"
 
 #if defined(_MSC_VER) && _MSC_VER < 1800
 // MSVC prior to 2013 lacked stdbool.h and inttypes.h
@@ -108,7 +109,13 @@ typedef bool nc_utf8proc_bool;
 #else
 #  include <stddef.h>
 #  include <stdbool.h>
-#  include <inttypes.h>
+#ifdef HAVE_INTTYPES_H
+  #include <inttypes.h>
+#else
+  #ifdef HAVE_STDINT_H
+    #include <stdint.h>
+  #endif
+#endif
 typedef int8_t nc_utf8proc_int8_t;
 typedef uint8_t nc_utf8proc_uint8_t;
 typedef int16_t nc_utf8proc_int16_t;
