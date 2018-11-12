@@ -15,7 +15,7 @@ Release Notes
 R1-5 (November 12, 2018)
 ========================
 * Added support for reading MJPEG streams to GraphicsMagickSrc and xml2Src.  This allows ADURL to stream
-  data from Web cameras. Thanks to Peter Heestermann for this.
+  data from Web cameras. Thanks to Peter Heesterman for this.
 * Updated netCDFSrc from netCDF 4.1.3 to 4.6.1.  Updated netCDFSrc/README.epics to document how this was done.
 * Fixed a problem when closing netCDF files > 2 GB on Windows when building with Visual Studio 2015 or 2017.
 
