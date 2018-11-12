@@ -149,7 +149,7 @@ static off_t nc_get_filelen(const int fd) {
 static size_t
 pagesize(void)
 {
-  size_t pgsz;
+  size_t pgsz=0;
 #if defined(_WIN32) || defined(_WIN64)
   SYSTEM_INFO info;
 #endif
