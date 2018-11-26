@@ -66,6 +66,12 @@ ifeq ($(WITH_JPEG),YES)
   jpeg_SRCS += jmemnobs.c
 
   endif # ($(JPEG_EXTERNAL),NO)
+
+  LIBRARY_IOC  += decompressJPEG
+  decompressJPEG_SRCS += decompressJPEG.c
+  decompressJPEG_LIBS += jpeg
+  decompressJPEG_SYS_LIBS_WIN32 += ws2_32
+
 endif # ($(WITH_JPEG),YES)
 
 include $(TOP)/configure/RULES
