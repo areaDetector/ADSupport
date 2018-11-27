@@ -12,7 +12,7 @@ ifeq ($(WITH_JPEG),YES)
   INC += jmorecfg.h 
   INC += jerror.h 
 
-  LIBRARY_IOC = jpeg
+  LIBRARY = jpeg
   ifeq ($(SHARED_LIBRARIES),YES)
     USR_CFLAGS_WIN32 += -DDLL_JPEG
     jpeg.dll: USR_CFLAGS_WIN32 += -DDLL_EXPORT
@@ -67,7 +67,7 @@ ifeq ($(WITH_JPEG),YES)
 
   endif # ($(JPEG_EXTERNAL),NO)
 
-  LIBRARY_IOC  += decompressJPEG
+  LIBRARY  += decompressJPEG
   decompressJPEG_SRCS += decompressJPEG.c
   decompressJPEG_LIBS += jpeg
   decompressJPEG_SYS_LIBS_WIN32 += ws2_32
