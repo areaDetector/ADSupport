@@ -40,3 +40,7 @@ ifdef T_A
   -include $(AREA_DETECTOR)/configure/CONFIG_SITE.Common.$(T_A)
   -include $(AREA_DETECTOR)/configure/CONFIG_SITE.$(EPICS_HOST_ARCH).$(T_A)
 endif
+
+# Disable COMMANDLINE_LIBRARY so libraries won't be linked to readline.
+COMMANDLINE_LIBRARY=
+
