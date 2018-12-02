@@ -1,0 +1,24 @@
+#!/bin/bash
+#  This script takes 1 parameters.  
+# 1 - The version number (R2-0, etc.)
+
+echo "Parameter 1 = " $1
+
+DESTINATION=/home/epics/public_html/pub/ADSupport/ADSupport_Prebuilt_$1
+cd ..
+tar czf $DESTINATION.tgz \
+ADSupport/lib/linux-x86 \
+ADSupport/lib/linux-x86_64 \
+ADSupport/lib/linux-x86-rhel6 \
+ADSupport/lib/linux-x86_64-rhel6 \
+ADSupport/bin/win32-x86 \
+ADSupport/bin/windows-x64
+
+rm -f $DESTINATION.zip
+zip -r -q $DESTINATION.zip   \
+ADSupport/lib/linux-x86 \
+ADSupport/lib/linux-x86_64 \
+ADSupport/lib/linux-x86-rhel6 \
+ADSupport/lib/linux-x86_64-rhel6 \
+ADSupport/bin/win32-x86 \
+ADSupport/bin/windows-x64
