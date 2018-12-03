@@ -9,6 +9,9 @@ posixio.c
 utf8proc.h
   Add test for HAVE_INTTYPES_H for including inttypes.h; needed for vxWorks.
 
+pstdint.h
+   Changed to allow compiling on vxWorks < 6.9
+
 drc.c
   Changed order of variable declarations to allow compiling on VS2010.
   
