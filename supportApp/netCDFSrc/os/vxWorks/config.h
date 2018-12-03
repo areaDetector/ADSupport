@@ -217,7 +217,9 @@
 #define HAVE_STDLIB_H 1
 
 /* Define to 1 if you have the `strdup' function. */
-#define HAVE_STRDUP 1
+#if defined(vxWorks) && defined(_WRS_VXWORKS_MAJOR) && (_WRS_VXWORKS_MAJOR >= 6) && (_WRS_VXWORKS_MINOR >= 9)
+  #define HAVE_STRDUP 1
+#endif
 
 /* Define to 1 if you have the <strings.h> header file. */
 #define HAVE_STRINGS_H 1
