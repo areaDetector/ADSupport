@@ -114,6 +114,8 @@ typedef bool nc_utf8proc_bool;
 #else
   #ifdef HAVE_STDINT_H
     #include <stdint.h>
+  #else
+    #include "pstdint.h"
   #endif
 #endif
 typedef int8_t nc_utf8proc_int8_t;
