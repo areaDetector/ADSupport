@@ -682,6 +682,11 @@ typedef uint_least32_t uint_fast32_t;
 /* TODO -- what will Intel do about x86-64? */
 # endif
 
+/* Old vxWorks does not define ptrdiff_t */
+#ifdef vxWorks
+  typedef long ptrdiff_t;
+#endif
+
 # ifdef stdint_intptr_bits
 #  define stdint_intptr_glue3_i(a,b,c)  a##b##c
 #  define stdint_intptr_glue3(a,b,c)    stdint_intptr_glue3_i(a,b,c)
