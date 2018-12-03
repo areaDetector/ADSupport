@@ -676,6 +676,8 @@ typedef uint_least32_t uint_fast32_t;
 #  endif
 # elif defined (__i386__) || defined (_WIN32) || defined (WIN32)
 #  define stdint_intptr_bits 32
+# elif defined (vxWorks)
+#  define stdint_intptr_bits 32
 # elif defined (__INTEL_COMPILER)
 /* TODO -- what will Intel do about x86-64? */
 # endif
