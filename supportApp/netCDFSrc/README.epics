@@ -7,7 +7,8 @@ posixio.c
   Initialize pgsz to 0 to avoid compiler warnings
   
 utf8proc.h
-  Add test for HAVE_INTTYPES_H for including inttypes.h; needed for vxWorks.
+  Add test for HAVE_INTTYPES_H for including inttypes.h or pstdint.h; needed for vxWorks.
+  Define SSIZE_MAX on vxWorks.
 
 pstdint.h
    Changed to allow compiling on vxWorks < 6.9
