@@ -134,6 +134,11 @@ typedef bool nc_utf8proc_bool;
 extern "C" {
 #endif
 
+#ifdef vxWorks
+#undef SSIZE_MAX
+#define SSIZE_MAX LONG_MAX
+#endif
+
 #ifndef SSIZE_MAX
 #define SSIZE_MAX ((size_t)SIZE_MAX/2)
 #endif
