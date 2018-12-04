@@ -19,6 +19,7 @@ R1-6 (December 3, 2018)
   to decompress a JPEG encoded buffer.  It is intended to be called from Java for the ImageJ EPICS_NTNDA_Viewer.
   It could also be called from other languages.
 * Fixed a minor problem with netCDFSrc/libdispatch/dauth.c
+* Fixes to netCDFSrc to work with vxWorks 5.5, 6.8, and 6.9.
 
 
 R1-5 (November 12, 2018)
