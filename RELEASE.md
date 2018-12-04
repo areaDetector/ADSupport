@@ -13,7 +13,7 @@ files respectively, in the configure/ directory of the appropriate release of th
 Release Notes
 =============
 
-R1-6 (November XXX, 2018)
+R1-6 (December 3, 2018)
 ========================
 * Added a new library, decompressJPEG. This contains a small C function to do all of the calls to libjpeg
   to decompress a JPEG encoded buffer.  It is intended to be called from Java for the ImageJ EPICS_NTNDA_Viewer.
