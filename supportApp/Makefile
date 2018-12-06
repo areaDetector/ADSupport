@@ -30,5 +30,7 @@ nexusSrc_DEPEND_DIRS += hdf5Src
 DIRS += GraphicsMagickSrc
 GraphicsMagickSrc_DEPEND_DIRS += tiffSrc zlibSrc xml2Src jpegSrc
 
+DIRS += cbfSrc
+
 include $(TOP)/configure/RULES_DIRS
 
