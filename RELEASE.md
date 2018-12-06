@@ -13,6 +13,14 @@ files respectively, in the configure/ directory of the appropriate release of th
 Release Notes
 =============
 
+R1-7 (January XXX, 2018)
+========================
+* Added bitshuffle.  This is used by ADEiger to read streams that are compressed with bitshuffle/lz4.
+  It also builds the HDF5 filter for bitshuffle/lz4 which can be useful for reading HDF5 files
+  with this compression, including those written by the Eiger server.
+* Changed bloscSrc/Makefile to install lz4.h.
+  This allows ADSupport to be used for simple lz4 compression/decompression, i.e. without Blosc headers.
+
 R1-6 (December 3, 2018)
 ========================
 * Added a new library, decompressJPEG. This contains a small C function to do all of the calls to libjpeg
