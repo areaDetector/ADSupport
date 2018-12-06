@@ -1,0 +1,221 @@
+Index: include/cbf.h
+===================================================================
+--- include/cbf.h	(revision 145)
++++ include/cbf.h	(working copy)
+@@ -533,6 +533,11 @@
+ int cbf_make_handle (cbf_handle *handle);
+ 
+ 
++  /* Set log file of a handle */
++
++int cbf_set_cbf_logfile (cbf_handle handle, FILE * logfile);
++
++
+   /* Free a handle */
+ 
+ int cbf_free_handle (cbf_handle handle);
+@@ -1128,11 +1133,21 @@
+ #define cbf_set_realarray_wdims_sf(handle, compression, id, value, elsize, nelem, byteorder, dimslow, dimmid, dimfast, padding) \
+          cbf_set_realarray_wdims((handle),(compression),(id),(value),(elsize),(nelem),(byteorder),(dimfast),(dimmid),(dimslow),(padding))
+ 
++  /* Turn on/off printing of warning messages */
++
++void cbf_set_warning_messages_enabled (int enabled);
++
++
+   /* Issue a warning message */
+ 
+ void cbf_warning (const char *message);
+ 
+ 
++  /* Turn on/off printing of error messages */
++
++void cbf_set_error_messages_enabled (int enabled);
++
++
+   /* Issue an error message */
+ 
+ void cbf_error (const char *message);
+Index: include/cbff.h
+===================================================================
+--- include/cbff.h	(revision 145)
++++ include/cbff.h	(working copy)
+@@ -328,6 +328,11 @@
+     /* Create a handle */
+     
+     int cbff_make_handle(size_t * CBFFhandle);
++
++
++    /* Set log file of a handle */
++
++    int cbff_set_cbf_logfile (size_t CBFFhandle, size_t CBFFstream);
+     
+     
+     /* Free a handle */
+@@ -1266,21 +1271,33 @@
+                                  size_t padding);
+ 
+      
++    /* Turn on/off printing of warning messages */
++
++    void cbff_set_warning_messages_enabled (int enabled);
++
++
++
+     /* Issue a warning message */
+     
+-    void cbf_warning (const char *message);
++    void cbff_warning (const char *message);
+     
+     
+     
++    /* Turn on/off printing of error messages */
++
++    void cbff_set_error_messages_enabled (int enabled);
++
++
++
+     /* Issue an error message */
+     
+-    void cbf_error (const char *message);
++    void cbff_error (const char *message);
+     
+     
+     
+     /* issue a log message for a cbf */
+     
+-    void cbf_log (cbf_handle handle, const char *message, int logflags);
++    void cbff_log (size_t CBFFhandle, const char *message, int logflags);
+     
+     
+     
+Index: src/cbff.c
+===================================================================
+--- src/cbff.c	(revision 145)
++++ src/cbff.c	(working copy)
+@@ -422,6 +422,18 @@
+         *CBFFhandle = cbff_handle(handle);
+         return errorcode;
+     }
++
++
++    /* Set log file of a handle */
++
++    int cbff_set_cbf_logfile(
++                             size_t CBFFhandle,
++                             size_t CBFFstream) {
++        return cbf_set_cbf_logfile(
++                                   cbff_cbf_handle(CBFFhandle),
++                                   cbff_file_handle(CBFFstream));
++    }
++
+     
+     /* Free a handle */
+     
+@@ -2451,6 +2463,14 @@
+                                        padding);
+     }
+     
++    /* Turn on/off printing of warning messages */
++
++    void cbff_set_warning_messages_enabled (int enabled) {
++        cbf_set_warning_messages_enabled(enabled);
++    }
++
++
++
+     /* Issue a warning message */
+     
+     void cbff_warning (const char *message) {
+@@ -2459,6 +2479,14 @@
+     
+     
+     
++    /* Turn on/off printing of error messages */
++
++    void cbff_set_error_messages_enabled (int enabled) {
++        cbf_set_error_messages_enabled(enabled);
++    }
++
++
++
+     /* Issue an error message */
+     
+     void cbff_error (const char *message) {
+Index: src/cbf.c
+===================================================================
+--- src/cbf.c	(revision 145)
++++ src/cbf.c	(working copy)
+@@ -265,6 +265,9 @@
+ #include <sys/types.h>
+ #include <regex.h>
+ 
++static int error_messages_enabled = 1;
++static int warning_messages_enabled = 1;
++
+ int cbf_parse (void *context);
+ 
+ 
+@@ -309,6 +312,8 @@
+   return 0;
+ }
+ 
++  /* Set log file of a handle */
++
+ int cbf_set_cbf_logfile (cbf_handle handle, FILE * logfile) 
+ {
+ 	handle ->logfile = logfile;
+@@ -4200,19 +4205,41 @@
+ }
+ 
+ 
++  /* Turn on/off printing of warning messages */
++
++void cbf_set_warning_messages_enabled (int enabled)
++
++{
++  warning_messages_enabled = enabled;
++}
++
++
+   /* Issue a warning message */
+ 
+ void cbf_warning (const char *message)
+ 
+ {
++  if (!warning_messages_enabled) return;
++
+   fprintf (stderr, " CBFlib: warning -- %s\n", message);
+ }
+ 
+ 
++  /* Turn on/off printing of error messages */
++
++void cbf_set_error_messages_enabled (int enabled)
++
++{
++  error_messages_enabled = enabled;
++}
++
++
+   /* Issue an error message */
+ 
+ void cbf_error (const char *message)
+ {
++  if (!error_messages_enabled) return;
++
+   fprintf (stderr, " CBFlib: error -- %s\n", message);
+ }
+ 
+@@ -4230,8 +4257,10 @@
+   int line=0, column=0;
+   
+   if (cbf_alloc(&memblock, NULL, 1, strlen(message)+80) ) {
++
++    if (handle->logfile)
+   	  
+-    fprintf (handle->logfile, "CBFlib: memory allocation error\n");
++      fprintf (handle->logfile, "CBFlib: memory allocation error\n");
+     
+     return;
+ 
