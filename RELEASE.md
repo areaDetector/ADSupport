@@ -20,6 +20,8 @@ R1-7 (January XXX, 2018)
   with this compression, including those written by the Eiger server.
 * Changed bloscSrc/Makefile to install lz4.h.
   This allows ADSupport to be used for simple lz4 compression/decompression, i.e. without Blosc headers.
+* Moved the CBF file support code from ADPilatus/pilatusApp/cbfSrc to supportApp/cbfSrc.
+  This allows other detectors, such as ADMMPAD to use it as well.
 
 R1-6 (December 3, 2018)
 ========================
