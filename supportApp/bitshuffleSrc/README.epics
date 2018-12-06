@@ -1,0 +1,7 @@
+This directory contains the bitshuffle source, version 0.3.5.
+
+No source files were modified.
+
+Makefile  
+  This is a new file for the EPICS build system.
+
