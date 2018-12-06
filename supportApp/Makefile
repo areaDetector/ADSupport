@@ -10,6 +10,9 @@ DIRS += zlibSrc
 DIRS += bloscSrc
 bloscSrc_DEPEND_DIRS += zlibSrc
 
+DIRS += bitshuffleSrc
+bitshuffleSrc_DEPEND_DIRS += bloscSrc
+
 DIRS += tiffSrc
 tiffSrc_DEPEND_DIRS += zlibSrc
 
