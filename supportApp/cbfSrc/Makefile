@@ -8,6 +8,13 @@ LIBRARY_IOC_Linux = cbfad
 LIBRARY_IOC_Darwin = cbfad
 LIBRARY_IOC_solaris = cbfad
 
+INC += cbf_ad.h
+INC += cbf_tree_ad.h
+INC += cbf_context_ad.h
+INC += cbf_file_ad.h
+INC += global_ad.h
+INC += md5_ad.h
+
 cbfad_SRCS += cbf.c
 cbfad_SRCS += cbf_alloc.c
 cbfad_SRCS += cbf_ascii.c
