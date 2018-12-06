@@ -10,8 +10,10 @@ ifeq ($(WITH_BITSHUFFLE),YES)
 
     LIBRARY_IOC = bitshuffle
     LIBBITSHUFFLE = $(TOP)/supportApp/bitshuffleSrc
+    USR_CFLAGS_Linux += -std=c99
 
     INC += bitshuffle.h
+    INC += bitshuffle_core.h
     INC += bshuf_h5filter.h
     LIB_SRCS += bitshuffle.c
     LIB_SRCS += bitshuffle_core.c
