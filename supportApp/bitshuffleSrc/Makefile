@@ -9,7 +9,7 @@ ifeq ($(WITH_BITSHUFFLE),YES)
   ifeq ($(BITSHUFFLE_EXTERNAL),NO)
 
     LIBRARY_IOC = bitshuffle
-    LIBBITSHUFFLE = $(TOP)/supportApp/bitshuffleSrc
+    BITSHUFFLE = $(TOP)/supportApp/bitshuffleSrc
     USR_CFLAGS_Linux += -std=c99
 
     INC += bitshuffle.h
@@ -20,6 +20,10 @@ ifeq ($(WITH_BITSHUFFLE),YES)
     LIB_SRCS += bshuf_h5filter.c
     LIB_SRCS += bshuf_h5plugin.c
     LIB_SRCS += iochain.c
+    
+    SRC_DIRS += $(BITSHUFFLE)/lz4
+    INC += lz4.h
+    LIB_SRCS += lz4.c
 
   endif # ($(BITSHUFFLE_EXTERNAL),NO)
 endif # ($(WITH_BITSHUFFLE),YES)
