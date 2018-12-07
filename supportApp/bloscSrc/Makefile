@@ -46,7 +46,6 @@ ifeq ($(WITH_BLOSC),YES)
     # LZ4
     USR_CFLAGS += -DHAVE_LZ4
     SRC_DIRS += $(LIBBLOSC)/internal-complibs/lz4-1.7.5
-    INC += lz4.h
     LIB_SRCS += lz4.c
     LIB_SRCS += lz4hc.c
     # BLOSC
