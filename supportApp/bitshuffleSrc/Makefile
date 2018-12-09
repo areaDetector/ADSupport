@@ -12,24 +12,26 @@ ifeq ($(WITH_BITSHUFFLE),YES)
     BITSHUFFLE = $(TOP)/supportApp/bitshuffleSrc
     USR_CFLAGS_Linux += -std=c99
     USR_CFLAGS_WIN32 += -DLZ4_DLL_EXPORT=1
+    USR_CFLAGS_WIN32 += -DBITSHUFFLE_DLL_EXPORT=1
 
     INC += bitshuffle.h
     INC += bitshuffle_core.h
     INC += bshuf_h5filter.h
-    bitshuffle_SRCS += bitshuffle.c
-    bitshuffle_SRCS += bitshuffle_core.c
-    bitshuffle_SRCS += iochain.c
+    LIB_SRCS += bitshuffle.c
+    LIB_SRCS += bitshuffle_core.c
+    LIB_SRCS += iochain.c
     
     SRC_DIRS += $(BITSHUFFLE)/lz4
     INC += lz4.h
-    bitshuffle_SRCS += lz4.c
+    LIB_SRCS += lz4.c
 
-    ifeq ($(WITH_HDF5),YES)
-        LIBRARY_IOC += bitshuffle_hdf5
-        bitshuffle_hdf5_SRCS += bshuf_h5filter.c
-        bitshuffle_hdf5_SRCS += bshuf_h5plugin.c
-        bitshuffle_hdf5_LIBS += bitshuffle hdf5
-    endif # ($(WITH_HDF5),YES)
+    # We are getting unresolved globals on Windows like H5E_CANTREGISTER_g so disable for now
+    # Needed for HDF filter
+#    ifeq ($(WITH_HDF5),YES)
+#        LIB_SRCS += bshuf_h5filter.c
+#        LIB_SRCS += bshuf_h5plugin.c
+#        LIB_LIBS += hdf5
+#    endif # ($(WITH_HDF5),YES)
 
   endif # ($(BITSHUFFLE_EXTERNAL),NO)
 endif # ($(WITH_BITSHUFFLE),YES)
