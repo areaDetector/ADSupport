@@ -241,7 +241,10 @@ typedef unsigned int JDIMENSION;
 /* a function called through method pointers: */
 #define METHODDEF(type)		static type
 /* a function used only in its module: */
+#ifdef LOCAL
+#undef LOCAL
 #define LOCAL(type)		static type
+#endif
 /* a function referenced thru EXTERNs: */
 #define GLOBAL(type)		type
 /* a reference to a GLOBAL function: */
