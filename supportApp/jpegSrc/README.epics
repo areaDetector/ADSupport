@@ -5,7 +5,7 @@ The following source files were modified.
 
 jmorecfg.h
   Windows version define EXTERN and GLOBAL appropriately for DLLs
-  vxWorks version don't redefine UINT8, UINT16, INT16, INT32 
+  vxWorks version don't redefine UINT8, UINT16, INT16, INT32 and replace LOCAL macro
 
 Makefile  
   This is completely new.
