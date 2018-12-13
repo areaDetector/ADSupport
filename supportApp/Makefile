@@ -9,7 +9,7 @@ DIRS += bloscSrc
 bloscSrc_DEPEND_DIRS += zlibSrc
 
 DIRS += tiffSrc
-tiffSrc_DEPEND_DIRS += zlibSrc
+tiffSrc_DEPEND_DIRS += zlibSrc jpegSrc
 
 DIRS += xml2Src
 xml2Src_DEPEND_DIRS += zlibSrc
