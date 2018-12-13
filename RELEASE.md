@@ -20,6 +20,7 @@ R1-7 (January XXX, 2018)
   with this compression, including those written by the Eiger server.
 * Moved the CBF file support code from ADPilatus/pilatusApp/cbfSrc to supportApp/cbfSrc.
   This allows other detectors, such as ADMMPAD to use it as well.
+* Fixed warnings about redefinition of LOCAL on vxWorks.
 
 R1-6 (December 3, 2018)
 ========================
