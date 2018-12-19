@@ -55,6 +55,22 @@
 extern "C" {
 #endif
 
+/*^***************************************************************
+*  Export parameters
+*****************************************************************/
+/*
+*  BITSHUFFLE_DLL_EXPORT :
+*  Enable exporting of functions when building a Windows DLL
+*/
+#if defined(BITSHUFFLE_DLL_EXPORT) && (BITSHUFFLE_DLL_EXPORT==1)
+#  define BITSHUFFLELIB_API __declspec(dllexport)
+#elif defined(BITSHUFFLE_DLL_IMPORT) && (BITSHUFFLE_DLL_IMPORT==1)
+#  define BITSHUFFLELIB_API __declspec(dllimport) /* It isn't required but allows to generate better code, saving a function pointer load from the IAT and an indirect jump.*/
+#else
+#  define BITSHUFFLELIB_API
+#endif
+
+
 /* --- bshuf_using_SSE2 ----
  *
  * Whether routines where compiled with the SSE2 instruction set.
@@ -78,6 +94,17 @@ int bshuf_using_SSE2(void);
  */
 int bshuf_using_AVX2(void);
 
+/* Write a 64 bit unsigned integer to a buffer in big endian order. */
+BITSHUFFLELIB_API void bshuf_write_uint64_BE(void* buf, uint64_t num);
+
+/* Read a 64 bit unsigned integer from a buffer big endian order. */
+BITSHUFFLELIB_API uint64_t bshuf_read_uint64_BE(void* buf);
+
+/* Write a 32 bit unsigned integer to a buffer in big endian order. */
+BITSHUFFLELIB_API void bshuf_write_uint32_BE(void* buf, uint32_t num);
+
+/* Read a 32 bit unsigned integer from a buffer big endian order. */
+BITSHUFFLELIB_API uint32_t bshuf_read_uint32_BE(const void* buf);
 
 /* ---- bshuf_default_block_size ----
  *
@@ -95,7 +122,7 @@ int bshuf_using_AVX2(void);
  *  elem_size : element size of data to be shuffled/compressed.
  *
  */
-size_t bshuf_default_block_size(const size_t elem_size);
+BITSHUFFLELIB_API size_t bshuf_default_block_size(const size_t elem_size);
 
 
 /* ---- bshuf_bitshuffle ----
@@ -119,7 +146,7 @@ size_t bshuf_default_block_size(const size_t elem_size);
  *  number of bytes processed, negative error-code if failed.
  *
  */
-int64_t bshuf_bitshuffle(const void* in, void* out, const size_t size,
+BITSHUFFLELIB_API int64_t bshuf_bitshuffle(const void* in, void* out, const size_t size,
         const size_t elem_size, size_t block_size);
 
 
@@ -147,7 +174,7 @@ int64_t bshuf_bitshuffle(const void* in, void* out, const size_t size,
  *  number of bytes processed, negative error-code if failed.
  *
  */
-int64_t bshuf_bitunshuffle(const void* in, void* out, const size_t size,
+BITSHUFFLELIB_API int64_t bshuf_bitunshuffle(const void* in, void* out, const size_t size,
         const size_t elem_size, size_t block_size);
 
 #ifdef __cplusplus
