@@ -16,7 +16,6 @@ ifeq ($(WITH_BITSHUFFLE),YES)
 
     INC += bitshuffle.h
     INC += bitshuffle_core.h
-    INC += bshuf_h5filter.h
     LIB_SRCS += bitshuffle.c
     LIB_SRCS += bitshuffle_core.c
     LIB_SRCS += iochain.c
@@ -24,14 +23,6 @@ ifeq ($(WITH_BITSHUFFLE),YES)
     SRC_DIRS += $(BITSHUFFLE)/lz4
     INC += lz4.h
     LIB_SRCS += lz4.c
-
-    # We are getting unresolved globals on Windows like H5E_CANTREGISTER_g so disable for now
-    # Needed for HDF filter
-#    ifeq ($(WITH_HDF5),YES)
-#        LIB_SRCS += bshuf_h5filter.c
-#        LIB_SRCS += bshuf_h5plugin.c
-#        LIB_LIBS += hdf5
-#    endif # ($(WITH_HDF5),YES)
 
   endif # ($(BITSHUFFLE_EXTERNAL),NO)
 endif # ($(WITH_BITSHUFFLE),YES)

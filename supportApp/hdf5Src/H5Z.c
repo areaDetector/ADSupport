@@ -34,6 +34,10 @@
 #   include "blosc_filter.h"
 #endif
 
+#ifdef H5_HAVE_FILTER_BSHUF
+#   include "bshuf_h5filter.h"
+#endif
+
 /* Local typedefs */
 #ifdef H5Z_DEBUG
 typedef struct H5Z_stats_t {
@@ -117,6 +121,10 @@ H5Z__init_package(void)
     if(H5Z_register(BLOSC_FILTER) < 0)
         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register blosc filter")
 #endif /* H5_HAVE_FILTER_BLOSC */
+#ifdef H5_HAVE_FILTER_BSHUF
+    if(bshuf_register_h5filter() < 0)
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register bshuf filter")
+#endif /* H5_HAVE_FILTER_BSHUF */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

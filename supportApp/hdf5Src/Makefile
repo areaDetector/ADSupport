@@ -408,6 +408,24 @@ ifeq ($(WITH_HDF5),YES)
       endif
     endif
 
+    ifeq ($(WITH_BITSHUFFLE),YES)
+      USR_CFLAGS += -DH5_HAVE_FILTER_BSHUF
+      LIB_SRCS += bshuf_h5filter.c
+      ifeq ($(BITSHUFFLE_EXTERNAL),YES)
+        ifdef BITSHUFFLE_INCLUDE
+          USR_INCLUDES += $(addprefix -I, $(BITSHUFFLE_INCLUDE))
+        endif
+        ifdef BITSHUFFLE_LIB
+          bshuf_DIR = $(BITSHUFFLE_LIB)
+          LIB_LIBS += bitshuffle
+        else
+          LIB_SYS_LIBS += bitshuffle
+        endif
+      else
+        LIB_LIBS += bitshuffle
+      endif
+    endif
+
     LIB_SYS_LIBS_WIN32 += ws2_32
 
     H5detect_SRCS += H5detect.c
