@@ -1,6 +1,11 @@
 This directory contains the bitshuffle source, version 0.3.5.
 
-No source files were modified.
+bitshuffle.h, bitshuffle_core.h
+  Modified to add export macros for building dynamically on Windows
+  
+lz4/
+  Updated lz4 files from 1.7.1 to 1.7.5.  The new version has the export macros for Windows.
+
 
 Makefile  
   This is a new file for the EPICS build system.
