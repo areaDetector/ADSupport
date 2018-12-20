@@ -12,8 +12,8 @@ ifeq ($(WITH_HDF5),YES)
     PROD_IOC    = H5detect
 
     USR_CFLAGS += -D NDEBUG
+    USR_CFLAGS_Linux += -std=c99
     ifeq ($(SHARED_LIBRARIES), YES)
-      USR_CFLAGS_Linux += -std=c99
       USR_CFLAGS_WIN32 += -D H5_BUILT_AS_DYNAMIC_LIB 
       USR_CFLAGS_WIN32 += -D hdf5_shared_EXPORTS
       ifeq (mingw, $(findstring mingw, $(T_A)))
