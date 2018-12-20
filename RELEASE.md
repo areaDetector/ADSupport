@@ -15,8 +15,9 @@ Release Notes
 
 R1-7 (January XXX, 2018)
 ========================
-* Added bitshuffle.  This is used by ADEiger to read streams that are compressed with bitshuffle/lz4.
-  It also builds the HDF5 filter for bitshuffle/lz4 which can be useful for reading HDF5 files
+* Added bitshuffle, which includes lz4.
+  This is used by ADEiger to read streams that are compressed with bitshuffle/lz4.
+* Builds the HDF5 filter for bitshuffle/lz4 which can be useful for writing and reading HDF5 files
   with this compression, including those written by the Eiger server.
 * Moved the CBF file support code from ADPilatus/pilatusApp/cbfSrc to supportApp/cbfSrc.
   This allows other detectors, such as ADMMPAD to use it as well.
