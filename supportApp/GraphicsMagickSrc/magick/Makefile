@@ -38,6 +38,7 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
     INSTALL_INCLUDE           = $(INSTALL_LOCATION)/include/magick
     INC += magick_config.h
     INC += magick_config_Win32.h
+    INC += magick_config_Darwin.h
     INC += magick_config_Linux.h
     INC += api.h
     INC += enum_strings.h
