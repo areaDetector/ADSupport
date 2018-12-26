@@ -14,35 +14,31 @@
 /* #undef EnableBrokenCoders */
 
 /* C compiler used for compilation */
-#define GM_BUILD_CC "gcc -std=gnu99"
+#define GM_BUILD_CC "gcc"
 
 /* CFLAGS used for C compilation */
-#define GM_BUILD_CFLAGS "-fopenmp -g -O2 -Wall -pthread"
+#define GM_BUILD_CFLAGS "-g -O2 -Wall -D_THREAD_SAFE"
 
 /* arguments passed to configure */
-#define GM_BUILD_CONFIGURE_ARGS "./configure "
+#define GM_BUILD_CONFIGURE_ARGS "./configure  '--without-x'"
 
 /* CPPFLAGS used for preprocessing */
-#define GM_BUILD_CPPFLAGS "-I/usr/include/freetype2 -I/usr/include/libxml2"
+#define GM_BUILD_CPPFLAGS "-I/opt/local/include/freetype2 -I/opt/local/include/libxml2"
 
 /* C++ compiler used for compilation */
 #define GM_BUILD_CXX "g++"
 
 /* CXXFLAGS used for C++ compilation */
-#define GM_BUILD_CXXFLAGS "-pthread"
+#define GM_BUILD_CXXFLAGS "-D_THREAD_SAFE"
 
 /* Host identification triplet */
-#ifdef __LP64__
-#define GM_BUILD_HOST "x86_64-unknown-linux-gnu"
-#else
-#define GM_BUILD_HOST "i686-pc-linux-gnu"
-#endif
+#define GM_BUILD_HOST "x86_64-apple-darwin17.7.0"
 
 /* LDFLAGS used for linking */
-#define GM_BUILD_LDFLAGS ""
+#define GM_BUILD_LDFLAGS "-L/opt/local/lib"
 
 /* LIBS used for linking */
-#define GM_BUILD_LIBS "-lfreetype -ljpeg -lpng12 -lXext -lSM -lICE -lX11 -lbz2 -lxml2 -lz -lm -lgomp -lpthread"
+#define GM_BUILD_LIBS "-lfreetype -lbz2 -lxml2 -lz -lm -lpthread"
 
 /* Define if C++ compiler supports __func__ */
 #define HAS_CPP__func__ 1
@@ -81,7 +77,7 @@
 
 /* Define to 1 if you have the declaration of `strlcpy', and to 0 if you
    don't. */
-#define HAVE_DECL_STRLCPY 0
+#define HAVE_DECL_STRLCPY 1
 
 /* Define to 1 if you have the declaration of `vsnprintf', and to 0 if you
    don't. */
@@ -156,10 +152,10 @@
 #define HAVE_LONG_DOUBLE_WIDER 1
 
 /* Define to 1 if you have the <machine/param.h> header file. */
-/* #undef HAVE_MACHINE_PARAM_H */
+#define HAVE_MACHINE_PARAM_H 1
 
 /* Define to 1 if you have the <mach-o/dyld.h> header file. */
-/* #undef HAVE_MACH_O_DYLD_H */
+#define HAVE_MACH_O_DYLD_H 1
 
 /* Define to 1 if you have the `madvise' function. */
 #define HAVE_MADVISE 1
@@ -193,10 +189,10 @@
 #define HAVE_POPEN 1
 
 /* Define to 1 if you have the `posix_fadvise' function. */
-#define HAVE_POSIX_FADVISE 1
+/* #undef HAVE_POSIX_FADVISE */
 
 /* Define to 1 if you have the `posix_fallocate' function. */
-#define HAVE_POSIX_FALLOCATE 1
+/* #undef HAVE_POSIX_FALLOCATE */
 
 /* Define to 1 if you have the `posix_madvise' function. */
 #define HAVE_POSIX_MADVISE 1
@@ -286,10 +282,10 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if you have the `strlcat' function. */
-/* #undef HAVE_STRLCAT */
+#define HAVE_STRLCAT 1
 
 /* Define to 1 if you have the `strlcpy' function. */
-/* #undef HAVE_STRLCPY */
+#define HAVE_STRLCPY 1
 
 /* Define to 1 if you have the `strtoll' function. */
 #define HAVE_STRTOLL 1
@@ -330,25 +326,25 @@
 #define HAVE_TEMPLATES /**/
 
 /* Define to 1 if you have the <tiffconf.h> header file. */
-#define HAVE_TIFFCONF_H 1
+/* #undef HAVE_TIFFCONF_H */
 
 /* Define to 1 if you have the `TIFFIsCODECConfigured' function. */
-#define HAVE_TIFFISCODECCONFIGURED 1
+/* #undef HAVE_TIFFISCODECCONFIGURED */
 
 /* Define to 1 if you have the `TIFFMergeFieldInfo' function. */
-#define HAVE_TIFFMERGEFIELDINFO 1
+/* #undef HAVE_TIFFMERGEFIELDINFO */
 
 /* Define to 1 if you have the `TIFFSetErrorHandlerExt' function. */
-#define HAVE_TIFFSETERRORHANDLEREXT 1
+/* #undef HAVE_TIFFSETERRORHANDLEREXT */
 
 /* Define to 1 if you have the `TIFFSetTagExtender' function. */
-#define HAVE_TIFFSETTAGEXTENDER 1
+/* #undef HAVE_TIFFSETTAGEXTENDER */
 
 /* Define to 1 if you have the `TIFFSetWarningHandlerExt' function. */
-#define HAVE_TIFFSETWARNINGHANDLEREXT 1
+/* #undef HAVE_TIFFSETWARNINGHANDLEREXT */
 
 /* Define to 1 if you have the `TIFFSwabArrayOfTriples' function. */
-#define HAVE_TIFFSWABARRAYOFTRIPLES 1
+/* #undef HAVE_TIFFSWABARRAYOFTRIPLES */
 
 /* Define to 1 if you have the `times' function. */
 #define HAVE_TIMES 1
@@ -372,7 +368,7 @@
 #define HAVE__EXIT 1
 
 /* Define to 1 if you have the `_NSGetExecutablePath' function. */
-/* #undef HAVE__NSGETEXECUTABLEPATH */
+#define HAVE__NSGETEXECUTABLEPATH 1
 
 /* Define to 1 if you have the `_pclose' function. */
 /* #undef HAVE__PCLOSE */
@@ -414,10 +410,10 @@
 #define HasPNG 1
 
 /* X11 server supports shape extension */
-#define HasShape 1
+/* #undef HasShape */
 
 /* X11 server supports shared memory extension */
-#define HasSharedMemory 1
+/* #undef HasSharedMemory */
 
 /* Define if you have TIFF library */
 #define HasTIFF 1
@@ -441,7 +437,7 @@
 /* #undef HasWMFlite */
 
 /* Define if you have X11 library */
-#define HasX11 1
+/* #undef HasX11 */
 
 /* Define if you have XML library */
 #define HasXML 1
@@ -456,16 +452,16 @@
 /* #undef MAGICK_FONT_PATH */
 
 /* Command which returns total physical memory in bytes */
-/* #undef MAGICK_PHYSICAL_MEMORY_COMMAND */
+#define MAGICK_PHYSICAL_MEMORY_COMMAND "/usr/sbin/sysctl -n hw.physmem"
 
 /* Target Host CPU */
-#define MAGICK_TARGET_CPU i686
+#define MAGICK_TARGET_CPU x86_64
 
 /* Target Host OS */
-#define MAGICK_TARGET_OS linux-gnu
+#define MAGICK_TARGET_OS darwin17.7.0
 
 /* Target Host Vendor */
-#define MAGICK_TARGET_VENDOR pc
+#define MAGICK_TARGET_VENDOR apple
 
 /* define if the compiler lacks ios::binary */
 /* #undef MISSING_STD_IOS_BINARY */
@@ -535,7 +531,7 @@
 /* #undef PTHREAD_CREATE_JOINABLE */
 
 /* Number of bits in a pixel Quantum (8/16/32) */
-#define QuantumDepth 32
+#define QuantumDepth 8
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #define RETSIGTYPE void
@@ -547,7 +543,7 @@
 #define SIZEOF_SIGNED_INT 4
 
 /* The size of `signed long', as computed by sizeof. */
-#define SIZEOF_SIGNED_LONG 4
+#define SIZEOF_SIGNED_LONG 8
 
 /* The size of `signed long long', as computed by sizeof. */
 #define SIZEOF_SIGNED_LONG_LONG 8
@@ -556,16 +552,16 @@
 #define SIZEOF_SIGNED_SHORT 2
 
 /* The size of `size_t', as computed by sizeof. */
-#define SIZEOF_SIZE_T 4
+#define SIZEOF_SIZE_T 8
 
 /* The size of `unsigned int', as computed by sizeof. */
 #define SIZEOF_UNSIGNED_INT 4
 
 /* The size of `unsigned int*', as computed by sizeof. */
-#define SIZEOF_UNSIGNED_INTP 4
+#define SIZEOF_UNSIGNED_INTP 8
 
 /* The size of `unsigned long', as computed by sizeof. */
-#define SIZEOF_UNSIGNED_LONG 4
+#define SIZEOF_UNSIGNED_LONG 8
 
 /* The size of `unsigned long long', as computed by sizeof. */
 #define SIZEOF_UNSIGNED_LONG_LONG 8
@@ -599,7 +595,7 @@
 
 
 /* GraphicsMagick is formally installed under prefix */
-// #define UseInstalledMagick 1
+#define UseInstalledMagick 1
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
@@ -617,7 +613,7 @@
 #define X11ConfigurePath "X11ConfigurePath"
 
 /* Define to 1 if the X Window System is missing or not being used. */
-/* #undef X_DISPLAY_MISSING */
+#define X_DISPLAY_MISSING 1
 
 /* Enable large inode numbers on Mac OS X 10.5.  */
 #ifndef _DARWIN_USE_64_BIT_INODE
@@ -625,7 +621,7 @@
 #endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */
-#define _FILE_OFFSET_BITS 64
+/* #undef _FILE_OFFSET_BITS */
 
 /* Define to 1 to make fseeko visible on some hosts (e.g. glibc 2.2). */
 /* #undef _LARGEFILE_SOURCE */
