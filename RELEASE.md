@@ -8,12 +8,12 @@ The versions of EPICS base, asyn, and other synApps modules used for each releas
 the EXAMPLE_RELEASE_PATHS.local, EXAMPLE_RELEASE_LIBS.local, and EXAMPLE_RELEASE_PRODS.local
 files respectively, in the configure/ directory of the appropriate release of the 
 [top-level areaDetector](https://github.com/areaDetector/areaDetector) repository.
-
+ 
 
 Release Notes
 =============
 
-R1-7 (January XXX, 2018)
+R1-7 (March 19, 2018)
 ========================
 * Added bitshuffle, which includes lz4.
   This is used by ADEiger to read streams that are compressed with bitshuffle/lz4.
@@ -22,6 +22,8 @@ R1-7 (January XXX, 2018)
 * Moved the CBF file support code from ADPilatus/pilatusApp/cbfSrc to supportApp/cbfSrc.
   This allows other detectors, such as ADMMPAD to use it as well.
 * Fixed warnings about redefinition of LOCAL on vxWorks.
+* Fixed problem building decompressJPEG in jpegSrc if JPEG_EXTERNAL=YES.
+* Fixes for Darwin builds of GraphicsMagick and netCDF.
 
 R1-6 (December 3, 2018)
 ========================
