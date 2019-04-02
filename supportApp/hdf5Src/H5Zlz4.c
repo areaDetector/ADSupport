@@ -11,9 +11,15 @@
 #include <stdio.h>
 #if defined(_WIN32)
 #include <Winsock2.h>
+#else
+#include <arpa/inet.h>
 #endif
 #include <H5PLextern.h>
 #include <lz4.h>
+#include "lz4_h5filter.h"
+
+#define PUSH_ERR(func, minor, str)                                      \
+    H5Epush1(__FILE__, func, __LINE__, H5E_PLINE, minor, str)
 
 static size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts,
         const unsigned int cd_values[], size_t nbytes,
@@ -125,6 +131,7 @@ static size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts,
         size_t block;
         uint64_t *i64Buf;
         uint32_t *i32Buf;
+        size_t maxDestSize;
         char *rpos;      /* pointer to current read position */
         char *roBuf;    /* pointer to current write position */
 
@@ -147,8 +154,9 @@ static size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts,
             blockSize = nbytes;
         }
         nBlocks = (nbytes-1)/blockSize +1;
-        if (NULL==(outBuf = malloc(LZ4_COMPRESSBOUND(nbytes)
-                + 4+8 + nBlocks*4)))
+        maxDestSize = LZ4_compressBound(nbytes) + 4 + 8 + nBlocks*4;
+        outBuf = H5allocate_memory(maxDestSize, false);
+        if (NULL == outBuf)
         {
             goto error;
         }
@@ -174,7 +182,7 @@ static size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts,
                 blockSize = nbytes - origWritten;
 
 #if LZ4_VERSION_NUMBER > 10300
-            compBlockSize = LZ4_compress_default(rpos, roBuf+4,blockSize,nBlocks*4); /// reserve space for compBlockSize
+            compBlockSize = LZ4_compress_default(rpos, roBuf+4,blockSize, maxDestSize-outSize); /// reserve space for compBlockSize
 #else
             compBlockSize = LZ4_compress(rpos, roBuf+4, blockSize); /// reserve space for compBlockSize
 #endif
@@ -195,14 +203,14 @@ static size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts,
             outSize += compBlockSize + 4;
         }
 
-        free(*buf);
+        H5free_memory(*buf);
         *buf = outBuf;
         *buf_size = outSize;
         outBuf = NULL;
         ret_value = outSize;
 
     }
-    done:
+    /* done: */
     if(outBuf)
         free(outBuf);
     return ret_value;
@@ -210,7 +218,19 @@ static size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts,
 
     error:
     if(outBuf)
-        free(outBuf);
+        H5free_memory(outBuf);
     outBuf = NULL;
     return 0;
+}
+
+int lz4_register_h5filter(void){
+
+    int retval;
+
+    retval = H5Zregister(H5Z_LZ4);
+    if(retval<0){
+        PUSH_ERR("lz4_register_h5filter",
+                 H5E_CANTREGISTER, "Can't register lz4 filter");
+    }
+    return retval;
 }
