@@ -52,9 +52,6 @@ const H5Z_class2_t H5Z_LZ4[1] = {{
         (H5Z_func_t)H5Z_filter_lz4,         /* The actual filter function   */
 }};
 
-H5PL_type_t   H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}
-const void *H5PLget_plugin_info(void) {return H5Z_LZ4;}
-
 static size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts,
         const unsigned int cd_values[], size_t nbytes,
         size_t *buf_size, void **buf)
