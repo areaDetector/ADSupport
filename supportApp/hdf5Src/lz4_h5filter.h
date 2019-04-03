@@ -25,7 +25,7 @@
 #define H5Z_FILTER_LZ4 32004
 
 
-extern const H5Z_class2_t H5Z_LZ4[1];
+H5_DLLVAR const H5Z_class2_t H5Z_LZ4[1];
 
 /* ---- lz4_register_h5filter ----
  *
