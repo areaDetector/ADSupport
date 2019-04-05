@@ -38,16 +38,10 @@ ifeq ($(WITH_HDF5),YES)
     endif
 
     ifeq ($(WITH_BITSHUFFLE),YES)
-      # Note: We are getting the lz4 codec from the bitshuffle source
-      # So they are combined here.  They could be separated at a later time.
       LOADABLE_LIBRARY += HDF5_bshuf_plugin
       HDF5_bshuf_plugin_SRCS += bshuf_h5plugin.c
       HDF5_bshuf_plugin_LIBS += hdf5
-      LOADABLE_LIBRARY += HDF5_lz4_plugin
-      HDF5_lz4_plugin_SRCS += lz4_h5plugin.c
-      HDF5_lz4_plugin_LIBS += hdf5
       USR_CFLAGS += -DH5_HAVE_FILTER_BSHUF
-      USR_CFLAGS += -DH5_HAVE_FILTER_LZ4
       ifeq ($(BITSHUFFLE_EXTERNAL),YES)
         ifdef BITSHUFFLE_INCLUDE
           USR_INCLUDES += $(addprefix -I, $(BITSHUFFLE_INCLUDE))
@@ -59,7 +53,28 @@ ifeq ($(WITH_HDF5),YES)
           HDF5_bshuf_plugin_SYS_LIBS += bitshuffle
         endif
       else
-        LIBS += bitshuffle
+        HDF5_bshuf_plugin_LIBS += bitshuffle
+      endif
+    endif
+
+    ifeq ($(WITH_BITSHUFFLE),YES)
+      # Note: We are getting the lz4 codec from the bitshuffle source
+      # So they are combined here.  They could be separated at a later time.
+      LOADABLE_LIBRARY += HDF5_lz4_plugin
+      HDF5_lz4_plugin_SRCS += lz4_h5plugin.c
+      HDF5_lz4_plugin_LIBS += hdf5
+      USR_CFLAGS += -DH5_HAVE_FILTER_LZ4
+      ifeq ($(BITSHUFFLE_EXTERNAL),YES)
+        ifdef BITSHUFFLE_INCLUDE
+          USR_INCLUDES += $(addprefix -I, $(BITSHUFFLE_INCLUDE))
+        endif
+        ifdef BITSHUFFLE_LIB
+          bshuf_DIR = $(BITSHUFFLE_LIB)
+          HDF5_lz4_plugin_LIBS += bitshuffle
+        else
+          HDF5_lz4_plugin_SYS_LIBS += bitshuffle
+        endif
+      else
         HDF5_lz4_plugin_LIBS += bitshuffle
       endif
     endif
