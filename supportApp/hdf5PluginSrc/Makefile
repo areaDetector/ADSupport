@@ -16,9 +16,12 @@ ifeq ($(WITH_HDF5),YES)
       USR_CFLAGS_WIN32 += -D H5_BUILT_AS_DYNAMIC_LIB 
       USR_CFLAGS_WIN32 += -D hdf5_shared_IMPORTS
     endif
+    SRC_DIRS += $(TOP)/supportApp/hdf5Src
+    LIB_SYS_LIBS_WIN32 += ws2_32
  
     ifeq ($(WITH_BLOSC),YES)
       LOADABLE_LIBRARY += HDF5_blosc_plugin
+      HDF5_blosc_plugin_SRCS += blosc_filter.c
       HDF5_blosc_plugin_SRCS += blosc_plugin.c
       HDF5_blosc_plugin_LIBS += hdf5
       USR_CFLAGS += -DH5_HAVE_FILTER_BLOSC
@@ -39,6 +42,7 @@ ifeq ($(WITH_HDF5),YES)
 
     ifeq ($(WITH_BITSHUFFLE),YES)
       LOADABLE_LIBRARY += HDF5_bshuf_plugin
+      HDF5_bshuf_plugin_SRCS += bshuf_h5filter.c
       HDF5_bshuf_plugin_SRCS += bshuf_h5plugin.c
       HDF5_bshuf_plugin_LIBS += hdf5
       USR_CFLAGS += -DH5_HAVE_FILTER_BSHUF
@@ -61,6 +65,7 @@ ifeq ($(WITH_HDF5),YES)
       # Note: We are getting the lz4 codec from the bitshuffle source
       # So they are combined here.  They could be separated at a later time.
       LOADABLE_LIBRARY += HDF5_lz4_plugin
+      HDF5_lz4_plugin_SRCS += H5Zlz4.c
       HDF5_lz4_plugin_SRCS += lz4_h5plugin.c
       HDF5_lz4_plugin_LIBS += hdf5
       USR_CFLAGS += -DH5_HAVE_FILTER_LZ4
