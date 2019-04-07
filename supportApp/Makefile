@@ -24,6 +24,9 @@ hdf5Src_DEPEND_DIRS += szipSrc zlibSrc bloscSrc bitshuffleSrc
 DIRS += hdf5_hlSrc
 hdf5_hlSrc_DEPEND_DIRS += hdf5Src
 
+DIRS += hdf5PluginSrc
+hdf5PluginSrc_DEPEND_DIRS += hdf5Src
+
 DIRS += netCDFSrc
 # We are building netCDF without HDF5 support, but there are errors in their source files so we need this
 netCDFSrc_DEPEND_DIRS += hdf5Src

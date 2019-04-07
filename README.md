@@ -13,7 +13,7 @@ has a different version from the one required by areaDetector.
 
 This module contains the following libraries:
 
-- [Bitshuffle] (https://github.com/kiyo-masui/bitshuffle/)
+- [Bitshuffle and lz4] (https://github.com/kiyo-masui/bitshuffle/)
 - [Blosc] (https://github.com/Blosc/c-blosc)
 - [CBF] (https://sourceforge.net/projects/cbflib/)
 - [GraphicsMagick] (http://www.graphicsmagick.org/)

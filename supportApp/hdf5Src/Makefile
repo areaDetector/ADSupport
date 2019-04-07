@@ -66,6 +66,9 @@ ifeq ($(WITH_HDF5),YES)
     INC += H5Zpublic.h
     INC += hdf5.h
     INC += H5pubconf.h
+    INC += blosc_filter.h
+    INC += lz4_h5filter.h
+    INC += bshuf_h5filter.h
     INC_Linux +=  H5pubconf_32.h
     INC_Linux +=  H5pubconf_64.h
 
@@ -410,8 +413,12 @@ ifeq ($(WITH_HDF5),YES)
     endif
 
     ifeq ($(WITH_BITSHUFFLE),YES)
+      # Note: We are getting the lz4 codec from the bitshuffle source
+      # So they are combined here.  They could be separated at a later time.
       USR_CFLAGS += -DH5_HAVE_FILTER_BSHUF
+      USR_CFLAGS += -DH5_HAVE_FILTER_LZ4
       LIB_SRCS += bshuf_h5filter.c
+      LIB_SRCS += H5Zlz4.c
       ifeq ($(BITSHUFFLE_EXTERNAL),YES)
         ifdef BITSHUFFLE_INCLUDE
           USR_INCLUDES += $(addprefix -I, $(BITSHUFFLE_INCLUDE))
@@ -438,4 +445,3 @@ endif # ($(WITH_HDF5),YES)
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
-
