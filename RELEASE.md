@@ -21,6 +21,8 @@ R1-7 (April 1, 2018)
   with this compression, including those written by the Eiger server.
 * Builds the HDF5 filter for lz4 (without bitshuffle or Blosc) which can be useful for writing and reading HDF5 files
   with this compression, including those written by the Eiger server.
+* Builds dynamically loaded filter plugins for Blosc, Bitshuffle/lz4, and lz4.  These are built for Linux, Windows and Mac.
+  These plugins can be used with any HDF5 program using HDF5 1.8.11 or later to read files compressed with these filters.
 * Moved the CBF file support code from ADPilatus/pilatusApp/cbfSrc to supportApp/cbfSrc.
   This allows other detectors, such as ADMMPAD to use it as well.
 * Fixed warnings about redefinition of LOCAL on vxWorks.
