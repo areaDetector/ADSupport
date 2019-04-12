@@ -54,11 +54,17 @@ These plugins can be used with any HDF5 application built with HDF5 1.8.11 or la
 The plugin libraries that are built are HDF5_blosc_plugin.so, HDF5_bshuf_plugin.so, and HDF5_lz4_plugin.so.
 The library extensions will be .dll on Windows and .dylib on Mac.
 In order for the HDF5 application to find these plugins at run-time the following environment variable
-must be set on Linux:
-HDF5_PLUGIN_PATH=ADSupport/lib/linux-x86_64
-On Windows it should be:
-HDF5_PLUGIN_PATH=ADSupport/bin/windows-x64
+must be set.
 
+On Linux:
+```
+HDF5_PLUGIN_PATH=ADSupport/lib/linux-x86_64
+```
+
+On Windows:
+```
+HDF5_PLUGIN_PATH=ADSupport/bin/windows-x64
+```
 Using these plugins HDF5 applications can read files written by NDFileHDF5 with any of the supported compressions.
 The files can be compressed in the HDF5 library, or compressed elsewhere (e.g. NDPluginCodec, 
 ADEiger compressed NDArrays) and written with HDF5 direct chunk write.
