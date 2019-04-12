@@ -13,7 +13,7 @@ files respectively, in the configure/ directory of the appropriate release of th
 Release Notes
 =============
 
-R1-7 (April XXX, 2019)
+R1-7 (April 12, 2019)
 ========================
 * Added bitshuffle, which includes lz4.
   This is used by ADEiger to read streams that are compressed with bitshuffle/lz4.
