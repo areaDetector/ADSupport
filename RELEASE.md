@@ -13,6 +13,10 @@ files respectively, in the configure/ directory of the appropriate release of th
 Release Notes
 =============
 
+R1-7-1 (April XXX, 2019)
+========================
+* Fixed problem with hdf5PluginSrc/Makefile, only build plugins if SHAREABLE_LIBRARIES=YES.
+
 R1-7 (April 12, 2019)
 ========================
 * Added bitshuffle, which includes lz4.
