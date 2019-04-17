@@ -20,7 +20,9 @@ ifeq ($(WITH_HDF5),YES)
     LIB_SYS_LIBS_WIN32 += ws2_32
  
     ifeq ($(WITH_BLOSC),YES)
-      LOADABLE_LIBRARY += HDF5_blosc_plugin
+      ifeq ($(SHARED_LIBRARIES), YES)
+        LOADABLE_LIBRARY += HDF5_blosc_plugin
+      endif
       HDF5_blosc_plugin_SRCS += blosc_filter.c
       HDF5_blosc_plugin_SRCS += blosc_plugin.c
       HDF5_blosc_plugin_LIBS += hdf5
@@ -41,7 +43,9 @@ ifeq ($(WITH_HDF5),YES)
     endif
 
     ifeq ($(WITH_BITSHUFFLE),YES)
-      LOADABLE_LIBRARY += HDF5_bshuf_plugin
+      ifeq ($(SHARED_LIBRARIES), YES)
+        LOADABLE_LIBRARY += HDF5_bshuf_plugin
+      endif
       HDF5_bshuf_plugin_SRCS += bshuf_h5filter.c
       HDF5_bshuf_plugin_SRCS += bshuf_h5plugin.c
       HDF5_bshuf_plugin_LIBS += hdf5
@@ -64,7 +68,9 @@ ifeq ($(WITH_HDF5),YES)
     ifeq ($(WITH_BITSHUFFLE),YES)
       # Note: We are getting the lz4 codec from the bitshuffle source
       # So they are combined here.  They could be separated at a later time.
-      LOADABLE_LIBRARY += HDF5_lz4_plugin
+      ifeq ($(SHARED_LIBRARIES), YES)
+        LOADABLE_LIBRARY += HDF5_lz4_plugin
+      endif
       HDF5_lz4_plugin_SRCS += H5Zlz4.c
       HDF5_lz4_plugin_SRCS += lz4_h5plugin.c
       HDF5_lz4_plugin_LIBS += hdf5
