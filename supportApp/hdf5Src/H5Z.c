@@ -42,6 +42,10 @@
 #   include "lz4_h5filter.h"
 #endif
 
+#ifdef H5_HAVE_FILTER_JPEG
+#   include "jpeg_h5filter.h"
+#endif
+
 /* Local typedefs */
 #ifdef H5Z_DEBUG
 typedef struct H5Z_stats_t {
@@ -133,6 +137,10 @@ H5Z__init_package(void)
     if(lz4_register_h5filter() < 0)
         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register lz4 filter")
 #endif /* H5_HAVE_FILTER_LZ4 */
+#ifdef H5_HAVE_FILTER_JPEG
+    if(jpeg_register_h5filter() < 0)
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register jpeg filter")
+#endif /* H5_HAVE_FILTER_JPEG */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
