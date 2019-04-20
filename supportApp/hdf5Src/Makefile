@@ -69,6 +69,7 @@ ifeq ($(WITH_HDF5),YES)
     INC += blosc_filter.h
     INC += lz4_h5filter.h
     INC += bshuf_h5filter.h
+    INC += jpeg_h5filter.h
     INC_Linux +=  H5pubconf_32.h
     INC_Linux +=  H5pubconf_64.h
 
@@ -431,6 +432,24 @@ ifeq ($(WITH_HDF5),YES)
         endif
       else
         LIB_LIBS += bitshuffle
+      endif
+    endif
+
+    ifeq ($(WITH_JPEG),YES)
+      USR_CFLAGS += -DH5_HAVE_FILTER_JPEG
+      LIB_SRCS += jpeg_h5filter.c
+      ifeq ($(JPEG_EXTERNAL),YES)
+        ifdef JPEG_INCLUDE
+          USR_INCLUDES += $(addprefix -I, $(JPEG_INCLUDE))
+        endif
+        ifdef JPEG_LIB
+          jpeg_DIR = $(JPEG_LIB)
+          LIB_LIBS += jpeg
+        else
+          LIB_SYS_LIBS += jpeg
+        endif
+      else
+        LIB_LIBS += jpeg
       endif
     endif
 
