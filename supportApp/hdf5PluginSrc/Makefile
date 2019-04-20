@@ -90,6 +90,29 @@ ifeq ($(WITH_HDF5),YES)
       endif
     endif
 
+    ifeq ($(WITH_JPEG),YES)
+      ifeq ($(SHARED_LIBRARIES), YES)
+        LOADABLE_LIBRARY += HDF5_jpeg_plugin
+      endif
+      HDF5_jpeg_plugin_SRCS += jpeg_h5filter.c
+      HDF5_jpeg_plugin_SRCS += jpeg_h5plugin.c
+      HDF5_jpeg_plugin_LIBS += hdf5
+      USR_CFLAGS += -DH5_HAVE_FILTER_JPEG
+      ifeq ($(JPEG_EXTERNAL),YES)
+        ifdef JPEG_INCLUDE
+          USR_INCLUDES += $(addprefix -I, $(JPEG_INCLUDE))
+        endif
+        ifdef JPEG_LIB
+          jpeg_DIR = $(JPEG_LIB)
+          HDF5_jpeg_plugin_LIBS += jpeg
+        else
+          HDF5_jpeg_plugin_SYS_LIBS += jpeg
+        endif
+      else
+        HDF5_jpeg_plugin_LIBS += jpeg
+      endif
+    endif
+
   endif # ($(HDF5_EXTERNAL),NO)
 endif # ($(WITH_HDF5),YES)
 
