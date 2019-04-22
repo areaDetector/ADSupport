@@ -22,7 +22,7 @@ size_t jpeg_h5_filter(unsigned int flags, size_t cd_nelmts,
            const unsigned int cd_values[], size_t nbytes,
            size_t *buf_size, void **buf) {
 
-    struct jpeg_error_mgr jpegErr = {};
+    struct jpeg_error_mgr jpegErr;
     size_t buf_size_out=0;
     void *out_buf=0;
 
@@ -85,7 +85,7 @@ size_t jpeg_h5_filter(unsigned int flags, size_t cd_nelmts,
          * cd_values[2] = ny
          * cd_values[3] = 0=Mono, 1=RGB
          */
-        struct jpeg_compress_struct jpegInfo = {};
+        struct jpeg_compress_struct jpegInfo;
         int qualityFactor;
         int colorMode;
         unsigned char *outData = NULL;
