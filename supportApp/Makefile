@@ -19,7 +19,7 @@ DIRS += szipSrc
 DIRS += bitshuffleSrc
 
 DIRS += hdf5Src
-hdf5Src_DEPEND_DIRS += szipSrc zlibSrc bloscSrc bitshuffleSrc
+hdf5Src_DEPEND_DIRS += szipSrc zlibSrc bloscSrc bitshuffleSrc jpegSrc
 
 DIRS += hdf5_hlSrc
 hdf5_hlSrc_DEPEND_DIRS += hdf5Src
