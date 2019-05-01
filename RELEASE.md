@@ -13,8 +13,9 @@ files respectively, in the configure/ directory of the appropriate release of th
 Release Notes
 =============
 
-R1-7-1 (April XXX, 2019)
+R1-8 (May XXX, 2019)
 ========================
+* Added HDF5 filter and dynamically loaded filter plugin for JPEG.
 * Fixed problem with hdf5PluginSrc/Makefile, only build plugins if SHAREABLE_LIBRARIES=YES.
 
 R1-7 (April 12, 2019)
