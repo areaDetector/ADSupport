@@ -94,6 +94,7 @@ size_t jpeg_h5_filter(unsigned int flags, size_t cd_nelmts,
         int sizeX;
         int sizeY;
         int nwrite=0;
+        size_t expectedSize;
         unsigned char *pData=NULL, *buffer=NULL;
         
         if (cd_nelmts != 4) {
@@ -108,6 +109,14 @@ size_t jpeg_h5_filter(unsigned int flags, size_t cd_nelmts,
         sizeX         = cd_values[1];
         sizeY         = cd_values[2];
         colorMode     = cd_values[3];
+        
+        /* Sanity check to make sure we have been passed a complete image */
+        expectedSize = sizeX * sizeY;
+        if (colorMode == 1) expectedSize *= 3;
+        if (expectedSize != nbytes) {
+            PUSH_ERR("jpeg_h5_filter", H5E_CALLBACK, "nbytes does not match image size");
+            return 0;
+        }
 
         jpeg_create_compress(&jpegInfo);
         jpegInfo.err = jpeg_std_error(&jpegErr);
