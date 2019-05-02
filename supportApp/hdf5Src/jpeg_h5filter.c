@@ -188,7 +188,7 @@ H5Z_class_t jpeg_H5Filter[1] = {{
     H5Z_CLASS_T_VERS,
     (H5Z_filter_t)(JPEG_H5FILTER),
     1, 1,
-    "jpeg; see https://github.com/UChicago-CARS/jpegHDF5",
+    "jpeg; see https://github.com/CARS-UChicago/jpegHDF5",
     NULL,
     NULL,
     (H5Z_func_t)(jpeg_h5_filter)
