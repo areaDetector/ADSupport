@@ -76,9 +76,9 @@ static size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts,
         if(blockSize>origSize)
             blockSize = origSize;
 
-        if (NULL==(outBuf = malloc(origSize)))
+        if (NULL==(outBuf = H5allocate_memory(origSize, false)))
         {
-            printf("cannot malloc\n");
+            printf("error calling H5allocate_memory\n");
             goto error;
         }
         roBuf = (char*)outBuf;   /* pointer to current write position */
@@ -115,7 +115,7 @@ static size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts,
             roBuf += blockSize;            /* advance the write pointer */
             decompSize += blockSize;
         }
-        free(*buf);
+        H5free_memory(*buf);
         *buf = outBuf;
         outBuf = NULL;
         ret_value = (size_t)origSize;  // should always work, as orig_size cannot be > 2GB (sizeof(size_t) < 4GB)
@@ -209,7 +209,7 @@ static size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts,
     }
     /* done: */
     if(outBuf)
-        free(outBuf);
+        H5free_memory(outBuf);
     return ret_value;
 
 
