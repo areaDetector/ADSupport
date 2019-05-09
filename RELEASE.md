@@ -16,6 +16,7 @@ Release Notes
 R1-8 (May XXX, 2019)
 ========================
 * Added HDF5 filter and dynamically loaded filter plugin for JPEG.
+* Fixed memory allocation functions used in blosc and lz4 HDF5 filters.
 * Fixed problem with hdf5PluginSrc/Makefile, only build plugins if SHAREABLE_LIBRARIES=YES.
 
 R1-7 (April 12, 2019)
