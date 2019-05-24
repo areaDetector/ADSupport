@@ -13,7 +13,7 @@ files respectively, in the configure/ directory of the appropriate release of th
 [top-level areaDetector](https://github.com/areaDetector/areaDetector) repository.
  
 
-## __R1-8 (May XXX, 2019)__
+## __R1-8 (May 24, 2019)__
   * Added HDF5 filter and dynamically loaded filter plugin for JPEG.
   * Fixed memory allocation functions used in blosc and lz4 HDF5 filters.
   * Fixed problem with hdf5PluginSrc/Makefile, only build plugins if SHAREABLE_LIBRARIES=YES.
