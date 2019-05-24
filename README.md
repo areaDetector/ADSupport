@@ -51,7 +51,8 @@ or in ADSupport/configure/CONFIG_SITE.*.
 
 This module also builds shareable libraries for HDF5 compression filter plugins.  
 These plugins can be used with any HDF5 application built with HDF5 1.8.11 or later.
-The plugin libraries that are built are HDF5_blosc_plugin.so, HDF5_bshuf_plugin.so, and HDF5_lz4_plugin.so.
+The plugin libraries that are built are HDF5_blosc_plugin.so, HDF5_bshuf_plugin.so,
+HDF5_lz4_plugin.so, and HDF5_jpeg_plugin.so.
 The library extensions will be .dll on Windows and .dylib on Mac.
 In order for the HDF5 application to find these plugins at run-time the following environment variable
 must be set.
