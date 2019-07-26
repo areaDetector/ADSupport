@@ -144,7 +144,7 @@ size_t bshuf_h5_filter(unsigned int flags, size_t cd_nelmts,
     }
     size = nbytes_uncomp / elem_size;
 
-    out_buf = H5allocate_memory(buf_size_out, false);
+    out_buf = malloc(buf_size_out);
     if (out_buf == NULL) {
         PUSH_ERR("bshuf_h5_filter", H5E_CALLBACK, 
                 "Could not allocate output buffer.");
@@ -187,10 +187,10 @@ size_t bshuf_h5_filter(unsigned int flags, size_t cd_nelmts,
     if (err < 0) {
         sprintf(msg, "Error in bitshuffle with error code %d.", err);
         PUSH_ERR("bshuf_h5_filter", H5E_CALLBACK, msg);
-        H5free_memory(out_buf);
+        free(out_buf);
         return 0;
     } else {
-        H5free_memory(*buf);
+        free(*buf);
         *buf = out_buf;
         *buf_size = buf_size_out;
 
