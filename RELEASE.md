@@ -12,6 +12,20 @@ the EXAMPLE_RELEASE_PATHS.local, EXAMPLE_RELEASE_LIBS.local, and EXAMPLE_RELEASE
 files respectively, in the configure/ directory of the appropriate release of the 
 [top-level areaDetector](https://github.com/areaDetector/areaDetector) repository.
  
+ ## __R1-9 (August XXX, 2019)__
+  * Fixed memory allocation functions used in the blosc, lz4, bslz4, and JPEG HDF5 filters.
+    In R1-8 it was consistently using H5allocate_memory() and H5free_memory, rather than malloc() and free().
+    This prevented crashes when the compressors were called by NDFileHDF5.
+    However, it did not work with third-party applications built with HDF5 1.8.11-1.8.14 because
+    H5allocate_memory() and H5free_memory were added in 1.8.15.
+    This was a problem for Matlab, which currently uses 1.8.12.
+    The HDF5 Group also said that we should be using malloc() and free().
+    We determined that the reason for the access violation in the compressors when using malloc() and free()
+    was because we were building on Linux with the macro H5_MEMORY_ALLOC_SANITY_CHECK defined.
+    For some reason if that is defined then calling free() on an array allocated by the HDF5 library
+    causes an access violation.
+    Changed the code not to define that macro and used malloc() and free() everywhere.
+    It now works both on Matlab and in the NDFileHDF5 compressors.
 
 ## __R1-8 (May 24, 2019)__
   * Added HDF5 filter and dynamically loaded filter plugin for JPEG.
