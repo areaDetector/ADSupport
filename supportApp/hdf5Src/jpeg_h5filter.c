@@ -43,7 +43,7 @@ size_t jpeg_h5_filter(unsigned int flags, size_t cd_nelmts,
         jpeg_read_header(&jpegInfo, TRUE);
         jpeg_start_decompress(&jpegInfo);
         buf_size_out = elem_size * jpegInfo.output_height * jpegInfo.output_width * jpegInfo.output_components;
-        out_buf = H5allocate_memory(buf_size_out, false);
+        out_buf = malloc(buf_size_out);
         if (out_buf == NULL) {
             PUSH_ERR("jpeg_h5_filter", H5E_CALLBACK, 
                     "Could not allocate output buffer.");
@@ -64,14 +64,14 @@ size_t jpeg_h5_filter(unsigned int flags, size_t cd_nelmts,
         }   
         jpeg_finish_decompress(&jpegInfo);
         if (err == 1) {
-            H5free_memory(*buf);
+            free(*buf);
             *buf = out_buf;
             *buf_size = buf_size_out;
             return buf_size_out;
         } else {
             sprintf(msg, "Error in jpeg with error code %d.", err);
             PUSH_ERR("jpeg_h5_filter", H5E_CALLBACK, msg);
-            H5free_memory(out_buf);
+            free(out_buf);
           return 0;
         }
 
@@ -151,7 +151,7 @@ size_t jpeg_h5_filter(unsigned int flags, size_t cd_nelmts,
         jpeg_finish_compress(&jpegInfo);
         buf_size_out = outSize;
     
-        out_buf = H5allocate_memory(buf_size_out, false);
+        out_buf = malloc(buf_size_out);
         if (!out_buf) {
             PUSH_ERR("jpeg_h5_filter", H5E_CALLBACK, 
                 "Failed to allocate JPEG array");
@@ -159,7 +159,7 @@ size_t jpeg_h5_filter(unsigned int flags, size_t cd_nelmts,
         }
         memcpy(out_buf, outData, buf_size_out);
 
-        H5free_memory(*buf);
+        free(*buf);
         if (outData)
             free(outData);
         *buf = out_buf;
@@ -171,7 +171,7 @@ size_t jpeg_h5_filter(unsigned int flags, size_t cd_nelmts,
         if (outData)
             free(outData);
         if (out_buf)
-            H5free_memory(out_buf);
+            free(out_buf);
         return 0;
     }
 }

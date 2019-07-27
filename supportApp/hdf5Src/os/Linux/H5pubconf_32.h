@@ -427,7 +427,7 @@
 #define H5_LT_OBJDIR ".libs/"
 
 /* Define to enable internal memory allocation sanity checking. */
-#define H5_MEMORY_ALLOC_SANITY_CHECK 1
+/* #undef H5_MEMORY_ALLOC_SANITY_CHECK */
 
 /* Define if the metadata trace file code is to be compiled in */
 /* #undef H5_METADATA_TRACE_FILE */
