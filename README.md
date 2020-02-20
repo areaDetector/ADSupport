@@ -2,7 +2,7 @@ ADSupport
 ======
 The home of the support libraries for the 
 [EPICS](http://www.aps.anl.gov/epics/) 
-[areaDetector](https://cars.uchicago.edu/software/epics/areaDetector.html) 
+[areaDetector](https://github.com/areaDetector/areaDetector/blob/master/README.md) 
 software.  It contains third party libraries required for some plugins and
 drivers.  These are provided in source-code form compatible with the EPICS
 build system.  This makes it convenient to use these libraries on systems
