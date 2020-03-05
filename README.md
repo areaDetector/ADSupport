@@ -71,5 +71,5 @@ The files can be compressed in the HDF5 library, or compressed elsewhere (e.g. N
 ADEiger compressed NDArrays) and written with HDF5 direct chunk write.
 
 Additional information:
-* [Documentation](https://cars.uchicago.edu/software/epics/areaDetectorDoc.html).
-* [Release notes and links to source code releases](RELEASE.md).
+* [Documentation](https://areadetector.github.io)
+* [Release notes and links to source code releases](RELEASE.md)
