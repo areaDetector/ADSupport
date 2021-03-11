@@ -82,6 +82,12 @@
 #include "jpc_util.h"
 #include "jpc_math.h"
 
+int jpc_tsfb_analyze2(jpc_tsfb_t *tsfb, int *a, int xstart, int ystart,
+  int width, int height, int stride, int numlvls);
+
+int jpc_tsfb_synthesize2(jpc_tsfb_t *tsfb, int *a, int xstart, int ystart,
+  int width, int height, int stride, int numlvls);
+
 void jpc_tsfb_getbands2(jpc_tsfb_t *tsfb, int locxstart, int locystart,
   int xstart, int ystart, int xend, int yend, jpc_tsfb_band_t **bands,
   int numlvls);
