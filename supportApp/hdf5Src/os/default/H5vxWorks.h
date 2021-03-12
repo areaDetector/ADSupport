@@ -14,3 +14,10 @@ void tzset(void);
 int vxWorks_ftruncate(int fd, off_t length);
 #define HDflock(F,L)   vxWorks_flock(F,L)
 int vxWorks_flock(int fd, int operation);
+long long llround(double arg);
+long long llroundf(float arg);
+long lround(double arg);
+long lroundf(float arg);
+double round(double arg);
+float roundf(float arg);
+float powf(float x, float y);
