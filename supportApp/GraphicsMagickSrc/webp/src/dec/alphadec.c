@@ -15,6 +15,7 @@
 #include "./alphai.h"
 #include "./vp8i.h"
 #include "../enc/vp8li.h"
+#include "../dec/vp8li.h"
 #include "../dsp/dsp.h"
 #include "../utils/quant_levels_dec.h"
 #include "../utils/utils.h"
