@@ -11,6 +11,11 @@ The versions of EPICS base, asyn, and other synApps modules used for each releas
 the EXAMPLE_RELEASE_PATHS.local, EXAMPLE_RELEASE_LIBS.local, and EXAMPLE_RELEASE_PRODS.local
 files respectively, in the configure/ directory of the appropriate release of the 
 [top-level areaDetector](https://github.com/areaDetector/areaDetector) repository.
+
+ ## __R1-9-1 (March 26, 2021)__
+  * Fixed compilation errors with EPICS base 7.0.5 which changed the use of undefined functions
+    from being a warning to being an error.  There were a few files in GraphicsMagick that were missing
+    the required header files.  There was also one file in the HDF5 support for vxWorks with this problem.
  
  ## __R1-9 (August 8, 2019)__
   * Fixed memory allocation functions used in the blosc, lz4, bslz4, and JPEG HDF5 filters.
