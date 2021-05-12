@@ -345,7 +345,7 @@ xmlNanoHTTPScanURL(xmlNanoHTTPCtxtPtr ctxt, const char *URL) {
  */
 
 void
-xmlNanoHTTPScanStreamProxy(const char *URL) {
+xmlNanoHTTPStreamScanProxy(const char *URL) {
     xmlURIPtr uri;
 
     if (proxy != NULL) {
