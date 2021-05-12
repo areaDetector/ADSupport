@@ -130,7 +130,7 @@ else
 
 endif # ($(XML2_EXTERNAL),NO)
 
-INC += libxml/nanohttp_stream.h
+INC += nanohttp_stream.h
 LIBRARY += nanohttp_stream
 nanohttp_stream_SRCS += nanohttp_stream.c
 
