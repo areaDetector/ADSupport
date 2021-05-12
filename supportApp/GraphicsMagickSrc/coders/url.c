@@ -53,7 +53,7 @@
 #include <libxml/parser.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/nanoftp.h>
-#include <libxml/nanohttp.h>
+#include <libxml/nanohttp_stream.h>
 
 /*
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -181,7 +181,7 @@ static Image *ReadURLImage(const ImageInfo *image_info,ExceptionInfo *exception)
 
           type=(char *) NULL;
           if (!image_info->file)
-            context=xmlNanoHTTPOpen(filename,&type);
+            context=xmlNanoHTTPStreamOpen(filename,&type);
           else 
           {
             context=image_info->file;
@@ -189,7 +189,7 @@ static Image *ReadURLImage(const ImageInfo *image_info,ExceptionInfo *exception)
           }
           if (context != (void *) NULL)
             {
-              while ((bytes=xmlNanoHTTPRead(context,buffer,MaxBufferExtent)) > 0)
+              while ((bytes=xmlNanoHTTPStreamRead(context,buffer,MaxBufferExtent)) > 0)
               {
                 (void) fwrite(buffer,bytes,1,file);
                 if ((xmlNanoHTTPFrameState(context) == Complete) || (xmlNanoHTTPFrameState(context) == Error))
@@ -199,8 +199,8 @@ static Image *ReadURLImage(const ImageInfo *image_info,ExceptionInfo *exception)
               xmlFree(type);
               if (!xmlNanoHTTPStreaming(context))
               {
-                xmlNanoHTTPClose(context);
-                xmlNanoHTTPCleanup();
+                xmlNanoHTTPStreamClose(context);
+                xmlNanoHTTPStreamCleanup();
                 context = NULL;
               }
             }
