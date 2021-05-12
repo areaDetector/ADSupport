@@ -4,27 +4,26 @@ include $(TOP)/configure/CONFIG
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 #=============================
 
+ifeq ($(WITH_ZLIB),YES)
+  ifeq ($(ZLIB_EXTERNAL),NO)
+    USR_CFLAGS_WIN32 += -DHAVE_ZLIB_H
+    LIB_LIBS += zlib
+  endif # ($(ZLIB_EXTERNAL),NO)
+endif # ($(WITH_ZLIB),YES)
+
+USR_CFLAGS_WIN32 += -DWIN32
+ifeq ($(SHARED_LIBRARIES),YES)
+  USR_CFLAGS += -DPIC -DNOLIBTOOL
+endif
+xml2_SYS_LIBS_WIN32 += ws2_32
+
+# Need _REENTRANT flag on Linux for threads to build correctly
+USR_CFLAGS_Linux += -D_REENTRANT
 
 ifeq ($(XML2_EXTERNAL),NO)
 
   LIBRARY = xml2
 
-  ifeq ($(WITH_ZLIB),YES)
-    ifeq ($(ZLIB_EXTERNAL),NO)
-      USR_CFLAGS_WIN32 += -DHAVE_ZLIB_H
-      LIB_LIBS += zlib
-    endif # ($(ZLIB_EXTERNAL),NO)
-  endif # ($(WITH_ZLIB),YES)
-
-  USR_CFLAGS_WIN32 += -DWIN32
-  ifeq ($(SHARED_LIBRARIES),YES)
-    USR_CFLAGS += -DPIC -DNOLIBTOOL
-  endif
-  xml2_SYS_LIBS_WIN32 += ws2_32
-
-  # Need _REENTRANT flag on Linux for threads to build correctly
-  USR_CFLAGS_Linux += -D_REENTRANT
-  
   INC_WIN32 += win32config.h
   INC_WIN32 += wsockcompat.h
   INC_Darwin += config.h
@@ -123,8 +122,17 @@ ifeq ($(XML2_EXTERNAL),NO)
   LIB_SRCS += xpointer.c
   LIB_SRCS += xmlstring.c
 
+  nanohttp_stream_LIBS += xml2
+  nanohttp_stream_DEPEND_LIBS += xml2
+
+else 
+  nanohttp_stream_SYS_LIBS += xml2
+
 endif # ($(XML2_EXTERNAL),NO)
 
+INC += libxml/nanohttp_stream.h
+LIBRARY += nanohttp_stream
+nanohttp_stream_SRCS += nanohttp_stream.c
 
 include $(TOP)/configure/RULES
 #----------------------------------------
