@@ -88,9 +88,10 @@
 #include <libxml/xmlerror.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h> /* for xmlStr(n)casecmp() */
-#include <libxml/nanohttp_stream.h>
 #include <libxml/globals.h>
 #include <libxml/uri.h>
+
+#include <nanohttp_stream.h>
 
 /**
  * A couple portability macros
