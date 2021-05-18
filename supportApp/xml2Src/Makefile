@@ -133,6 +133,7 @@ endif # ($(XML2_EXTERNAL),NO)
 INC += nanohttp_stream.h
 LIBRARY += nanohttp_stream
 nanohttp_stream_SRCS += nanohttp_stream.c
+nanohttp_stream_SYS_LIBS_WIN32 += ws2_32
 
 include $(TOP)/configure/RULES
 #----------------------------------------
