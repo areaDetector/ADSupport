@@ -188,6 +188,7 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
         LIB_SYS_LIBS += xml2
       endif
     endif
+    LIB_LIBS += nanohttp_stream
     
     ifeq ($(ZLIB_EXTERNAL),NO)
       LIB_LIBS += zlib
