@@ -12,6 +12,19 @@ the EXAMPLE_RELEASE_PATHS.local, EXAMPLE_RELEASE_LIBS.local, and EXAMPLE_RELEASE
 files respectively, in the configure/ directory of the appropriate release of the 
 [top-level areaDetector](https://github.com/areaDetector/areaDetector) repository.
 
+ ## __R1-10 (May 26, 2021)__
+  * Changed the support for reading MJPEG streams in GraphicsMagickSrc and xml2Src.
+    In R1-5 nanohttp.c and nanohppt.h in xml2Src were changed to support MJPEG streams.
+    This had the undesired side-effect of being incompatible with the standard version
+    of libxml2, and thus it no longer worked to use XML2_EXTERNAL=YES and WITH_GRAPHICSMAGICK=YES.
+    This was fixed by moving the functions for MJPEG streams into new files
+    nanohttp_stream.c and nanohttp_stream.h.
+    These files are used to build a new library, nanohttp_stream.
+    nanohhtp.c and nanohttp.h were reverted to their original versions.
+  * Changed GraphicsMagickSrc/coders/url.c to use these new functions and the new library
+    for MJPEG streaming.
+  * This release now works with XML2_EXTERNAL=YES and WITH_GRAPHICSMAGICK=YES.
+
  ## __R1-9-1 (March 26, 2021)__
   * Fixed compilation errors with EPICS base 7.0.5 which changed the use of undefined functions
     from being a warning to being an error.  There were a few files in GraphicsMagick that were missing
