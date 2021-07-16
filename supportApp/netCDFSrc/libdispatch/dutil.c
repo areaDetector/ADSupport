@@ -220,7 +220,7 @@ NC_mktmp(const char* base)
 #else /* !HAVE_MKSTEMP */
     {
 #ifdef HAVE_MKTEMP
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__MINGW32__)
         /* Use _mktemp_s */
 	_mktemp_s(tmp,sizeof(tmp)-1);
 #else /*!_MSC_VER*/
