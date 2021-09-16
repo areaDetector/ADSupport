@@ -37,9 +37,7 @@
 #endif
 
 #ifndef HAVE_SSIZE_T
-#ifndef __MINGW32__
 typedef int ssize_t;
-#endif
 #endif
 
 #ifndef SEEK_SET
