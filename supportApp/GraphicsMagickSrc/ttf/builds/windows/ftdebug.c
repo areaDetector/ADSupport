@@ -42,7 +42,7 @@
 
 
 #include <ft2build.h>
-#include <freetype/internal/internal.h>
+#include FT_INTERNAL_DEBUG_H
 
 
 #ifdef FT_DEBUG_LEVEL_ERROR
