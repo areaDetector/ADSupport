@@ -1,6 +1,10 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#ifdef __MINGW32__
+#define HAVE_SSIZE_T
+#endif
+
 #ifdef _MSC_VER
 
 /* Prevent an issue where there is a circular inclusion

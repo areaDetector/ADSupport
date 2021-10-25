@@ -16,8 +16,9 @@
 #define H5_HAVE_WIN32_API 1
 
 /* Define if using a Windows compiler (i.e. Visual Studio) */
+#ifndef __MINGW32__
 #define H5_HAVE_VISUAL_STUDIO 1
-
+#endif
 /* Define if building universal (internal helper macro) */
 /* #undef H5_AC_APPLE_UNIVERSAL_BUILD */
 
