@@ -44,3 +44,10 @@ endif
 # Disable COMMANDLINE_LIBRARY so libraries won't be linked to readline.
 COMMANDLINE_LIBRARY=
 
+#The build system will build each library XXX only if the following make variables are set.
+#WITH_XXX=YES
+#XXX_EXTERNAL=NO
+
+#For example:
+#WITH_HDF5=YES
+#HDF5_EXTERNAL=NO
