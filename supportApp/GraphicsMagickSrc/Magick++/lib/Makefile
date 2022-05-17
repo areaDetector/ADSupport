@@ -8,23 +8,30 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
     
     ifeq (windows-x64, $(findstring windows-x64, $(T_A)))
       USR_CXXFLAGS_WIN32 += -DWIN64
+      USR_CFLAGS_WIN32 += -DWIN64
     endif
     
     ifeq (win32-x86, $(findstring win32-x86, $(T_A)))
       USR_CXXFLAGS_WIN32 += -DWIN32
+      USR_CFLAGS_WIN32 += -DWIN32
     endif
     
     USR_CXXFLAGS_WIN32 += -D_VISUALC_
+    USR_CFLAGS_WIN32 += -D_VISUALC_
     
     ifeq ($(SHARED_LIBRARIES),YES)
       USR_CXXFLAGS_WIN32 += -D_DLL
+      USR_CFLAGS_WIN32 += -D_DLL
       USR_CXXFLAGS_WIN32 += -D_MAGICKDLL_
+      USR_CFLAGS_WIN32 += -D_MAGICKDLL_
     else
       USR_CXXFLAGS_WIN32 += -D_LIB
+      USR_CFLAGS_WIN32 += -D_LIB
     endif
     
     ifeq ($(GRAPHICSMAGICK_PREFIX_SYMBOLS),YES)
       USR_CXXFLAGS += -DPREFIX_MAGICK_SYMBOLS
+      USR_CFLAGS += -DPREFIX_MAGICK_SYMBOLS
     endif
     
     USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc
