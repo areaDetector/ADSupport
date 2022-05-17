@@ -398,6 +398,7 @@ MagickExport MagickBool IsWindows95()
 %
 %
 */
+#ifndef __MINGW32__
 static LONG WINAPI
 MagickUnhandledExceptionFilter(struct _EXCEPTION_POINTERS *info)
 {
@@ -640,7 +641,8 @@ NTInitializeExceptionHandlers()
                       SEM_NOOPENFILEERRORBOX);
   (void) SetUnhandledExceptionFilter(MagickUnhandledExceptionFilter);
 }
-
+#endif // __MINGW32__
+
 #if !defined(HasLTDL)
 /*
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
