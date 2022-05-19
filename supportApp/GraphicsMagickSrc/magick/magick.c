@@ -1178,7 +1178,7 @@ InitializeMagick(const char *path)
 	MinimumCoderClass=PrimaryCoderClass;
     }
 
-#if defined(MSWINDOWS) && !defined(__MINGW32__)
+#if defined(MSWINDOWS)
   NTInitializeExceptionHandlers();  /* WIN32 Exceptions */
 #endif /* defined(MSWINDOWS) */
   InitializeMagickSignalHandlers(); /* Signal handlers */
