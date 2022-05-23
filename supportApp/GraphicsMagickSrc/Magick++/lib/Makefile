@@ -26,6 +26,10 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
     ifeq ($(GRAPHICSMAGICK_PREFIX_SYMBOLS),YES)
       USR_CXXFLAGS += -DPREFIX_MAGICK_SYMBOLS
     endif
+    ifeq (mingw, $(findstring mingw, $(T_A)))
+      # multiple definition of `_Unwind_Resume on Linux. I don't know how to fix it.
+      USR_LDFLAGS += -Wl,-allow-multiple-definition
+    endif
     
     USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc
     USR_INCLUDES += -I$(TOP)/supportApp/GraphicsMagickSrc/lcms/include
