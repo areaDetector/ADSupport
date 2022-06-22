@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <stdio.h>
 #if defined(_WIN32)
-#include <Winsock2.h>
+#include <winsock2.h>
 #else
 #include <arpa/inet.h>
 #endif
