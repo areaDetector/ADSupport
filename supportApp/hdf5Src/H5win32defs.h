@@ -78,13 +78,16 @@ typedef __int64             h5_stat_size_t;
  */
 #define HDmemset(X,C,Z)     memset((void*)(X),C,Z)
 
+#ifndef _TIMEZONE_DEFINED
+#define _TIMEZONE_DEFINED
 struct timezone {
     int tz_minuteswest;
     int tz_dsttime;
 };
+#endif
 
 /* time.h before VS2015 does not include timespec */
-#if (_MSC_VER < 1900)
+#if defined (_MSC_VER) && (_MSC_VER < 1900)
 struct timespec
 {
     time_t tv_sec;  /* Seconds - >= 0 */
