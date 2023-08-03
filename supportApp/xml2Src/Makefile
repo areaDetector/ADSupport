@@ -123,6 +123,7 @@ ifeq ($(XML2_EXTERNAL),NO)
   LIB_SRCS += xmlstring.c
 
   nanohttp_stream_LIBS += xml2
+  nanohttp_stream_CFLAGS += -DIN_LIBXML
 
 else 
   nanohttp_stream_SYS_LIBS += xml2
