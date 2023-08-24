@@ -13,18 +13,18 @@ has a different version from the one required by areaDetector.
 
 This module contains the following libraries:
 
-- [Bitshuffle and lz4] (https://github.com/kiyo-masui/bitshuffle/)
-- [Blosc] (https://github.com/Blosc/c-blosc)
-- [CBF] (https://sourceforge.net/projects/cbflib/)
-- [GraphicsMagick] (http://www.graphicsmagick.org/)
-- [HDF5]   (https://support.hdfgroup.org/HDF5/)
-- [JPEG]   (http://www.ijg.org/)
-- [netCDF] (http://www.unidata.ucar.edu/software/netcdf/)  
-- [NeXus]  (http://www.nexusformat.org/)
-- [SZIP]   (https://support.hdfgroup.org/doc_resource/SZIP/)
-- [TIFF]   (http://simplesystems.org/libtiff/)
-- [XML2]   (http://www.xmlsoft.org/index.html)
-- [ZLIB]   (http://www.zlib.net/)
+- [Bitshuffle and lz4](https://github.com/kiyo-masui/bitshuffle/)
+- [Blosc](https://github.com/Blosc/c-blosc)
+- [CBF](https://sourceforge.net/projects/cbflib/)
+- [GraphicsMagick](http://www.graphicsmagick.org/)
+- [HDF5](https://support.hdfgroup.org/HDF5/)
+- [JPEG](http://www.ijg.org/)
+- [netCDF](http://www.unidata.ucar.edu/software/netcdf/)
+- [NeXus](http://www.nexusformat.org/)
+- [SZIP](https://support.hdfgroup.org/doc_resource/SZIP/)
+- [TIFF](http://simplesystems.org/libtiff/)
+- [XML2](http://www.xmlsoft.org/index.html)
+- [ZLIB](http://www.zlib.net/)
 
 These libraries have had minor changes made so they will build with the EPICS
 build system on all of the supported platforms.  These changes are documented
