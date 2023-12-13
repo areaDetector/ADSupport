@@ -39,5 +39,7 @@ GraphicsMagickSrc_DEPEND_DIRS += tiffSrc zlibSrc xml2Src jpegSrc
 
 DIRS += cbfSrc
 
+DIRS += videoCompressionSrc
+
 include $(TOP)/configure/RULES_DIRS
 
