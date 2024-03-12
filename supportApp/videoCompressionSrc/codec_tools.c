@@ -12,6 +12,7 @@ AVCodecContext *c_c = 0;
 int first = 1;
 AVCodecContext *c_d = 0; 
 int count_d = 0;
+int mutex_initialized=0;
 
 
 const AVCodec *codec;
@@ -150,21 +151,27 @@ void reset_encoder_context(){
 	avcodec_open2(c_c, codec, NULL);
 }
 void set_gop_size(int gop_size){
+	//maybe lock/unlock can go in reset function instead of every setter function?
+	pthread_mutex_lock(&mutex);
 	c_c->gop_size = gop_size;
 	reset_encoder_context();
+	pthread_mutex_unlock(&mutex);
 }
 void set_q_min_max(int q){
+	pthread_mutex_lock(&mutex);
 	printf("in set_q_min_max function\n");
 	//c_c->global_quality = quality;
 	//avcodec_close(c_c);
 	if(c_c==0){
 		printf("ERROR c_c is NULL!! could not set qminmax to %d\n", q);
+		pthread_mutex_unlock(&mutex);
 		return;
 	}
 	c_c->qmin = q;
 	c_c->qmax = q;
 	//avcodec_open2(c_c, codec, NULL);
 	reset_encoder_context();
+	pthread_mutex_unlock(&mutex);
 }
 void re_init_encoder_context(){
 	printf("inside re_init_encoder_context\n");

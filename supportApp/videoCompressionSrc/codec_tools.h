@@ -3,6 +3,7 @@
 
 #ifndef CODEC_TOOLS
 #define CODEC_TOOLS
+#include <pthread.h>
 AVCodecContext* init_decoder_context();
 AVCodecContext* init_encoder_context(int width, int height);
 void buffer_to_packet(char* buffer, int size, AVPacket* pkt);
@@ -17,6 +18,8 @@ void write_buffer_16(char* buffer, int i, int val);
 int frame_to_buffer(AVFrame* frame, char* buffer, int* width, int* height);
 void set_gop_size(int gop_size);
 void set_q_min_max(int q);
+pthread_mutex_t mutex;
+int mutex_initialized;
 
 extern AVCodecContext *c_c; 
 extern int first;
