@@ -6,12 +6,16 @@
 #include <libavutil/opt.h>
 #include "codec_tools.h"
 extern int mutex_initialized;
-int compress_buffer(char* source, int x_size, int y_size, char* dest){
+int compress_buffer(CodecContext* c, char* source, int x_size, int y_size, char* dest){
+	AVCodecContext* c_c = c->c_c;
+	pthread_mutex_t* mutex = &(c->mutex);
+	//if(c->mutex_initialized==0){
 	if(mutex_initialized==0){
-		pthread_mutex_init(&mutex, NULL);
+		pthread_mutex_init(mutex, NULL);
+		c->mutex_initialized=1;
 		mutex_initialized=1;
 	}
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(mutex);
 	int pix_size = 1;
 	int uncompressed_size = pix_size*x_size*y_size;
 	if(c_c==0){
@@ -28,12 +32,12 @@ int compress_buffer(char* source, int x_size, int y_size, char* dest){
 	free(frame->data[0]);
 	av_frame_free(&frame);
 	if(pkt==0){
-		pthread_mutex_unlock(&mutex);
+		pthread_mutex_unlock(mutex);
 		return -1;
 	}
 	//Fail if compressed size is larger than uncompressed - to prevent memory being written out of range
 	if(pkt->size > uncompressed_size){
-		pthread_mutex_unlock(&mutex);
+		pthread_mutex_unlock(mutex);
 		return -1;
 	}
 	packet_to_buffer(pkt, dest);
@@ -41,7 +45,7 @@ int compress_buffer(char* source, int x_size, int y_size, char* dest){
 	av_packet_free(&pkt);
 	//av_packet_unref(pkt);
 	//return pkt->size;
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(mutex);
 	return r;
 }
 int decompress_buffer(char* buffer_in, int size_in, char* buffer_out, int* width, int* height){

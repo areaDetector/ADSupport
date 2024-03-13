@@ -4,7 +4,9 @@
 #if defined (__cplusplus)
 extern "C" {
 #endif
+//#include "codec_tools.h"
 
+//int H264_compress(CodecContext* c, const char* source, char* dest, int x_size, int y_size);
 int H264_compress(const char* source, char* dest, int x_size, int y_size);
 
 
