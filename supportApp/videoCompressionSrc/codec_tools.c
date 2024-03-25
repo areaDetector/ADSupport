@@ -13,7 +13,7 @@ AVCodecContext *c_d = 0;
 int count_d = 0;
 int mutex_initialized=0;
 
-CodecContext* vc_c=0;
+//CodecContext* vc_c=0;
 
 const AVCodec *codec;
 
@@ -88,6 +88,7 @@ AVFrame* packet_to_frame(AVCodecContext *c, AVPacket *pkt){
 	int i = 1;
 	frame = av_frame_alloc();
 	int ret = avcodec_send_packet(c, pkt);
+	if(c==0) printf("warning null context in packet_to_frame\n");
 	
 	do{
 		ret = avcodec_receive_frame(c, frame);
@@ -163,7 +164,7 @@ void reset_encoder_context(CodecContext* c){
 	avcodec_close(c_c);
 	avcodec_open2(c_c, codec, NULL);
 }
-void set_gop_size(CodecContext* c, int gop_size){
+void set_gop_size_(CodecContext* c, int gop_size){
 	AVCodecContext* c_c = c->c_c;
 	//maybe lock/unlock can go in reset function instead of every setter function?
 	pthread_mutex_t* mutex = &(c->mutex);
@@ -174,8 +175,8 @@ void set_gop_size(CodecContext* c, int gop_size){
 }
 //void set_q_min_max(CodecContext* c, int q){
 
-void set_q_min_max(int q){
-	CodecContext* c = vc_c;
+void set_q_min_max_(CodecContext* c, int q){
+	//CodecContext* c = vc_c;
 	if (c==0) {
 		printf("null context\n");
 		return;
@@ -196,6 +197,12 @@ void set_q_min_max(int q){
 	//avcodec_open2(c_c, codec, NULL);
 	reset_encoder_context(c);
 	pthread_mutex_unlock(mutex);
+}
+void set_q_min_max(void* c, int q){
+	set_q_min_max_((CodecContext*)c, q);
+}
+void set_gop_size(void* c, int q){
+	set_gop_size_((CodecContext*)c, q);
 }
 void re_init_encoder_context(CodecContext* c){
 	AVCodecContext* c_c = c->c_c;

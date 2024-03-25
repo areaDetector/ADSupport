@@ -14,7 +14,7 @@ typedef struct{
 	int mutex_initialized;
 } CodecContext;
 
-extern CodecContext* vc_c;
+//extern CodecContext* vc_c;
 
 
 CodecContext* init_decoder_context();
@@ -29,9 +29,10 @@ void re_init_encoder_context();
 void write_buffer_8(char* buffer, int i, int val);
 void write_buffer_16(char* buffer, int i, int val);
 int frame_to_buffer(AVFrame* frame, char* buffer, int* width, int* height);
-void set_gop_size(CodecContext* c, int gop_size);
+//void set_gop_size(CodecContext* c, int gop_size);
+void set_gop_size(void* c, int gop_size);
 //void set_q_min_max(CodecContext* c, int q);
-void set_q_min_max(int q);
+void set_q_min_max(void* c, int q);
 //pthread_mutex_t mutex;
 int mutex_initialized;
 

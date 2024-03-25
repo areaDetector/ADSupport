@@ -48,8 +48,9 @@ int compress_buffer(CodecContext* c, char* source, int x_size, int y_size, char*
 	pthread_mutex_unlock(mutex);
 	return r;
 }
+AVCodecContext* init_av_decoder_context();
 int decompress_buffer(char* buffer_in, int size_in, char* buffer_out, int* width, int* height){
-	if(c_d==0) c_d = init_decoder_context();
+	if(c_d==0) c_d = init_av_decoder_context();
 	AVPacket* pkt;
 	pkt = av_packet_alloc();
 	pkt->pts = count_d;
