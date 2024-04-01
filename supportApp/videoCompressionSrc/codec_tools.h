@@ -34,7 +34,8 @@ void set_gop_size(void* c, int gop_size);
 //void set_q_min_max(CodecContext* c, int q);
 void set_q_min_max(void* c, int q);
 //pthread_mutex_t mutex;
-int mutex_initialized;
+//int mutex_initialized;
+AVCodecContext* init_av_encoder_context(int width, int height);
 
 
 //extern AVCodecContext *c_c; 
