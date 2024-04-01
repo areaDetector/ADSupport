@@ -4,6 +4,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
 #include <libavutil/opt.h>
+#include <libavutil/version.h>
 #include "streaming_vc.h"
 //#include "pgm.h"
 #include "codec_tools.h"
@@ -20,7 +21,9 @@ const AVCodec *codec;
 AVCodecContext* init_av_decoder_context(){
 	AVCodecContext *c= NULL;
 	const AVCodec *codec;
-	avcodec_register_all();
+	#if LIBAVCODEC_VERSION_MAJOR<=57 
+		avcodec_register_all();
+	#endif
 	codec = avcodec_find_decoder(AV_CODEC_ID_H264);
 	c = avcodec_alloc_context3(codec);
 	avcodec_open2(c, codec, NULL);
@@ -29,7 +32,9 @@ AVCodecContext* init_av_decoder_context(){
 
 AVCodecContext* init_av_encoder_context(int width, int height){
 	AVCodecContext *c= NULL;
-	avcodec_register_all();
+	#if LIBAVCODEC_VERSION_MAJOR<=57 
+		avcodec_register_all();
+	#endif
 	codec = avcodec_find_encoder(AV_CODEC_ID_H264);
 	c = avcodec_alloc_context3(codec);
 	c->bit_rate = 400000;
@@ -45,9 +50,9 @@ AVCodecContext* init_av_encoder_context(int width, int height){
 	c->gop_size = 100;
 	//c->max_b_frames = 1;
 	c->max_b_frames = 0;
-	//c->pix_fmt = AV_PIX_FMT_YUV420P;
+	c->pix_fmt = AV_PIX_FMT_YUV420P;
 	//c->pix_fmt = AV_PIX_FMT_YUV422P10;
-	c->pix_fmt = AV_PIX_FMT_YUV422P;
+	//c->pix_fmt = AV_PIX_FMT_YUV422P;
 	c->flags |= AV_CODEC_FLAG_QSCALE;
 
 	int ret = avcodec_open2(c, codec, NULL);
@@ -164,39 +169,33 @@ void reset_encoder_context(CodecContext* c){
 	avcodec_close(c_c);
 	avcodec_open2(c_c, codec, NULL);
 }
-void set_gop_size_(CodecContext* c, int gop_size){
+void set_param_int_(CodecContext* c, int* p_param, int param_val){
+	if (c==0) {
+		printf("Error: null context\n");
+		return;
+	}
 	AVCodecContext* c_c = c->c_c;
 	//maybe lock/unlock can go in reset function instead of every setter function?
 	pthread_mutex_t* mutex = &(c->mutex);
 	pthread_mutex_lock(mutex);
-	c_c->gop_size = gop_size;
+	if(c_c==0){
+		printf("Error: c_c is NULL. Could not set param to %d\n", param_val);
+		pthread_mutex_unlock(mutex);
+		return;
+	}
+	//c_c->gop_size = gop_size;
+	*p_param = param_val;
 	reset_encoder_context(c);
 	pthread_mutex_unlock(mutex);
+}
+void set_gop_size_(CodecContext* c, int gop_size){
+	set_param_int_(c, &(c->c_c->gop_size), gop_size);
 }
 //void set_q_min_max(CodecContext* c, int q){
 
 void set_q_min_max_(CodecContext* c, int q){
-	//CodecContext* c = vc_c;
-	if (c==0) {
-		printf("null context\n");
-		return;
-	}
-	AVCodecContext* c_c = c->c_c;
-	pthread_mutex_t* mutex = &(c->mutex);
-	pthread_mutex_lock(mutex);
-	printf("in set_q_min_max function\n");
-	//c_c->global_quality = quality;
-	//avcodec_close(c_c);
-	if(c_c==0){
-		printf("ERROR c_c is NULL!! could not set qminmax to %d\n", q);
-		pthread_mutex_unlock(mutex);
-		return;
-	}
-	c_c->qmin = q;
-	c_c->qmax = q;
-	//avcodec_open2(c_c, codec, NULL);
-	reset_encoder_context(c);
-	pthread_mutex_unlock(mutex);
+	set_param_int_(c, &(c->c_c->qmin), q);
+	set_param_int_(c, &(c->c_c->qmax), q);
 }
 void set_q_min_max(void* c, int q){
 	set_q_min_max_((CodecContext*)c, q);
