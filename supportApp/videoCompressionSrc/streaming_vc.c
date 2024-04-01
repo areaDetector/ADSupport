@@ -19,11 +19,13 @@ int compress_buffer(CodecContext* c, char* source, int x_size, int y_size, char*
 	int pix_size = 1;
 	int uncompressed_size = pix_size*x_size*y_size;
 	if(c_c==0){
-		c_c = init_encoder_context(x_size, y_size); 
+		//c_c = init_encoder_context(x_size, y_size); 
+		c_c = init_av_encoder_context(x_size, y_size); 
 	}
 	else if(c_c->width!=x_size || c_c->height!=y_size){
 		avcodec_close(c_c);
-		c_c = init_encoder_context(x_size, y_size); 
+		//c_c = init_encoder_context(x_size, y_size); 
+		c_c = init_av_encoder_context(x_size, y_size); 
 	}
 		
 	AVPacket* pkt;
