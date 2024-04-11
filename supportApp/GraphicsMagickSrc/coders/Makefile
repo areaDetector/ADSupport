@@ -204,7 +204,7 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
       endif
     endif
 
-    LIB_SYS_LIBS_WIN32 += User32 Gdi32 OleAut32
+    LIB_SYS_LIBS_WIN32 += user32 gdi32 oleaut32
 
   endif # ($(GRAPHICSMAGICK_EXTERNAL),NO)
 endif # ($(WITH_GRAPHICSMAGICK),YES)

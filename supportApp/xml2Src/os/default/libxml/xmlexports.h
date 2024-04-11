@@ -51,7 +51,7 @@
 /** DOC_DISABLE */
 
 /* Windows platform with MS compiler */
-#if defined(_WIN32) && defined(_MSC_VER)
+#if defined(_WIN32) && (defined(_MSC_VER) || defined(__MINGW32__))
   #undef XMLPUBFUN
   #undef XMLPUBVAR
   #undef XMLCALL
@@ -60,10 +60,11 @@
     #define XMLPUBFUN __declspec(dllexport)
     #define XMLPUBVAR __declspec(dllexport)
   #else
-    #define XMLPUBFUN
     #if !defined(LIBXML_STATIC)
       #define XMLPUBVAR __declspec(dllimport) extern
+      #define XMLPUBFUN __declspec(dllimport)
     #else
+      #define XMLPUBFUN
       #define XMLPUBVAR extern
     #endif
   #endif
@@ -84,35 +85,6 @@
   #undef XMLPUBVAR
   #undef XMLCALL
   #undef XMLCDECL
-  #if defined(IN_LIBXML) && !defined(LIBXML_STATIC)
-    #define XMLPUBFUN __declspec(dllexport)
-    #define XMLPUBVAR __declspec(dllexport) extern
-  #else
-    #define XMLPUBFUN
-    #if !defined(LIBXML_STATIC)
-      #define XMLPUBVAR __declspec(dllimport) extern
-    #else
-      #define XMLPUBVAR extern
-    #endif
-  #endif
-  #define XMLCALL __cdecl
-  #define XMLCDECL __cdecl
-  #if !defined _REENTRANT
-    #define _REENTRANT
-  #endif
-#endif
-
-/* Windows platform with GNU compiler (Mingw) */
-#if defined(_WIN32) && defined(__MINGW32__)
-  #undef XMLPUBFUN
-  #undef XMLPUBVAR
-  #undef XMLCALL
-  #undef XMLCDECL
-  /*
-   * if defined(IN_LIBXML) this raises problems on mingw with msys
-   * _imp__xmlFree listed as missing. Try to workaround the problem
-   * by also making that declaration when compiling client code.
-   */
   #if defined(IN_LIBXML) && !defined(LIBXML_STATIC)
     #define XMLPUBFUN __declspec(dllexport)
     #define XMLPUBVAR __declspec(dllexport) extern
