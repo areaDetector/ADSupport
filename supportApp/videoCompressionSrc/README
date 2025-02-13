@@ -1,0 +1,7 @@
+Prerequisites:
+* ffmpeg needs to be installed. "yum install ffmpeg-devel"
+
+PVs:
+* $(P)$(R)QMinMax - 1 for least lossless compression, higher values for lossier compression
+* $(P)$(R)GOPSize - Group of picture size. 1 for frame-by-frame compression. Set to higher values for true video compression.
+
