@@ -1,6 +1,8 @@
 #ifndef LZ4HDF5_H
 #define LZ4HDF5_H
 
+#include <shareLib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
