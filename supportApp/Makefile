@@ -39,5 +39,8 @@ GraphicsMagickSrc_DEPEND_DIRS += tiffSrc zlibSrc xml2Src jpegSrc
 
 DIRS += cbfSrc
 
+DIRS += lz4hdf5Src
+lz4hdf5Src_DEPEND_DIRS += bitshuffleSrc
+
 include $(TOP)/configure/RULES_DIRS
 
