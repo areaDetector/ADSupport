@@ -1,11 +1,11 @@
 /*
- * This file implements lz4 compression/decompression where the data
- * has a 12-byte header that specified the block size and other information
- * It is different from the lz4 compression in ADSupport that does not have this header
- * This file is needed because Dectris Stream2 sends lz4 data with smaller block size than
- * the default, so the lz4 decompression won't work.
- * 
- * This code is modified from H5Zlz4.c in the HDF5 library.
+ * This file implements a version of the lz4 codec where the data is compressed in blocks.
+ * This codec adds a 12-byte header that contains the size of the uncompressed data and the block size.
+ * Each block contains a 4-byte header that contains the compressed length of that block.
+ * This codec is used by the HDF5 library and by Dectris for the Stream2 interface on their detectors.
+ * The documentation is here: https://github.com/dectris/HDF5Plugin/blob/master/HDF5_LZ4.pdf
+ * This code for this library is derived from the H5Zlz4.c file in the HDF5 External Filter Plugins library.
+ * https://github.com/nexusformat/HDF5-External-Filter-Plugins/blob/master/LZ4/src/H5Zlz4.c
  */
 
 #include <sys/types.h>
