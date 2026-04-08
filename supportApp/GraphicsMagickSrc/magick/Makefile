@@ -210,7 +210,6 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
     endif
     
     LIB_SYS_LIBS_WIN32 += Advapi32 User32 Gdi32
-    LIB_SYS_LIBS_Linux += Xext
 
   endif # ($(GRAPHICSMAGICK_EXTERNAL),NO)
 endif # ($(WITH_GRAPHICSMAGICK),YES)

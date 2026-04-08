@@ -441,7 +441,7 @@
 /* #undef HasWMFlite */
 
 /* Define if you have X11 library */
-#define HasX11 1
+/*#define HasX11 1 */
 
 /* Define if you have XML library */
 #define HasXML 1
