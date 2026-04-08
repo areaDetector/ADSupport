@@ -49,6 +49,15 @@ CONFIG_SITE.local.* files in in the configure/ directory of the appropriate rele
 [top-level areaDetector](https://github.com/areaDetector/areaDetector) repository
 or in ADSupport/configure/CONFIG_SITE.*.
 
+This module also builds a library for the HDF5 version of the LZ4 codec which compresses
+in block units.  The library is called lz4hdf5.
+This codec adds a 12-byte header that contains the size of the uncompressed data and the block size.
+Each block contains a 4-byte header that contains the compressed length of that block.
+[Documentation](https://github.com/dectris/HDF5Plugin/blob/master/HDF5_LZ4.pdf)
+The code for this library is derived from the 
+[H5Zlz4.c file](https://github.com/nexusformat/HDF5-External-Filter-Plugins/blob/master/LZ4/src/H5Zlz4.c)
+in the HDF5 library.
+ 
 This module also builds shareable libraries for HDF5 compression filter plugins.  
 These plugins can be used with any HDF5 application built with HDF5 1.8.11 or later.
 The plugin libraries that are built are HDF5_blosc_plugin.so, HDF5_bshuf_plugin.so,
