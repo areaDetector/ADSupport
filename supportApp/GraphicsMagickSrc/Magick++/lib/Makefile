@@ -70,8 +70,6 @@ ifeq ($(WITH_GRAPHICSMAGICK),YES)
     LIB_LIBS += Magick
     LIB_LIBS += coders
     
-    LIB_SYS_LIBS_Linux += Xext
-
   endif # ($(GRAPHICSMAGICK_EXTERNAL),NO)
 endif # ($(WITH_GRAPHICSMAGICK),YES)
 
