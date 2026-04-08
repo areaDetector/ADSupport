@@ -35,7 +35,7 @@
 
 #define DEFAULT_BLOCK_SIZE 1<<30; /* 1GB. LZ4 needs blocks < 1.9GB. */
 
-epicsShareFunc size_t decompress_lz4hdf5(const char *inbuf, char *outbuf, size_t maxOutputSize)
+epicsShareFunc size_t decompress_lz4hdf5(const char *inbuf, char *outbuf, size_t maxOutputSize, size_t *blockSizeOut)
 {
     size_t ret_value;
 
@@ -57,7 +57,7 @@ epicsShareFunc size_t decompress_lz4hdf5(const char *inbuf, char *outbuf, size_t
     rpos += 4;
     if(blockSize>origSize)
         blockSize = (uint32_t)origSize;
-
+    *blockSizeOut = blockSize;
     roBuf = (char*)outbuf;   /* pointer to current write position */
     decompSize     = 0;
     /// start with the first block ///
@@ -96,9 +96,8 @@ epicsShareFunc size_t decompress_lz4hdf5(const char *inbuf, char *outbuf, size_t
     return ret_value;
 }
 
-epicsShareFunc size_t compress_lz4hdf5(const char *inbuf, char *outbuf, size_t nbytes, size_t maxOutputSize)
+epicsShareFunc size_t compress_lz4hdf5(const char *inbuf, char *outbuf, size_t nbytes, size_t maxOutputSize, size_t blockSize)
 {
-    size_t blockSize;
     size_t nBlocks;
     size_t outSize; /* size of the output buffer. Header size (12 bytes) is included */
     size_t block;
@@ -114,8 +113,8 @@ epicsShareFunc size_t compress_lz4hdf5(const char *inbuf, char *outbuf, size_t n
         return 0;
     }
 
-    blockSize = DEFAULT_BLOCK_SIZE;
-    if(blockSize > nbytes)
+    if (blockSize == 0) blockSize = DEFAULT_BLOCK_SIZE;
+    if (blockSize > nbytes)
     {
         blockSize = nbytes;
     }
