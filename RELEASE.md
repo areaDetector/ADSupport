@@ -17,6 +17,8 @@ files respectively, in the configure/ directory of the appropriate release of th
     The code is modified from the HFZlz4.c file in the HDF external filter plugins package.
     This is the codec used by Dectris for LZ4 compression on the Stream2 interface.
   * Minor changes to support building with mingw32.
+  * Made X11 support in GraphicsMagick optional to support cross-compiling.
+  * Fixed incompatible pointer type in GraphicsMagick libjasper that caused error on RHEL 10.
 
 ## __R1-10 (May 26, 2021)__
   * Changed the support for reading MJPEG streams in GraphicsMagickSrc and xml2Src.
