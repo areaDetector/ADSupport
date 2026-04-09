@@ -35,6 +35,18 @@
 
 #define DEFAULT_BLOCK_SIZE 1<<30; /* 1GB. LZ4 needs blocks < 1.9GB. */
 
+epicsShareFunc size_t lz4hdf5_compressBound(size_t nbytes, size_t *blockSize, size_t *nBlocks)
+{
+    if (*blockSize == 0) *blockSize = DEFAULT_BLOCK_SIZE;
+    if (*blockSize > nbytes)
+    {
+        *blockSize = nbytes;
+    }
+    *nBlocks = (nbytes-1)/(*blockSize) + 1;
+    return LZ4_compressBound((int)nbytes) + 4 + 8 + *nBlocks*4;
+}
+
+
 epicsShareFunc size_t decompress_lz4hdf5(const char *inbuf, char *outbuf, size_t maxOutputSize, size_t *blockSizeOut)
 {
     size_t ret_value;
@@ -113,13 +125,7 @@ epicsShareFunc size_t compress_lz4hdf5(const char *inbuf, char *outbuf, size_t n
         return 0;
     }
 
-    if (blockSize == 0) blockSize = DEFAULT_BLOCK_SIZE;
-    if (blockSize > nbytes)
-    {
-        blockSize = nbytes;
-    }
-    nBlocks = (nbytes-1)/blockSize +1;
-    maxDestSize = LZ4_compressBound((int)nbytes) + 4 + 8 + nBlocks*4;
+    maxDestSize = lz4hdf5_compressBound(nbytes, &blockSize, &nBlocks);
     if (maxDestSize > maxOutputSize) {
         printf("maxOutputSize=%d too small, needs to be at least %d\n", (int)maxOutputSize, (int)maxDestSize);
         return 0;
