@@ -12,6 +12,15 @@ the EXAMPLE_RELEASE_PATHS.local, EXAMPLE_RELEASE_LIBS.local, and EXAMPLE_RELEASE
 files respectively, in the configure/ directory of the appropriate release of the 
 [top-level areaDetector](https://github.com/areaDetector/areaDetector) repository.
 
+## __R1-11 (April XXX, 2026)__
+  * Added support for the HDF5 version of the LZ4 codec which compress in blocks.
+    The code is modified from the HFZlz4.c file in the HDF external filter plugins package.
+    This is the codec used by Dectris for LZ4 compression on the Stream2 interface.
+  * Minor changes to support building with mingw32.
+  * Made X11 support in GraphicsMagick optional to support cross-compiling.
+  * Fixed incompatible pointer type in GraphicsMagick libjasper that caused error on RHEL 10.
+  * Fixed memory leak in decompressJPEG.c, used by ImageJ and other clients.
+
 ## __R1-10 (May 26, 2021)__
   * Changed the support for reading MJPEG streams in GraphicsMagickSrc and xml2Src.
     In R1-5 nanohttp.c and nanohppt.h in xml2Src were changed to support MJPEG streams.

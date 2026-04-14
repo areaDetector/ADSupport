@@ -1,4 +1,4 @@
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >=2                           
+#if defined __GNUC__ && 402 <= __GNUC__ * 100 + __GNUC_MINOR__
 #pragma GCC diagnostic ignored "-Wconversion"                     
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"  
 #pragma GCC diagnostic ignored "-Wlarger-than="                   

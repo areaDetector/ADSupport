@@ -33,4 +33,5 @@ epicsShareFunc void decompressJPEG(const unsigned char *input, long compressedSi
     }
 
     jpeg_finish_decompress(&jpegInfo);
+    jpeg_destroy_decompress(&jpegInfo);
 }

@@ -44,3 +44,5 @@ endif
 # Disable COMMANDLINE_LIBRARY so libraries won't be linked to readline.
 COMMANDLINE_LIBRARY=
 
+# Get local settings which can override those from areaDetector
+-include $(TOP)/configure/CONFIG_SITE.local
