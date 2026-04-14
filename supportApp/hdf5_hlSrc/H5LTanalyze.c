@@ -62,6 +62,9 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#ifdef linux
+#include <unistd.h>
+#endif
 
 /* end standard C headers. */
 
