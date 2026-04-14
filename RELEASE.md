@@ -19,6 +19,7 @@ files respectively, in the configure/ directory of the appropriate release of th
   * Minor changes to support building with mingw32.
   * Made X11 support in GraphicsMagick optional to support cross-compiling.
   * Fixed incompatible pointer type in GraphicsMagick libjasper that caused error on RHEL 10.
+  * Fixed memory leak in decompressJPEG.c, used by ImageJ and other clients.
 
 ## __R1-10 (May 26, 2021)__
   * Changed the support for reading MJPEG streams in GraphicsMagickSrc and xml2Src.
