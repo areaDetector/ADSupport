@@ -103,8 +103,8 @@ static short msb_test = 0x0001;
 #endif /* !HDF */
 
 #ifndef REMOVE_SZIP_ENCODER
-static int (*winner_function)();
-static int (*winner_ref_function)();
+static int (*winner_function)(unsigned *, unsigned *);
+static int (*winner_ref_function)(unsigned *, unsigned *);
 #endif /* !defined(REMOVE_SZIP_ENCODER) */
 
 static boolean compress_exactly_as_chip;
