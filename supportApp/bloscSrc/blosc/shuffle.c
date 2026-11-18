@@ -16,8 +16,8 @@
 
 /* Visual Studio < 2013 does not have stdbool.h so here it is a replacement: */
 #if defined __STDC__ && defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-/* have a C99 compiler */
-typedef _Bool bool;
+/* C99 and later provide bool through the standard header. */
+#include <stdbool.h>
 #else
 /* do not have a C99 compiler */
 typedef unsigned char bool;
