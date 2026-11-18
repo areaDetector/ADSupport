@@ -25,11 +25,15 @@ documentation and/or software.
 
 /* PROTOTYPES should be set to one if and only if the compiler supports
   function argument prototyping.
-The following makes PROTOTYPES default to 0 if it has not already
-  been defined with C compiler flags.
+Default to prototypes for standard C and C++ compilers unless
+  explicitly overridden with compiler flags.
  */
 #ifndef PROTOTYPES
+#if defined(__STDC__) || defined(__cplusplus)
+#define PROTOTYPES 1
+#else
 #define PROTOTYPES 0
+#endif
 #endif
 
 /* POINTER defines a generic pointer type */
