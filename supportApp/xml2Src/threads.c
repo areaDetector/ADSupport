@@ -63,29 +63,29 @@ extern int pthread_key_create (pthread_key_t *__key,
 	   __attribute((weak));
 extern int pthread_key_delete (pthread_key_t __key)
 	   __attribute((weak));
-extern int pthread_mutex_init ()
+extern int pthread_mutex_init (pthread_mutex_t *mutex, const pthread_mutexattr_t *attr)
 	   __attribute((weak));
-extern int pthread_mutex_destroy ()
+extern int pthread_mutex_destroy (pthread_mutex_t *mutex)
 	   __attribute((weak));
-extern int pthread_mutex_lock ()
+extern int pthread_mutex_lock (pthread_mutex_t *mutex)
 	   __attribute((weak));
-extern int pthread_mutex_unlock ()
+extern int pthread_mutex_unlock (pthread_mutex_t *mutex)
 	   __attribute((weak));
-extern int pthread_cond_init ()
+extern int pthread_cond_init (pthread_cond_t *cond, const pthread_condattr_t *attr)
 	   __attribute((weak));
-extern int pthread_cond_destroy ()
+extern int pthread_cond_destroy (pthread_cond_t *cond)
 	   __attribute((weak));
-extern int pthread_cond_wait ()
+extern int pthread_cond_wait (pthread_cond_t *cond, pthread_mutex_t *mutex)
 	   __attribute((weak));
-extern int pthread_equal ()
+extern int pthread_equal (pthread_t thread1, pthread_t thread2)
 	   __attribute((weak));
-extern pthread_t pthread_self ()
+extern pthread_t pthread_self (void)
 	   __attribute((weak));
-extern int pthread_key_create ()
+extern int pthread_key_create (pthread_key_t *key, void (*destructor)(void *))
 	   __attribute((weak));
-extern int pthread_key_delete ()
+extern int pthread_key_delete (pthread_key_t key)
 	   __attribute((weak));
-extern int pthread_cond_signal ()
+extern int pthread_cond_signal (pthread_cond_t *cond)
 	   __attribute((weak));
 #endif
 #endif /* linux */
